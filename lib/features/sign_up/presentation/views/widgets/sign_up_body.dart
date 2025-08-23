@@ -6,23 +6,27 @@ import 'package:smartshop_map/shared/widgets/custom_text_field.dart';
 import 'package:smartshop_map/shared/widgets/custom_button.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
-class SignInBody extends StatefulWidget {
-  const SignInBody({super.key});
+class SignUpBody extends StatefulWidget {
+  const SignUpBody({super.key});
 
   @override
-  State<SignInBody> createState() => _SignInBodyState();
+  State<SignUpBody> createState() => _SignUpBodyState();
 }
 
-class _SignInBodyState extends State<SignInBody> {
+class _SignUpBodyState extends State<SignUpBody> {
+  final _fullNameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
   bool _isPasswordVisible = false;
-  bool _rememberMe = true;
+  bool _isConfirmPasswordVisible = false;
 
   @override
   void dispose() {
+    _fullNameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
+    _confirmPasswordController.dispose();
     super.dispose();
   }
 
@@ -41,29 +45,60 @@ class _SignInBodyState extends State<SignInBody> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const SizedBox(height: 140),
+                  const SizedBox(height: 14),
 
-                  // Sign in Title - Left aligned
-                  Text(
-                    'Sign in',
-                    style: AppTextStyles.heading1.copyWith(
-                      color: AppColors.primary,
-                    ),
+                  // Back Arrow and Title Row
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      IconButton(
+                        onPressed: () {
+                          context.go('/signInView');
+                        },
+                        icon: Icon(
+                          Icons.arrow_back,
+                          color: AppColors.primary,
+                          size: 24,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        'Sign up',
+                        style: AppTextStyles.heading1.copyWith(
+                          color: AppColors.primary,
+                        ),
+                      ),
+                    ],
                   ),
 
                   const SizedBox(height: 40),
+
+                  // Full Name Field
+                  CustomTextField(
+                    height: 60,
+                    width: 350,
+                    hintText: 'Full name',
+                    prefixIcon: Icon(
+                      Icons.person_outline,
+                      color: const Color(0xFF807A7A),
+                      size: 25,
+                    ),
+                    controller: _fullNameController,
+                    borderColor: const Color(0xFFE4DFDF),
+                  ),
+
+                  const SizedBox(height: 16),
 
                   // Email Field
                   CustomTextField(
                     height: 60,
                     width: 350,
+                    hintText: 'ahlam@email.com',
                     prefixIcon: Icon(
                       Icons.email_outlined,
                       color: const Color(0xFF807A7A),
                       size: 25,
                     ),
-                    hintText: 'ahlam@email.com',
-
                     controller: _emailController,
                     borderColor: const Color(0xFFE4DFDF),
                   ),
@@ -98,59 +133,43 @@ class _SignInBodyState extends State<SignInBody> {
                     borderColor: const Color(0xFFE4DFDF),
                   ),
 
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 16),
 
-                  // Remember Me & Forgot Password
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Row(
-                        children: [
-                          Switch(
-                            value: _rememberMe,
-                            onChanged: (value) {
-                              setState(() {
-                                _rememberMe = value;
-                              });
-                            },
-                            activeColor: AppColors.primary,
-                          ),
-                          Text(
-                            'Remember Me',
-                            style: TextStyle(
-                              fontFamily: 'Inter',
-                              fontWeight: FontWeight.w400,
-                              fontSize: 16,
-                              height: 23 / 14,
-                              color: AppColors.primary,
-                            ),
-                          ),
-                        ],
+                  // Confirm Password Field
+                  CustomTextField(
+                    height: 60,
+                    width: 350,
+                    hintText: 'Confirm password',
+                    obscureText: !_isConfirmPasswordVisible,
+                    prefixIcon: Icon(
+                      Icons.lock_outline,
+                      color: const Color(0xFF807A7A),
+                      size: 25,
+                    ),
+                    suffixIcon: IconButton(
+                      onPressed: () {
+                        setState(() {
+                          _isConfirmPasswordVisible =
+                              !_isConfirmPasswordVisible;
+                        });
+                      },
+                      icon: Icon(
+                        _isConfirmPasswordVisible
+                            ? Icons.visibility
+                            : Icons.visibility_off,
+                        color: Colors.grey,
                       ),
-                      TextButton(
-                        onPressed: () {
-                          // Navigate to forgot password
-                        },
-                        child: Text(
-                          'Forgot Password?',
-                          style: TextStyle(
-                            fontFamily: 'Inter',
-                            fontWeight: FontWeight.w400,
-                            fontSize: 16,
-                            height: 23 / 14,
-                            color: AppColors.primary,
-                          ),
-                        ),
-                      ),
-                    ],
+                    ),
+                    controller: _confirmPasswordController,
+                    borderColor: const Color(0xFFE4DFDF),
                   ),
 
                   const SizedBox(height: 32),
 
-                  // Sign In Button - Centered
+                  // Sign Up Button - Centered
                   Center(
                     child: CustomButton(
-                      text: '     SIGN IN',
+                      text: '     SIGN UP',
                       height: 66,
                       width: 271,
                       backgroundColor: AppColors.primary,
@@ -166,6 +185,7 @@ class _SignInBodyState extends State<SignInBody> {
                         height: 24,
                       ),
                       onPressed: () {
+                        // Handle sign up
                         context.go('/homeView');
                       },
                     ),
@@ -173,7 +193,7 @@ class _SignInBodyState extends State<SignInBody> {
 
                   const SizedBox(height: 28),
 
-                  // OR Separator
+                  // OR Separator without Lines
                   Center(
                     child: Text(
                       'OR',
@@ -187,7 +207,7 @@ class _SignInBodyState extends State<SignInBody> {
                     ),
                   ),
 
-                  const SizedBox(height: 28),
+                  const SizedBox(height: 16),
 
                   // Google Login Button
                   Center(
@@ -211,7 +231,7 @@ class _SignInBodyState extends State<SignInBody> {
                   // Facebook Login Button
                   Center(
                     child: SocialLoginButton(
-                      text: 'Login with FaceBook',
+                      text: 'Login with Facebook',
                       imagePath: 'assets/images/faceBook.svg',
                       height: 66,
                       width: 250,
@@ -225,9 +245,7 @@ class _SignInBodyState extends State<SignInBody> {
                     ),
                   ),
 
-                  const SizedBox(height: 40),
-
-                  // Sign Up Link
+                  const SizedBox(height: 30),
                   Center(
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -235,7 +253,7 @@ class _SignInBodyState extends State<SignInBody> {
                       textBaseline: TextBaseline.alphabetic,
                       children: [
                         Text(
-                          "Don't have an account? ",
+                          'Already have an account? ',
                           style: TextStyle(
                             fontFamily: 'Inter',
                             fontWeight: FontWeight.w400,
@@ -246,7 +264,7 @@ class _SignInBodyState extends State<SignInBody> {
                         ),
                         TextButton(
                           onPressed: () {
-                            context.go('/signUpView');
+                            context.go('/signInView');
                           },
                           style: TextButton.styleFrom(
                             padding: EdgeInsets.zero,
@@ -254,7 +272,7 @@ class _SignInBodyState extends State<SignInBody> {
                             tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                           ),
                           child: Text(
-                            'Sign Up',
+                            'Sign In',
                             style: TextStyle(
                               decoration: TextDecoration.underline,
                               fontFamily: 'Inter',
