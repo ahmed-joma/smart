@@ -16,6 +16,7 @@ class CustomButton extends StatelessWidget {
   final Color? textColor;
   final double? fontSize;
   final FontWeight? fontWeight;
+  final String? fontFamily;
   final Widget? suffixWidget;
   final bool isSignInButton;
 
@@ -24,8 +25,8 @@ class CustomButton extends StatelessWidget {
     required this.text,
     this.onPressed,
     this.isLoading = false,
-    this.width = 271,
-    this.height = 58,
+    this.width,
+    this.height,
     this.margin,
     this.padding,
     this.borderRadius,
@@ -33,6 +34,7 @@ class CustomButton extends StatelessWidget {
     this.textColor,
     this.fontSize,
     this.fontWeight,
+    this.fontFamily,
     this.suffixWidget,
     this.isSignInButton = false,
   });
@@ -69,15 +71,20 @@ class CustomButton extends StatelessWidget {
             ? Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    text,
-                    style: AppTextStyles.mediumSemiBold.copyWith(
-                      color: textColor ?? AppColors.onPrimary,
-                      fontSize: fontSize,
-                      fontWeight: fontWeight,
+                  Expanded(
+                    child: Center(
+                      child: Text(
+                        text,
+                        style: AppTextStyles.mediumSemiBold.copyWith(
+                          color: textColor ?? AppColors.onPrimary,
+                          fontSize: fontSize,
+                          fontWeight: fontWeight,
+                          fontFamily: fontFamily,
+                        ),
+                      ),
                     ),
                   ),
-                  suffixWidget ?? const SizedBox.shrink(),
+                  if (suffixWidget != null) suffixWidget!,
                 ],
               )
             : Text(
@@ -86,6 +93,7 @@ class CustomButton extends StatelessWidget {
                   color: textColor ?? AppColors.onPrimary,
                   fontSize: fontSize,
                   fontWeight: fontWeight,
+                  fontFamily: fontFamily,
                 ),
               ),
       ),
@@ -105,6 +113,7 @@ class SocialLoginButton extends StatelessWidget {
   final Color? textColor;
   final double? fontSize;
   final FontWeight? fontWeight;
+  final Color? borderColor;
 
   const SocialLoginButton({
     super.key,
@@ -119,6 +128,7 @@ class SocialLoginButton extends StatelessWidget {
     this.textColor,
     this.fontSize,
     this.fontWeight,
+    this.borderColor,
   });
 
   @override
@@ -130,6 +140,9 @@ class SocialLoginButton extends StatelessWidget {
       decoration: BoxDecoration(
         color: backgroundColor ?? Colors.white,
         borderRadius: borderRadius ?? BorderRadius.circular(12),
+        border: borderColor != null
+            ? Border.all(color: borderColor!, width: 1)
+            : null,
       ),
       child: Material(
         color: Colors.transparent,

@@ -69,7 +69,7 @@ class CustomTextField extends StatelessWidget {
         borderRadius: borderRadius ?? BorderRadius.circular(12),
         border: borderColor != null
             ? Border.all(color: borderColor!, width: borderWidth)
-            : null,
+            : Border.all(color: AppColors.outline, width: 1),
       ),
       child: TextFormField(
         controller: controller,
@@ -92,7 +92,9 @@ class CustomTextField extends StatelessWidget {
           prefixIcon: prefixIcon,
           suffixIcon: suffixIcon,
           filled: false,
-          contentPadding: padding ?? const EdgeInsets.symmetric(horizontal: 16),
+          contentPadding:
+              padding ??
+              const EdgeInsets.symmetric(horizontal: 16, vertical: 17),
           border: InputBorder.none,
           enabledBorder: InputBorder.none,
           focusedBorder: InputBorder.none,
