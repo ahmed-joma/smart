@@ -13,4 +13,5 @@ export 'widgets/outlined_button.dart';
 export 'widgets/small_button.dart';
 export 'widgets/custom_checkbox.dart';
 export 'widgets/custom_text_field.dart';
+export 'widgets/custom_snackbar.dart';
 export 'widgets/vertical_text_field.dart';

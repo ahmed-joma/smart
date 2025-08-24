@@ -208,8 +208,8 @@ class _VerificationBodyState extends State<VerificationBody> {
                         ),
                         onPressed: _verificationCode.length == 4
                             ? () {
-                                // Handle verification
-                                context.go('/homeView');
+                                // Navigate to reset password
+                                context.go('/ressetPasswordView');
                               }
                             : null,
                       ),
