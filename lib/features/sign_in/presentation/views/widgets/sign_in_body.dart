@@ -129,7 +129,8 @@ class _SignInBodyState extends State<SignInBody> {
                       ),
                       TextButton(
                         onPressed: () {
-                          // Navigate to forgot password
+                          // Navigate to verification
+                          context.go('/verificationView');
                         },
                         child: Text(
                           'Forgot Password?',
