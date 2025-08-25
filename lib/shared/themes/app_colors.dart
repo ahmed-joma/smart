@@ -28,6 +28,13 @@ class AppColors {
   static const Color blue = Color(0xFF39D1F2);
   static const Color cyan = Color(0xFF00F8FF);
 
+  // Category Colors
+  static const Color sports = Color(0xFFF0635A);
+  static const Color hotel = Color(0xFFF59762);
+  static const Color food = Color(0xFF29D697);
+  static const Color events = Color(0xFF46CDFB);
+  static const Color filters = Color(0xFF5D56F3);
+
   // Surface Colors
   static const Color surface = white;
   static const Color surfaceVariant = whiteLight;

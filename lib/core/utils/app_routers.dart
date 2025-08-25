@@ -1,19 +1,21 @@
 import 'package:go_router/go_router.dart';
-import '../../features/Splash_Screen/presentation/views/Splash_Screen_view.dart';
+import '../../features/Splash_Screen/presentation/views/splash_screen_view.dart';
 import '../../features/sign_in/presentation/views/sign_in_view.dart';
 import '../../features/sign_up/presentation/views/sign_up_view.dart';
 import '../../features/Verification/presentation/views/Verification_view.dart';
 import '../../features/Resset_Password/presentation/views/Resset_Password_view.dart';
+import '../../features/Home/presentation/views/Home_view.dart';
 
-abstract class AppRouters {
-  static const kSplashView = '/';
-  static const kSignInView = '/signInView';
-  static const kSignUpView = '/signUpView';
-  static const kVerificationView = '/verificationView';
-  static const kRessetPasswordView = '/ressetPasswordView';
-  static const kHomeView = '/homeView';
+class AppRouters {
+  static const String kSplashView = '/splashView';
+  static const String kSignInView = '/signInView';
+  static const String kSignUpView = '/signUpView';
+  static const String kVerificationView = '/verificationView';
+  static const String kRessetPasswordView = '/ressetPasswordView';
+  static const String kHomeView = '/homeView';
 
   static final router = GoRouter(
+    initialLocation: kSplashView,
     routes: [
       GoRoute(
         path: kSplashView,
@@ -35,6 +37,7 @@ abstract class AppRouters {
         path: kRessetPasswordView,
         builder: (context, state) => const RessetPasswordView(),
       ),
+      GoRoute(path: kHomeView, builder: (context, state) => const HomeView()),
     ],
   );
 }

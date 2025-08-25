@@ -5,6 +5,7 @@ import 'package:smartshop_map/shared/themes/app_text_styles.dart';
 import 'package:smartshop_map/shared/widgets/custom_text_field.dart';
 import 'package:smartshop_map/shared/widgets/custom_button.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:smartshop_map/shared/widgets/custom_snackbar.dart';
 
 class SignInBody extends StatefulWidget {
   const SignInBody({super.key});
@@ -24,6 +25,26 @@ class _SignInBodyState extends State<SignInBody> {
     _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
+  }
+
+  void _onSignInPressed() {
+    // Check if email and password are valid
+    if (_emailController.text.isNotEmpty &&
+        _passwordController.text.isNotEmpty) {
+      // Show success notification
+      CustomSnackBar.showSuccess(
+        context: context,
+        message: 'success sign in',
+        duration: const Duration(seconds: 2),
+      );
+
+      // Navigate to home page after showing notification
+      Future.delayed(const Duration(seconds: 2), () {
+        if (mounted) {
+          context.go('/homeView');
+        }
+      });
+    }
   }
 
   @override
@@ -166,9 +187,7 @@ class _SignInBodyState extends State<SignInBody> {
                         width: 24,
                         height: 24,
                       ),
-                      onPressed: () {
-                        context.go('/homeView');
-                      },
+                      onPressed: _onSignInPressed,
                     ),
                   ),
 
