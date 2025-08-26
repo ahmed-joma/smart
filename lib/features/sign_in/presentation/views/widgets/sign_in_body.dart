@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:smartshop_map/shared/themes/app_colors.dart';
-import 'package:smartshop_map/shared/themes/app_text_styles.dart';
-import 'package:smartshop_map/shared/widgets/custom_text_field.dart';
-import 'package:smartshop_map/shared/widgets/custom_button.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:smartshop_map/shared/widgets/custom_snackbar.dart';
+import 'section_header.dart';
+import 'section_form_fields.dart';
+import 'section_remember_forgot.dart';
+import 'section_signin_button.dart';
+import 'section_social_login.dart';
+import 'section_signup_link.dart';
 
 class SignInBody extends StatefulWidget {
   const SignInBody({super.key});
@@ -39,6 +40,18 @@ class _SignInBodyState extends State<SignInBody> {
         _isPasswordValid = true;
       });
     }
+  }
+
+  void _onTogglePasswordVisibility() {
+    setState(() {
+      _isPasswordVisible = !_isPasswordVisible;
+    });
+  }
+
+  void _onRememberMeChanged(bool value) {
+    setState(() {
+      _rememberMe = value;
+    });
   }
 
   @override
@@ -95,237 +108,37 @@ class _SignInBodyState extends State<SignInBody> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const SizedBox(height: 140),
+                  // Header Section
+                  const SectionHeader(),
 
-                  // Sign in Title - Left aligned
-                  Text(
-                    'Sign in',
-                    style: AppTextStyles.heading1.copyWith(
-                      color: AppColors.primary,
-                    ),
+                  // Form Fields Section
+                  SectionFormFields(
+                    emailController: _emailController,
+                    passwordController: _passwordController,
+                    isEmailValid: _isEmailValid,
+                    isPasswordValid: _isPasswordValid,
+                    isPasswordVisible: _isPasswordVisible,
+                    onEmailChanged: _onEmailChanged,
+                    onPasswordChanged: _onPasswordChanged,
+                    onTogglePasswordVisibility: _onTogglePasswordVisibility,
                   ),
 
-                  const SizedBox(height: 40),
-
-                  // Email Field
-                  CustomTextField(
-                    height: 60,
-                    width: 350,
-                    prefixIcon: Icon(
-                      Icons.email_outlined,
-                      color: const Color(0xFF807A7A),
-                      size: 25,
-                    ),
-                    hintText: 'ahlam@email.com',
-                    controller: _emailController,
-                    borderColor: _isEmailValid
-                        ? const Color(0xFFE4DFDF)
-                        : Colors.red,
-                    onChanged: _onEmailChanged,
-                  ),
-
-                  const SizedBox(height: 16),
-
-                  // Password Field
-                  CustomTextField(
-                    height: 60,
-                    width: 350,
-                    hintText: 'Your password',
-                    obscureText: !_isPasswordVisible,
-                    prefixIcon: Icon(
-                      Icons.lock_outline,
-                      color: const Color(0xFF807A7A),
-                      size: 25,
-                    ),
-                    suffixIcon: IconButton(
-                      onPressed: () {
-                        setState(() {
-                          _isPasswordVisible = !_isPasswordVisible;
-                        });
-                      },
-                      icon: Icon(
-                        _isPasswordVisible
-                            ? Icons.visibility
-                            : Icons.visibility_off,
-                        color: Colors.grey,
-                      ),
-                    ),
-                    controller: _passwordController,
-                    borderColor: _isPasswordValid
-                        ? const Color(0xFFE4DFDF)
-                        : Colors.red,
-                    onChanged: _onPasswordChanged,
-                  ),
-
-                  const SizedBox(height: 20),
-
-                  // Remember Me & Forgot Password
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Row(
-                        children: [
-                          Switch(
-                            value: _rememberMe,
-                            onChanged: (value) {
-                              setState(() {
-                                _rememberMe = value;
-                              });
-                            },
-                            activeColor: AppColors.primary,
-                          ),
-                          Text(
-                            'Remember Me',
-                            style: TextStyle(
-                              fontFamily: 'Inter',
-                              fontWeight: FontWeight.w400,
-                              fontSize: 16,
-                              height: 23 / 14,
-                              color: AppColors.primary,
-                            ),
-                          ),
-                        ],
-                      ),
-                      TextButton(
-                        onPressed: () {
-                          // Navigate to verification
-                          context.go('/verificationView');
-                        },
-                        child: Text(
-                          'Forgot Password?',
-                          style: TextStyle(
-                            fontFamily: 'Inter',
-                            fontWeight: FontWeight.w400,
-                            fontSize: 16,
-                            height: 23 / 14,
-                            color: AppColors.primary,
-                          ),
-                        ),
-                      ),
-                    ],
+                  // Remember Me & Forgot Password Section
+                  SectionRememberForgot(
+                    rememberMe: _rememberMe,
+                    onRememberMeChanged: _onRememberMeChanged,
                   ),
 
                   const SizedBox(height: 32),
 
-                  // Sign In Button - Centered
-                  Center(
-                    child: CustomButton(
-                      text: '     SIGN IN',
-                      height: 66,
-                      width: 271,
-                      backgroundColor: AppColors.primary,
-                      textColor: Colors.white,
-                      borderRadius: BorderRadius.circular(12),
-                      isSignInButton: true,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      fontFamily: 'Noto Kufi Arabic',
-                      suffixWidget: SvgPicture.asset(
-                        'assets/images/arrow.svg',
-                        width: 24,
-                        height: 24,
-                      ),
-                      onPressed: _onSignInPressed,
-                    ),
-                  ),
+                  // Sign In Button Section
+                  SectionSignInButton(onPressed: _onSignInPressed),
 
-                  const SizedBox(height: 28),
+                  // Social Login Section
+                  const SectionSocialLogin(),
 
-                  // OR Separator
-                  Center(
-                    child: Text(
-                      'OR',
-                      style: TextStyle(
-                        fontFamily: 'Inter',
-                        fontWeight: FontWeight.w400,
-                        fontSize: 16,
-                        height: 23 / 14,
-                        color: Colors.grey.shade500,
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(height: 28),
-
-                  // Google Login Button
-                  Center(
-                    child: SocialLoginButton(
-                      text: 'Login with Google',
-                      imagePath: 'assets/images/Google.svg',
-                      height: 66,
-                      width: 250,
-                      borderRadius: BorderRadius.circular(12),
-                      backgroundColor: Colors.white,
-                      borderColor: const Color(0xFFE4DFDF),
-                      textColor: AppColors.primary,
-                      onPressed: () {
-                        // Handle Google login
-                      },
-                    ),
-                  ),
-
-                  const SizedBox(height: 16),
-
-                  // Facebook Login Button
-                  Center(
-                    child: SocialLoginButton(
-                      text: 'Login with FaceBook',
-                      imagePath: 'assets/images/faceBook.svg',
-                      height: 66,
-                      width: 250,
-                      borderRadius: BorderRadius.circular(12),
-                      backgroundColor: Colors.white,
-                      borderColor: const Color(0xFFE4DFDF),
-                      textColor: AppColors.primary,
-                      onPressed: () {
-                        // Handle Facebook login
-                      },
-                    ),
-                  ),
-
-                  const SizedBox(height: 40),
-
-                  // Sign Up Link
-                  Center(
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.baseline,
-                      textBaseline: TextBaseline.alphabetic,
-                      children: [
-                        Text(
-                          "Don't have an account? ",
-                          style: TextStyle(
-                            fontFamily: 'Inter',
-                            fontWeight: FontWeight.w400,
-                            fontSize: 14,
-                            height: 23 / 14,
-                            color: AppColors.primary,
-                          ),
-                        ),
-                        TextButton(
-                          onPressed: () {
-                            context.go('/signUpView');
-                          },
-                          style: TextButton.styleFrom(
-                            padding: EdgeInsets.zero,
-                            minimumSize: Size.zero,
-                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                          ),
-                          child: Text(
-                            'Sign Up',
-                            style: TextStyle(
-                              decoration: TextDecoration.underline,
-                              fontFamily: 'Inter',
-                              fontWeight: FontWeight.w600,
-                              fontSize: 14,
-                              height: 23 / 14,
-                              color: AppColors.primary,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+                  // Sign Up Link Section
+                  const SectionSignUpLink(),
 
                   const SizedBox(height: 20),
                 ],
