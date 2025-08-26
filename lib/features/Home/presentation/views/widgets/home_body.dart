@@ -6,6 +6,7 @@ import 'section_upcoming_events.dart';
 import 'section_hotel_reservations.dart';
 import 'section_nearby.dart';
 import 'section_bottom_navigation.dart';
+import 'home_drawer.dart';
 
 class HomeBody extends StatefulWidget {
   const HomeBody({super.key});
@@ -31,6 +32,7 @@ class _HomeBodyState extends State<HomeBody> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
+      drawer: const HomeDrawer(), // إضافة Navigation Drawer
       body: SafeArea(
         child: SingleChildScrollView(
           child: Column(

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:smartshop_map/shared/widgets/custom_snackbar.dart';
-import 'package:smartshop_map/shared/themes/app_colors.dart';
 import 'section_header.dart';
 import 'section_instructions.dart';
 import 'section_email_field.dart';

@@ -5,6 +5,7 @@ import '../../features/sign_up/presentation/views/sign_up_view.dart';
 import '../../features/Verification/presentation/views/Verification_view.dart';
 import '../../features/Resset_Password/presentation/views/Resset_Password_view.dart';
 import '../../features/Home/presentation/views/Home_view.dart';
+import 'package:flutter/material.dart';
 
 class AppRouters {
   static const String kSplashView = '/splashView';
@@ -13,6 +14,11 @@ class AppRouters {
   static const String kVerificationView = '/verificationView';
   static const String kRessetPasswordView = '/ressetPasswordView';
   static const String kHomeView = '/homeView';
+  static const String kMyProfileView = '/myProfileView';
+  static const String kCalendarView = '/calendarView';
+  static const String kAiChatbotView = '/aiChatbotView';
+  static const String kSettingsView = '/settingsView';
+  static const String kHelpFaqsView = '/helpFaqsView';
 
   static final router = GoRouter(
     initialLocation: kSplashView,
@@ -38,6 +44,31 @@ class AppRouters {
         builder: (context, state) => const RessetPasswordView(),
       ),
       GoRoute(path: kHomeView, builder: (context, state) => const HomeView()),
+      GoRoute(
+        path: kMyProfileView,
+        builder: (context, state) =>
+            const Scaffold(body: Center(child: Text('My Profile'))),
+      ),
+      GoRoute(
+        path: kCalendarView,
+        builder: (context, state) =>
+            const Scaffold(body: Center(child: Text('Calendar'))),
+      ),
+      GoRoute(
+        path: kAiChatbotView,
+        builder: (context, state) =>
+            const Scaffold(body: Center(child: Text('AI Chatbot'))),
+      ),
+      GoRoute(
+        path: kSettingsView,
+        builder: (context, state) =>
+            const Scaffold(body: Center(child: Text('Settings'))),
+      ),
+      GoRoute(
+        path: kHelpFaqsView,
+        builder: (context, state) =>
+            const Scaffold(body: Center(child: Text('Help & FAQs'))),
+      ),
     ],
   );
 }

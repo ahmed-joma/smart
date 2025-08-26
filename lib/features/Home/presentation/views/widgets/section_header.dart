@@ -23,7 +23,9 @@ class SectionHeader extends StatelessWidget {
             children: [
               // Hamburger Menu
               IconButton(
-                onPressed: () {},
+                onPressed: () {
+                  Scaffold.of(context).openDrawer();
+                },
                 icon: const Icon(
                   Icons.menu_outlined,
                   color: Colors.white,
