@@ -94,9 +94,41 @@ class _RessetPasswordBodyState extends State<RessetPasswordBody> {
     return _codeControllers.map((controller) => controller.text).join();
   }
 
+  Widget _buildRequirementItem(String text, bool isMet) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 4),
+      child: Row(
+        children: [
+          Icon(
+            isMet ? Icons.check_circle : Icons.circle_outlined,
+            size: 16,
+            color: isMet ? AppColors.success : AppColors.onSurfaceVariant,
+          ),
+          const SizedBox(width: 8),
+          Text(
+            text,
+            style: TextStyle(
+              fontSize: 12,
+              color: isMet ? AppColors.success : AppColors.onSurfaceVariant,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   void _checkPasswordValidity() {
     setState(() {
-      _isPasswordValid = _newPasswordController.text.length >= 6;
+      // Check password requirements as per API documentation
+      String password = _newPasswordController.text;
+      bool hasMinLength = password.length >= 8;
+      bool hasNumber = password.contains(RegExp(r'[0-9]'));
+      bool hasSpecialChar = password.contains(
+        RegExp(r'[!@#$%^&*(),.?":{}|<>]'),
+      );
+
+      _isPasswordValid = hasMinLength && hasNumber && hasSpecialChar;
+
       _isConfirmPasswordValid =
           _confirmPasswordController.text.isNotEmpty &&
           _newPasswordController.text == _confirmPasswordController.text;
@@ -256,7 +288,50 @@ class _RessetPasswordBodyState extends State<RessetPasswordBody> {
                   const SizedBox(height: 2044444),
 
                   // Password Fields Section (shown after email is sent)
-                  if (_showPasswordFields)
+                  if (_showPasswordFields) ...[
+                    // Password Requirements Info
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      margin: const EdgeInsets.only(bottom: 16),
+                      decoration: BoxDecoration(
+                        color: AppColors.surfaceVariant.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: AppColors.outline.withOpacity(0.3),
+                        ),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Password Requirements:',
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.onSurface,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          _buildRequirementItem(
+                            'At least 8 characters',
+                            _newPasswordController.text.length >= 8,
+                          ),
+                          _buildRequirementItem(
+                            'Contains at least one number',
+                            _newPasswordController.text.contains(
+                              RegExp(r'[0-9]'),
+                            ),
+                          ),
+                          _buildRequirementItem(
+                            'Contains at least one special character (!@#\$%^&*)',
+                            _newPasswordController.text.contains(
+                              RegExp(r'[!@#$%^&*(),.?":{}|<>]'),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
                     SectionPasswordFields(
                       newPasswordController: _newPasswordController,
                       confirmPasswordController: _confirmPasswordController,
@@ -267,6 +342,7 @@ class _RessetPasswordBodyState extends State<RessetPasswordBody> {
                       onToggleConfirmPasswordVisibility:
                           _onToggleConfirmPasswordVisibility,
                     ),
+                  ],
 
                   // Action Button Section
                   SectionActionButton(

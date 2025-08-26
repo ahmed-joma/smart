@@ -1,2 +1,2 @@
 // Splash Screen Feature
-export 'presentation/views/splash_screen_view.dart';
+export 'presentation/views/widgets/splash_screen_view.dart';
