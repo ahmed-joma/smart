@@ -84,7 +84,11 @@ class CustomButton extends StatelessWidget {
                       ),
                     ),
                   ),
-                  if (suffixWidget != null) suffixWidget!,
+                  if (suffixWidget != null)
+                    Transform.translate(
+                      offset: const Offset(-22, 0), // تحريك السهم يساراً 8 بكسل
+                      child: suffixWidget!,
+                    ),
                 ],
               )
             : Text(

@@ -20,6 +20,14 @@ class CustomSnackBar {
               decoration: BoxDecoration(
                 color: iconColor,
                 shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.1),
+                    blurRadius: 4,
+                    spreadRadius: 0,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
               ),
               child: Icon(
                 isSuccess ? Icons.check : Icons.info,
@@ -33,7 +41,7 @@ class CustomSnackBar {
                 message,
                 style: TextStyle(
                   fontFamily: 'Inter',
-                  fontWeight: FontWeight.w500,
+                  fontWeight: FontWeight.w600,
                   fontSize: 16,
                   color: textColor,
                 ),
@@ -41,11 +49,17 @@ class CustomSnackBar {
             ),
           ],
         ),
-        backgroundColor: backgroundColor.withOpacity(0.1),
+        backgroundColor: backgroundColor.withOpacity(
+          0.95,
+        ), // زيادة عدم الشفافية
         behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: BorderSide(color: backgroundColor.withOpacity(0.3), width: 1),
+        ),
         margin: const EdgeInsets.all(16),
         duration: duration,
+        elevation: 8, // إضافة ظل أقوى
       ),
     );
   }

@@ -20,6 +20,27 @@ class _SignInBodyState extends State<SignInBody> {
   bool _isPasswordVisible = false;
   bool _rememberMe = true;
 
+  // متغيرات للتحقق من صحة البيانات
+  bool _isEmailValid = true;
+  bool _isPasswordValid = true;
+
+  // دوال لإعادة تعيين حالة الحقول عند الكتابة
+  void _onEmailChanged(String value) {
+    if (_isEmailValid != true) {
+      setState(() {
+        _isEmailValid = true;
+      });
+    }
+  }
+
+  void _onPasswordChanged(String value) {
+    if (_isPasswordValid != true) {
+      setState(() {
+        _isPasswordValid = true;
+      });
+    }
+  }
+
   @override
   void dispose() {
     _emailController.dispose();
@@ -28,9 +49,14 @@ class _SignInBodyState extends State<SignInBody> {
   }
 
   void _onSignInPressed() {
+    // التحقق من صحة البيانات
+    setState(() {
+      _isEmailValid = _emailController.text.isNotEmpty;
+      _isPasswordValid = _passwordController.text.isNotEmpty;
+    });
+
     // Check if email and password are valid
-    if (_emailController.text.isNotEmpty &&
-        _passwordController.text.isNotEmpty) {
+    if (_isEmailValid && _isPasswordValid) {
       // Show success notification
       CustomSnackBar.showSuccess(
         context: context,
@@ -44,6 +70,13 @@ class _SignInBodyState extends State<SignInBody> {
           context.go('/homeView');
         }
       });
+    } else {
+      // Show error notification
+      CustomSnackBar.showError(
+        context: context,
+        message: 'Please fill in all fields',
+        duration: const Duration(seconds: 2),
+      );
     }
   }
 
@@ -84,9 +117,11 @@ class _SignInBodyState extends State<SignInBody> {
                       size: 25,
                     ),
                     hintText: 'ahlam@email.com',
-
                     controller: _emailController,
-                    borderColor: const Color(0xFFE4DFDF),
+                    borderColor: _isEmailValid
+                        ? const Color(0xFFE4DFDF)
+                        : Colors.red,
+                    onChanged: _onEmailChanged,
                   ),
 
                   const SizedBox(height: 16),
@@ -116,7 +151,10 @@ class _SignInBodyState extends State<SignInBody> {
                       ),
                     ),
                     controller: _passwordController,
-                    borderColor: const Color(0xFFE4DFDF),
+                    borderColor: _isPasswordValid
+                        ? const Color(0xFFE4DFDF)
+                        : Colors.red,
+                    onChanged: _onPasswordChanged,
                   ),
 
                   const SizedBox(height: 20),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:smartshop_map/shared/themes/app_colors.dart';
 import 'package:smartshop_map/shared/themes/app_text_styles.dart';
@@ -19,7 +20,10 @@ class _VerificationBodyState extends State<VerificationBody> {
   );
   final List<FocusNode> _focusNodes = List.generate(4, (index) => FocusNode());
 
-  int _resendTimer = 30; // 30 seconds
+  // Email variable - can be changed based on user
+  String _userEmail = 'ahmedjomma18@gmail.com';
+
+  int _resendTimer = 300; // 5 minutes (300 seconds)
   bool _canResend = false;
 
   @override
@@ -72,6 +76,12 @@ class _VerificationBodyState extends State<VerificationBody> {
     return _codeControllers.map((controller) => controller.text).join();
   }
 
+  String _formatTimer(int seconds) {
+    int minutes = seconds ~/ 60;
+    int remainingSeconds = seconds % 60;
+    return '${minutes}:${remainingSeconds.toString().padLeft(2, '0')}';
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -121,16 +131,47 @@ class _VerificationBodyState extends State<VerificationBody> {
 
                     const SizedBox(height: 16),
 
-                    // Phone Number Text
-                    Text(
-                      '   We\'ve send you the verification \n   code on 0547378494',
-                      style: TextStyle(
-                        fontFamily: 'Inter',
-                        fontWeight: FontWeight.w400,
-                        fontSize: 16,
-                        height: 23 / 16,
-                        color: AppColors.primary,
-                      ),
+                    // Email Text
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          '   We\'ve send you the verification',
+                          style: TextStyle(
+                            fontFamily: 'Inter',
+                            fontWeight: FontWeight.w400,
+                            fontSize: 16,
+                            height: 23 / 16,
+                            color: AppColors.primary,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Row(
+                          children: [
+                            Text(
+                              '   code on ',
+                              style: TextStyle(
+                                fontFamily: 'Inter',
+                                fontWeight: FontWeight.w400,
+                                fontSize: 16,
+                                height: 23 / 16,
+                                color: AppColors.primary,
+                              ),
+                            ),
+                            Text(
+                              _userEmail,
+                              style: TextStyle(
+                                fontFamily: 'Inter',
+                                fontWeight: FontWeight.w700,
+                                fontSize: 16,
+                                height: 23 / 16,
+                                color: AppColors.primary,
+                                decoration: TextDecoration.underline,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
 
                     const SizedBox(height: 40),
@@ -160,6 +201,10 @@ class _VerificationBodyState extends State<VerificationBody> {
                               keyboardType: TextInputType.number,
                               textAlign: TextAlign.center,
                               maxLength: 1,
+                              inputFormatters: [
+                                FilteringTextInputFormatter
+                                    .digitsOnly, // يقبل الأرقام فقط
+                              ],
                               style: TextStyle(
                                 fontFamily: 'Inter',
                                 fontWeight: FontWeight.w400,
@@ -223,7 +268,7 @@ class _VerificationBodyState extends State<VerificationBody> {
                           ? GestureDetector(
                               onTap: () {
                                 setState(() {
-                                  _resendTimer = 30; // Reset to 30 seconds
+                                  _resendTimer = 300; // Reset to 30 seconds
                                   _canResend = false;
                                 });
                                 _startTimer();
@@ -241,7 +286,7 @@ class _VerificationBodyState extends State<VerificationBody> {
                               ),
                             )
                           : Text(
-                              'Re-send code in 0:${_resendTimer.toString().padLeft(2, '0')}',
+                              'Re-send code in ${_formatTimer(_resendTimer)}',
                               style: TextStyle(
                                 fontFamily: 'Inter',
                                 fontWeight: FontWeight.w400,

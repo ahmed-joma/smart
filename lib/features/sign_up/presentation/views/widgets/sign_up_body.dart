@@ -5,6 +5,7 @@ import 'package:smartshop_map/shared/themes/app_text_styles.dart';
 import 'package:smartshop_map/shared/widgets/custom_text_field.dart';
 import 'package:smartshop_map/shared/widgets/custom_button.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:smartshop_map/shared/widgets/custom_snackbar.dart';
 
 class SignUpBody extends StatefulWidget {
   const SignUpBody({super.key});
@@ -20,6 +21,94 @@ class _SignUpBodyState extends State<SignUpBody> {
   final _confirmPasswordController = TextEditingController();
   bool _isPasswordVisible = false;
   bool _isConfirmPasswordVisible = false;
+
+  // متغيرات للتحقق من صحة البيانات
+  bool _isFullNameValid = true;
+  bool _isEmailValid = true;
+  bool _isPasswordValid = true;
+  bool _isConfirmPasswordValid = true;
+
+  // دوال لإعادة تعيين حالة الحقول عند الكتابة
+  void _onFullNameChanged(String value) {
+    if (_isFullNameValid != true) {
+      setState(() {
+        _isFullNameValid = true;
+      });
+    }
+  }
+
+  void _onEmailChanged(String value) {
+    if (_isEmailValid != true) {
+      setState(() {
+        _isEmailValid = true;
+      });
+    }
+  }
+
+  void _onPasswordChanged(String value) {
+    if (_isPasswordValid != true) {
+      setState(() {
+        _isPasswordValid = true;
+      });
+    }
+  }
+
+  void _onConfirmPasswordChanged(String value) {
+    if (_isConfirmPasswordValid != true) {
+      setState(() {
+        _isConfirmPasswordValid = true;
+      });
+    }
+  }
+
+  void _onSignUpPressed() {
+    // التحقق من صحة البيانات
+    setState(() {
+      _isFullNameValid = _fullNameController.text.isNotEmpty;
+      _isEmailValid = _emailController.text.isNotEmpty;
+      _isPasswordValid = _passwordController.text.isNotEmpty;
+      _isConfirmPasswordValid = _confirmPasswordController.text.isNotEmpty;
+    });
+
+    // التحقق من تطابق كلمتي المرور
+    bool passwordsMatch =
+        _passwordController.text == _confirmPasswordController.text;
+
+    // Check if all fields are valid and passwords match
+    if (_isFullNameValid &&
+        _isEmailValid &&
+        _isPasswordValid &&
+        _isConfirmPasswordValid &&
+        passwordsMatch) {
+      // Show success notification
+      CustomSnackBar.showSuccess(
+        context: context,
+        message: 'Account created successfully!',
+        duration: const Duration(seconds: 2),
+      );
+
+      // Navigate to home page after showing notification
+      Future.delayed(const Duration(seconds: 2), () {
+        if (mounted) {
+          context.go('/homeView');
+        }
+      });
+    } else if (!passwordsMatch) {
+      // Show error for password mismatch
+      CustomSnackBar.showError(
+        context: context,
+        message: 'Passwords do not match',
+        duration: const Duration(seconds: 2),
+      );
+    } else {
+      // Show error for empty fields
+      CustomSnackBar.showError(
+        context: context,
+        message: 'Please fill in all fields',
+        duration: const Duration(seconds: 2),
+      );
+    }
+  }
 
   @override
   void dispose() {
@@ -84,7 +173,10 @@ class _SignUpBodyState extends State<SignUpBody> {
                       size: 25,
                     ),
                     controller: _fullNameController,
-                    borderColor: const Color(0xFFE4DFDF),
+                    borderColor: _isFullNameValid
+                        ? const Color(0xFFE4DFDF)
+                        : Colors.red,
+                    onChanged: _onFullNameChanged,
                   ),
 
                   const SizedBox(height: 16),
@@ -100,7 +192,10 @@ class _SignUpBodyState extends State<SignUpBody> {
                       size: 25,
                     ),
                     controller: _emailController,
-                    borderColor: const Color(0xFFE4DFDF),
+                    borderColor: _isEmailValid
+                        ? const Color(0xFFE4DFDF)
+                        : Colors.red,
+                    onChanged: _onEmailChanged,
                   ),
 
                   const SizedBox(height: 16),
@@ -130,7 +225,10 @@ class _SignUpBodyState extends State<SignUpBody> {
                       ),
                     ),
                     controller: _passwordController,
-                    borderColor: const Color(0xFFE4DFDF),
+                    borderColor: _isPasswordValid
+                        ? const Color(0xFFE4DFDF)
+                        : Colors.red,
+                    onChanged: _onPasswordChanged,
                   ),
 
                   const SizedBox(height: 16),
@@ -161,7 +259,10 @@ class _SignUpBodyState extends State<SignUpBody> {
                       ),
                     ),
                     controller: _confirmPasswordController,
-                    borderColor: const Color(0xFFE4DFDF),
+                    borderColor: _isConfirmPasswordValid
+                        ? const Color(0xFFE4DFDF)
+                        : Colors.red,
+                    onChanged: _onConfirmPasswordChanged,
                   ),
 
                   const SizedBox(height: 32),
@@ -184,10 +285,7 @@ class _SignUpBodyState extends State<SignUpBody> {
                         width: 24,
                         height: 24,
                       ),
-                      onPressed: () {
-                        // Handle sign up
-                        context.go('/homeView');
-                      },
+                      onPressed: _onSignUpPressed,
                     ),
                   ),
 
