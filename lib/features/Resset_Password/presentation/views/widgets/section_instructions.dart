@@ -11,7 +11,7 @@ class SectionInstructions extends StatelessWidget {
       children: [
         // Instructions
         Text(
-          '   Please enter your email address\n   to request a password reset',
+          '   Please enter the verification code sent\n   to your email',
           style: TextStyle(
             fontFamily: 'Inter',
             fontWeight: FontWeight.w400,
@@ -21,7 +21,7 @@ class SectionInstructions extends StatelessWidget {
           ),
         ),
 
-        const SizedBox(height: 40),
+        const SizedBox(height: 20),
       ],
     );
   }

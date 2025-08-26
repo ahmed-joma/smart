@@ -38,8 +38,8 @@ class SectionRememberForgot extends StatelessWidget {
         ),
         TextButton(
           onPressed: () {
-            // Navigate to verification
-            context.go('/verificationView');
+            // Navigate to enter email page
+            context.go('/enterEmailView');
           },
           child: Text(
             'Forgot Password?',

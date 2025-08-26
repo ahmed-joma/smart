@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:smartshop_map/shared/widgets/custom_snackbar.dart';
 import 'section_header.dart';
 import 'section_form_fields.dart';
 import 'section_signup_button.dart';
@@ -83,52 +82,46 @@ class _SignUpBodyState extends State<SignUpBody> {
   }
 
   void _onSignUpPressed() {
-    // التحقق من صحة البيانات
+    // Validate all fields
+    bool isValid = true;
+
+    if (_fullNameController.text.trim().isEmpty) {
+      setState(() => _isFullNameValid = false);
+      isValid = false;
+    }
+
+    if (_emailController.text.trim().isEmpty) {
+      setState(() => _isEmailValid = false);
+      isValid = false;
+    }
+
+    if (_passwordController.text.isEmpty) {
+      setState(() => _isPasswordValid = false);
+      isValid = false;
+    }
+
+    if (_confirmPasswordController.text.isEmpty) {
+      setState(() => _isConfirmPasswordValid = false);
+      isValid = false;
+    }
+
+    if (_passwordController.text != _confirmPasswordController.text) {
+      setState(() => _isConfirmPasswordValid = false);
+      isValid = false;
+    }
+
+    if (!isValid) return;
+
+    // Clear errors
     setState(() {
-      _isFullNameValid = _fullNameController.text.isNotEmpty;
-      _isEmailValid = _emailController.text.isNotEmpty;
-      _isPasswordValid = _passwordController.text.isNotEmpty;
-      _isConfirmPasswordValid = _confirmPasswordController.text.isNotEmpty;
+      _isFullNameValid = true;
+      _isEmailValid = true;
+      _isPasswordValid = true;
+      _isConfirmPasswordValid = true;
     });
 
-    // التحقق من تطابق كلمتي المرور
-    bool passwordsMatch =
-        _passwordController.text == _confirmPasswordController.text;
-
-    // Check if all fields are valid and passwords match
-    if (_isFullNameValid &&
-        _isEmailValid &&
-        _isPasswordValid &&
-        _isConfirmPasswordValid &&
-        passwordsMatch) {
-      // Show success notification
-      CustomSnackBar.showSuccess(
-        context: context,
-        message: 'Account created successfully!',
-        duration: const Duration(seconds: 2),
-      );
-
-      // Navigate to home page after showing notification
-      Future.delayed(const Duration(seconds: 2), () {
-        if (mounted) {
-          context.go('/homeView');
-        }
-      });
-    } else if (!passwordsMatch) {
-      // Show error for password mismatch
-      CustomSnackBar.showError(
-        context: context,
-        message: 'Passwords do not match',
-        duration: const Duration(seconds: 2),
-      );
-    } else {
-      // Show error for empty fields
-      CustomSnackBar.showError(
-        context: context,
-        message: 'Please fill in all fields',
-        duration: const Duration(seconds: 2),
-      );
-    }
+    // Navigate to verification page
+    context.go('/verificationView');
   }
 
   @override

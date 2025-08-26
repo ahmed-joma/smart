@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../themes/app_colors.dart';
 import '../themes/app_text_styles.dart';
 
@@ -20,6 +21,7 @@ class CustomTextField extends StatelessWidget {
   final ValueChanged<String>? onChanged;
   final ValueChanged<String>? onSubmitted;
   final FormFieldValidator<String>? validator;
+  final List<TextInputFormatter>? inputFormatters;
   final double? width;
   final double? height;
   final EdgeInsetsGeometry? margin;
@@ -48,6 +50,7 @@ class CustomTextField extends StatelessWidget {
     this.onChanged,
     this.onSubmitted,
     this.validator,
+    this.inputFormatters,
     this.width = 335,
     this.height = 48,
     this.margin,
@@ -79,6 +82,7 @@ class CustomTextField extends StatelessWidget {
         readOnly: readOnly,
         maxLines: maxLines,
         maxLength: maxLength,
+        inputFormatters: inputFormatters,
         onTap: onTap,
         onChanged: onChanged,
         onFieldSubmitted: onSubmitted,

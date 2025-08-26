@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter/services.dart';
+import '../../../../../shared/shared.dart';
 import 'package:smartshop_map/shared/widgets/custom_snackbar.dart';
 import 'section_header.dart';
 import 'section_instructions.dart';
-import 'section_email_field.dart';
 import 'section_password_fields.dart';
 import 'section_action_button.dart';
 
@@ -15,43 +16,82 @@ class RessetPasswordBody extends StatefulWidget {
 }
 
 class _RessetPasswordBodyState extends State<RessetPasswordBody> {
-  final _emailController = TextEditingController();
+  final List<TextEditingController> _codeControllers = List.generate(
+    4,
+    (index) => TextEditingController(),
+  );
+  final List<FocusNode> _focusNodes = List.generate(4, (index) => FocusNode());
+
   final _newPasswordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
-  bool _isEmailValid = false;
   bool _isPasswordValid = false;
   bool _isConfirmPasswordValid = false;
   bool _showPasswordFields = false;
   bool _isNewPasswordVisible = false;
   bool _isConfirmPasswordVisible = false;
+  int _resendTimer = 300; // 5 minutes (300 seconds)
+  bool _canResend = false;
 
   @override
   void initState() {
     super.initState();
-    _checkEmailValidity();
-    _emailController.addListener(_checkEmailValidity);
+    _startTimer();
+    // Auto-focus first field
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _focusNodes[0].requestFocus();
+    });
     _newPasswordController.addListener(_checkPasswordValidity);
     _confirmPasswordController.addListener(_checkPasswordValidity);
   }
 
   @override
   void dispose() {
-    _emailController.removeListener(_checkEmailValidity);
+    for (var controller in _codeControllers) {
+      controller.dispose();
+    }
+    for (var node in _focusNodes) {
+      node.dispose();
+    }
     _newPasswordController.removeListener(_checkPasswordValidity);
     _confirmPasswordController.removeListener(_checkPasswordValidity);
-    _emailController.dispose();
     _newPasswordController.dispose();
     _confirmPasswordController.dispose();
     super.dispose();
   }
 
-  void _checkEmailValidity() {
-    setState(() {
-      _isEmailValid =
-          _emailController.text.isNotEmpty &&
-          _emailController.text.contains('@') &&
-          _emailController.text.contains('.');
+  void _startTimer() {
+    Future.delayed(const Duration(seconds: 1), () {
+      if (mounted && _resendTimer > 0) {
+        setState(() {
+          _resendTimer--;
+        });
+        _startTimer();
+      } else if (mounted) {
+        setState(() {
+          _canResend = true;
+        });
+      }
     });
+  }
+
+  String _formatTimer(int seconds) {
+    int minutes = seconds ~/ 60;
+    int remainingSeconds = seconds % 60;
+    return '${minutes}:${remainingSeconds.toString().padLeft(2, '0')}';
+  }
+
+  void _onCodeChanged(String value, int index) {
+    if (value.length == 1 && index < 3) {
+      // Move to next field
+      _focusNodes[index + 1].requestFocus();
+    } else if (value.isEmpty && index > 0) {
+      // Move to previous field on delete
+      _focusNodes[index - 1].requestFocus();
+    }
+  }
+
+  String get _verificationCode {
+    return _codeControllers.map((controller) => controller.text).join();
   }
 
   void _checkPasswordValidity() {
@@ -76,18 +116,9 @@ class _RessetPasswordBodyState extends State<RessetPasswordBody> {
   }
 
   void _onSendPressed() {
-    CustomSnackBar.showSuccess(
-      context: context,
-      message: 'Password reset email sent successfully!',
-      duration: const Duration(seconds: 3),
-    );
-    // Show password fields after notification
-    Future.delayed(const Duration(seconds: 1), () {
-      if (mounted) {
-        setState(() {
-          _showPasswordFields = true;
-        });
-      }
+    // Show password fields immediately
+    setState(() {
+      _showPasswordFields = true;
     });
   }
 
@@ -126,8 +157,103 @@ class _RessetPasswordBodyState extends State<RessetPasswordBody> {
                   // Instructions Section
                   const SectionInstructions(),
 
-                  // Email Field Section
-                  SectionEmailField(emailController: _emailController),
+                  // Instructions
+                  const SizedBox(height: 24),
+
+                  // Verification Code Fields (same as Verification page)
+                  Center(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: List.generate(4, (index) {
+                        return Container(
+                          width: 60,
+                          height: 60,
+                          margin: const EdgeInsets.symmetric(horizontal: 8),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(14),
+                            border: Border.all(
+                              color: _focusNodes[index].hasFocus
+                                  ? AppColors.primary
+                                  : const Color(0xFFE4DFDF),
+                              width: _focusNodes[index].hasFocus ? 6 : 6,
+                            ),
+                          ),
+                          child: TextField(
+                            controller: _codeControllers[index],
+                            focusNode: _focusNodes[index],
+                            keyboardType: TextInputType.number,
+                            textAlign: TextAlign.center,
+                            maxLength: 1,
+                            inputFormatters: [
+                              FilteringTextInputFormatter.digitsOnly,
+                            ],
+                            style: TextStyle(
+                              fontFamily: 'Inter',
+                              fontWeight: FontWeight.w400,
+                              fontSize: 24,
+                              color: AppColors.primary,
+                            ),
+                            decoration: InputDecoration(
+                              counterText: '',
+                              border: InputBorder.none,
+                              contentPadding: EdgeInsets.zero,
+                              hintText: '-',
+                              hintStyle: TextStyle(
+                                fontFamily: 'Inter',
+                                fontWeight: FontWeight.w400,
+                                fontSize: 24,
+                                color: Colors.grey.shade400,
+                              ),
+                            ),
+                            onChanged: (value) => _onCodeChanged(value, index),
+                          ),
+                        );
+                      }),
+                    ),
+                  ),
+                  const SizedBox(height: 40),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      if (!_canResend) ...[
+                        Text(
+                          'Resend code in ',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: AppColors.onSurfaceVariant,
+                          ),
+                        ),
+                        Text(
+                          _formatTimer(_resendTimer),
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.primary,
+                          ),
+                        ),
+                      ] else ...[
+                        TextButton(
+                          onPressed: () {
+                            setState(() {
+                              _resendTimer = 300;
+                              _canResend = false;
+                            });
+                            _startTimer();
+                          },
+                          child: Text(
+                            'Re-send code',
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.primary,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                  const SizedBox(height: 2044444),
 
                   // Password Fields Section (shown after email is sent)
                   if (_showPasswordFields)
@@ -145,14 +271,16 @@ class _RessetPasswordBodyState extends State<RessetPasswordBody> {
                   // Action Button Section
                   SectionActionButton(
                     showPasswordFields: _showPasswordFields,
-                    isEmailValid: _isEmailValid,
+                    isVerificationCodeValid: _verificationCode.length == 4,
                     isPasswordValid: _isPasswordValid,
                     isConfirmPasswordValid: _isConfirmPasswordValid,
                     onPressed: _showPasswordFields
                         ? (_isPasswordValid && _isConfirmPasswordValid
                               ? _onConfirmPressed
                               : null)
-                        : (_isEmailValid ? _onSendPressed : null),
+                        : (_verificationCode.length == 4
+                              ? _onSendPressed
+                              : null),
                   ),
 
                   const SizedBox(height: 40),

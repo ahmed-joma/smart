@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import '../../../../../shared/widgets/custom_snackbar.dart';
 import 'section_header.dart';
 import 'section_email_info.dart';
 import 'section_verification_fields.dart';
@@ -126,8 +127,18 @@ class _VerificationBodyState extends State<VerificationBody> {
                     SectionContinueButton(
                       onPressed: _verificationCode.length == 4
                           ? () {
-                              // Navigate to reset password
-                              context.go('/ressetPasswordView');
+                              // Show success notification
+                              CustomSnackBar.showSuccess(
+                                context: context,
+                                message: 'Account created successfully!',
+                                duration: const Duration(seconds: 2),
+                              );
+                              // Navigate to sign in page after showing notification
+                              Future.delayed(const Duration(seconds: 2), () {
+                                if (mounted) {
+                                  context.go('/signInView');
+                                }
+                              });
                             }
                           : null,
                     ),

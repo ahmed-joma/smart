@@ -5,7 +5,7 @@ import 'package:smartshop_map/shared/widgets/custom_button.dart';
 
 class SectionActionButton extends StatelessWidget {
   final bool showPasswordFields;
-  final bool isEmailValid;
+  final bool isVerificationCodeValid;
   final bool isPasswordValid;
   final bool isConfirmPasswordValid;
   final VoidCallback? onPressed;
@@ -13,7 +13,7 @@ class SectionActionButton extends StatelessWidget {
   const SectionActionButton({
     super.key,
     required this.showPasswordFields,
-    required this.isEmailValid,
+    required this.isVerificationCodeValid,
     required this.isPasswordValid,
     required this.isConfirmPasswordValid,
     required this.onPressed,
@@ -30,12 +30,14 @@ class SectionActionButton extends StatelessWidget {
             ? (isPasswordValid && isConfirmPasswordValid
                   ? AppColors.primary
                   : Colors.grey.shade300)
-            : (isEmailValid ? AppColors.primary : Colors.grey.shade300),
+            : (isVerificationCodeValid
+                  ? AppColors.primary
+                  : Colors.grey.shade300),
         textColor: showPasswordFields
             ? (isPasswordValid && isConfirmPasswordValid
                   ? Colors.white
                   : Colors.grey.shade600)
-            : (isEmailValid ? Colors.white : Colors.grey.shade600),
+            : (isVerificationCodeValid ? Colors.white : Colors.grey.shade600),
         borderRadius: BorderRadius.circular(12),
         isSignInButton: true,
         fontSize: 16,
@@ -50,7 +52,9 @@ class SectionActionButton extends StatelessWidget {
                 ? (isPasswordValid && isConfirmPasswordValid
                       ? Colors.white
                       : Colors.grey.shade600)
-                : (isEmailValid ? Colors.white : Colors.grey.shade600),
+                : (isVerificationCodeValid
+                      ? Colors.white
+                      : Colors.grey.shade600),
             BlendMode.srcIn,
           ),
         ),

@@ -4,7 +4,10 @@ import '../../features/sign_in/presentation/views/sign_in_view.dart';
 import '../../features/sign_up/presentation/views/sign_up_view.dart';
 import '../../features/Verification/presentation/views/Verification_view.dart';
 import '../../features/Resset_Password/presentation/views/Resset_Password_view.dart';
+import '../../features/Resset_Password/presentation/views/enter_email_view.dart';
 import '../../features/Home/presentation/views/Home_view.dart';
+import '../../features/My_Profile/presentation/views/my_profile_view.dart';
+import '../../features/My_Profile/presentation/views/edit_profile_view.dart';
 import 'package:flutter/material.dart';
 
 class AppRouters {
@@ -12,9 +15,11 @@ class AppRouters {
   static const String kSignInView = '/signInView';
   static const String kSignUpView = '/signUpView';
   static const String kVerificationView = '/verificationView';
+  static const String kEnterEmailView = '/enterEmailView';
   static const String kRessetPasswordView = '/ressetPasswordView';
   static const String kHomeView = '/homeView';
   static const String kMyProfileView = '/myProfileView';
+  static const String kEditProfileView = '/editProfileView';
   static const String kCalendarView = '/calendarView';
   static const String kAiChatbotView = '/aiChatbotView';
   static const String kSettingsView = '/settingsView';
@@ -40,14 +45,21 @@ class AppRouters {
         builder: (context, state) => const VerificationView(),
       ),
       GoRoute(
+        path: kEnterEmailView,
+        builder: (context, state) => const EnterEmailView(),
+      ),
+      GoRoute(
         path: kRessetPasswordView,
         builder: (context, state) => const RessetPasswordView(),
       ),
       GoRoute(path: kHomeView, builder: (context, state) => const HomeView()),
       GoRoute(
         path: kMyProfileView,
-        builder: (context, state) =>
-            const Scaffold(body: Center(child: Text('My Profile'))),
+        builder: (context, state) => const MyProfileView(),
+      ),
+      GoRoute(
+        path: kEditProfileView,
+        builder: (context, state) => const EditProfileView(),
       ),
       GoRoute(
         path: kCalendarView,
