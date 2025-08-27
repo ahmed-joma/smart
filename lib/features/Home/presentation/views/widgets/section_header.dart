@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../../../../../shared/shared.dart';
 import 'section_custom_category.dart';
 
@@ -115,7 +116,7 @@ class SectionHeader extends StatelessWidget {
           const SizedBox(height: 20),
 
           // Search and Filters Section
-          _buildSearchSection(),
+          Builder(builder: (context) => _buildSearchSection(context)),
 
           const SizedBox(height: 1),
 
@@ -126,7 +127,7 @@ class SectionHeader extends StatelessWidget {
     );
   }
 
-  Widget _buildSearchSection() {
+  Widget _buildSearchSection(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(
         horizontal: 0,
@@ -140,26 +141,31 @@ class SectionHeader extends StatelessWidget {
               child: Row(
                 children: [
                   const SizedBox(width: 8),
-                  const Icon(Icons.search, color: Colors.white, size: 30),
-                  const SizedBox(width: 4),
                   Expanded(
-                    child: TextField(
-                      decoration: const InputDecoration(
-                        hintText: 'Search...',
-                        hintStyle: TextStyle(
-                          color: Colors.grey,
-                          fontSize: 20,
-                          fontWeight: FontWeight.w400,
+                    child: GestureDetector(
+                      onTap: () {
+                        context.go('/searchView');
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        child: Row(
+                          children: [
+                            const Icon(
+                              Icons.search,
+                              color: Colors.white,
+                              size: 30,
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              'Search...',
+                              style: TextStyle(
+                                color: Colors.grey,
+                                fontSize: 20,
+                                fontWeight: FontWeight.w400,
+                              ),
+                            ),
+                          ],
                         ),
-                        border: InputBorder.none,
-                        enabledBorder: InputBorder.none,
-                        focusedBorder: InputBorder.none,
-                        contentPadding: EdgeInsets.zero,
-                      ),
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 25,
-                        fontWeight: FontWeight.w400,
                       ),
                     ),
                   ),

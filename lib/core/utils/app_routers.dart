@@ -8,6 +8,7 @@ import '../../features/Resset_Password/presentation/views/enter_email_view.dart'
 import '../../features/Home/presentation/views/Home_view.dart';
 import '../../features/My_Profile/presentation/views/my_profile_view.dart';
 import '../../features/My_Profile/presentation/views/edit_profile_view.dart';
+import '../../features/Search_White_Bar/presentation/views/search_view.dart';
 import 'package:flutter/material.dart';
 
 class AppRouters {
@@ -24,6 +25,7 @@ class AppRouters {
   static const String kAiChatbotView = '/aiChatbotView';
   static const String kSettingsView = '/settingsView';
   static const String kHelpFaqsView = '/helpFaqsView';
+  static const String kSearchView = '/searchView';
 
   static final router = GoRouter(
     initialLocation: kSplashView,
@@ -80,6 +82,10 @@ class AppRouters {
         path: kHelpFaqsView,
         builder: (context, state) =>
             const Scaffold(body: Center(child: Text('Help & FAQs'))),
+      ),
+      GoRoute(
+        path: kSearchView,
+        builder: (context, state) => const SearchView(),
       ),
     ],
   );
