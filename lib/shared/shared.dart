@@ -15,3 +15,6 @@ export 'widgets/custom_checkbox.dart';
 export 'widgets/custom_text_field.dart';
 export 'widgets/custom_snackbar.dart';
 export 'widgets/vertical_text_field.dart';
+
+// Features
+export '../features/Event_Details/Event_Details.dart';

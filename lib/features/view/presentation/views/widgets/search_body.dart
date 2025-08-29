@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '../../../../../shared/shared.dart';
 import 'section_header.dart';
 import '../../../../Search_White_Bar/presentation/views/widgets/section_search_bar.dart';
 import '../../../../Search_White_Bar/presentation/views/widgets/section_city_list.dart';
