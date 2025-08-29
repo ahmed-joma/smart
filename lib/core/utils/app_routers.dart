@@ -10,6 +10,7 @@ import '../../features/My_Profile/presentation/views/my_profile_view.dart';
 import '../../features/My_Profile/presentation/views/edit_profile_view.dart';
 import '../../features/Search_White_Bar/presentation/views/search_view.dart';
 import '../../features/Event_Details/presentation/views/Event_Details_view.dart';
+import '../../features/Filters/presentation/views/Filter_view.dart';
 import 'package:flutter/material.dart';
 
 class AppRouters {
@@ -28,6 +29,7 @@ class AppRouters {
   static const String kHelpFaqsView = '/helpFaqsView';
   static const String kSearchView = '/searchView';
   static const String kEventDetailsView = '/eventDetailsView';
+  static const String kFilterView = '/filterView';
 
   static final router = GoRouter(
     initialLocation: kSplashView,
@@ -95,6 +97,10 @@ class AppRouters {
           final eventData = state.extra as Map<String, dynamic>?;
           return EventDetailsView(eventData: eventData);
         },
+      ),
+      GoRoute(
+        path: kFilterView,
+        builder: (context, state) => const FilterView(),
       ),
     ],
   );

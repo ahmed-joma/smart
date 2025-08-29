@@ -44,27 +44,32 @@ class SectionSearchBar extends StatelessWidget {
           const SizedBox(width: 12),
 
           // Filters Button
-          Container(
-            height: 40,
-            padding: const EdgeInsets.symmetric(horizontal: 12),
-            decoration: BoxDecoration(
-              color: AppColors.primary,
-              borderRadius: BorderRadius.circular(24),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(Icons.filter_list, color: AppColors.onPrimary, size: 20),
-                const SizedBox(width: 8),
-                Text(
-                  'Filters',
-                  style: TextStyle(
-                    color: AppColors.onPrimary,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w400,
+          GestureDetector(
+            onTap: () {
+              Navigator.of(context).pushNamed('/filterView');
+            },
+            child: Container(
+              height: 40,
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              decoration: BoxDecoration(
+                color: AppColors.primary,
+                borderRadius: BorderRadius.circular(24),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.filter_list, color: AppColors.onPrimary, size: 20),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Filters',
+                    style: TextStyle(
+                      color: AppColors.onPrimary,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w400,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ],

@@ -177,27 +177,32 @@ class SectionHeader extends StatelessWidget {
           const SizedBox(width: 12),
 
           // Filters Button
-          Container(
-            height: 40,
-            width: 100,
-            decoration: BoxDecoration(
-              color: AppColors.filters,
-              borderRadius: BorderRadius.circular(25),
-            ),
-            child: const Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.tune, color: Colors.white, size: 20),
-                SizedBox(width: 8),
-                Text(
-                  'Filters',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w400,
-                    fontSize: 16,
+          GestureDetector(
+            onTap: () {
+              context.push('/filterView');
+            },
+            child: Container(
+              height: 40,
+              width: 100,
+              decoration: BoxDecoration(
+                color: AppColors.filters,
+                borderRadius: BorderRadius.circular(25),
+              ),
+              child: const Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.tune, color: Colors.white, size: 20),
+                  SizedBox(width: 8),
+                  Text(
+                    'Filters',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w400,
+                      fontSize: 16,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ],
