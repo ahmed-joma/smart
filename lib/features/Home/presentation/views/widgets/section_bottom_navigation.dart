@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../../../../../shared/shared.dart';
 
 class SectionBottomNavigation extends StatefulWidget {
@@ -29,9 +30,14 @@ class _SectionBottomNavigationState extends State<SectionBottomNavigation> {
       child: BottomNavigationBar(
         currentIndex: _selectedIndex,
         onTap: (index) {
-          setState(() {
-            _selectedIndex = index;
-          });
+          if (index == 1) {
+            // Navigate to Events page
+            context.go('/eventsView');
+          } else {
+            setState(() {
+              _selectedIndex = index;
+            });
+          }
         },
         type: BottomNavigationBarType.fixed,
         backgroundColor: Colors.white,

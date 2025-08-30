@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../../../../../shared/shared.dart';
 
 class SectionCustomCategory extends StatelessWidget {
@@ -32,10 +33,17 @@ class SectionCustomCategory extends StatelessWidget {
               padding: EdgeInsets.only(
                 right: index < categories.length - 1 ? 8 : 0,
               ),
-              child: _buildCategoryChip(
-                category['name'] as String,
-                category['icon'] as IconData,
-                category['color'] as Color,
+              child: GestureDetector(
+                onTap: () {
+                  if (category['name'] == 'Events') {
+                    context.go('/eventsView');
+                  }
+                },
+                child: _buildCategoryChip(
+                  category['name'] as String,
+                  category['icon'] as IconData,
+                  category['color'] as Color,
+                ),
               ),
             );
           },

@@ -11,30 +11,16 @@ class SectionFilterHeader extends StatelessWidget {
         crossAxisAlignment:
             CrossAxisAlignment.start, // ← هذا يجعل العناصر تبدأ من اليسار
         children: [
-          // Title with Back Arrow
-          Row(
-            children: [
-              GestureDetector(
-                onTap: () => Navigator.of(context).pop(),
-                child: Container(
-                  padding: const EdgeInsets.all(8),
-                  child: const Icon(
-                    Icons.arrow_back_ios,
-                    color: Colors.black,
-                    size: 24,
-                  ),
-                ),
+          // Title centered
+          const Center(
+            child: Text(
+              'Filter',
+              style: TextStyle(
+                fontSize: 28,
+                fontWeight: FontWeight.w400,
+                color: Colors.black,
               ),
-              const SizedBox(width: 8),
-              const Text(
-                'Filter',
-                style: TextStyle(
-                  fontSize: 28,
-                  fontWeight: FontWeight.w400,
-                  color: Colors.black,
-                ),
-              ),
-            ],
+            ),
           ),
 
           const SizedBox(height: 32),

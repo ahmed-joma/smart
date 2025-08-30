@@ -7,10 +7,9 @@ import 'section_price_range_filter.dart';
 import 'section_action_buttons.dart';
 
 class FilterBody extends StatefulWidget {
-  final VoidCallback? onClose;
   final ScrollController? scrollController;
 
-  const FilterBody({super.key, this.onClose, this.scrollController});
+  const FilterBody({super.key, this.scrollController});
 
   @override
   State<FilterBody> createState() => _FilterBodyState();

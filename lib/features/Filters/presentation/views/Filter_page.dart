@@ -31,12 +31,7 @@ class FilterPage extends StatelessWidget {
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
-              Expanded(
-                child: FilterBody(
-                  scrollController: scrollController,
-                  onClose: () => Navigator.of(context).pop(),
-                ),
-              ),
+              Expanded(child: FilterBody(scrollController: scrollController)),
             ],
           ),
         );
