@@ -89,7 +89,7 @@ class HomeDrawer extends StatelessWidget {
                     title: 'AI chatbot',
                     onTap: () {
                       // Navigate to AI Chatbot
-                      context.go('/aiChatbotView');
+                      context.go('/chatView');
                     },
                   ),
                   _buildDrawerItem(

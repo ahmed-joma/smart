@@ -18,3 +18,4 @@ export 'widgets/vertical_text_field.dart';
 
 // Features
 export '../features/Event_Details/Event_Details.dart';
+export '../features/chat_FitBot/chat_FitBot.dart';

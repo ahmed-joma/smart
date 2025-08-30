@@ -11,6 +11,7 @@ import '../../features/My_Profile/presentation/views/edit_profile_view.dart';
 import '../../features/Search_White_Bar/presentation/views/search_view.dart';
 import '../../features/Event_Details/presentation/views/Event_Details_view.dart';
 import '../../features/Event_Details/presentation/views/events_view.dart';
+import '../../features/chat_FitBot/presentation/views/chat_view.dart';
 import '../../features/Filters/presentation/views/Filter_view.dart';
 import 'package:flutter/material.dart';
 
@@ -31,6 +32,7 @@ class AppRouters {
   static const String kSearchView = '/searchView';
   static const String kEventDetailsView = '/eventDetailsView';
   static const String kEventsView = '/eventsView';
+  static const String kChatView = '/chatView';
   static const String kFilterView = '/filterView';
 
   static final router = GoRouter(
@@ -104,6 +106,7 @@ class AppRouters {
         path: kEventsView,
         builder: (context, state) => const EventsView(),
       ),
+      GoRoute(path: kChatView, builder: (context, state) => const ChatView()),
       GoRoute(
         path: kFilterView,
         builder: (context, state) => const FilterView(),
