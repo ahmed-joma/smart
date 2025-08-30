@@ -8,8 +8,9 @@ import 'section_action_buttons.dart';
 
 class FilterBody extends StatefulWidget {
   final VoidCallback? onClose;
+  final ScrollController? scrollController;
 
-  const FilterBody({super.key, this.onClose});
+  const FilterBody({super.key, this.onClose, this.scrollController});
 
   @override
   State<FilterBody> createState() => _FilterBodyState();
@@ -35,6 +36,7 @@ class _FilterBodyState extends State<FilterBody> {
         // Scrollable Content
         Expanded(
           child: SingleChildScrollView(
+            controller: widget.scrollController,
             child: Column(
               children: [
                 // Header with drag handle

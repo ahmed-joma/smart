@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../../shared/shared.dart';
+import '../../../../Filters/presentation/views/Filter_page.dart';
 
 class SectionSearchBar extends StatelessWidget {
   final TextEditingController searchController;
@@ -46,7 +47,12 @@ class SectionSearchBar extends StatelessWidget {
           // Filters Button
           GestureDetector(
             onTap: () {
-              Navigator.of(context).pushNamed('/filterView');
+              showModalBottomSheet(
+                context: context,
+                isScrollControlled: true,
+                backgroundColor: Colors.transparent,
+                builder: (context) => const FilterPage(),
+              );
             },
             child: Container(
               height: 40,

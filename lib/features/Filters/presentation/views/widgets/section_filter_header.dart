@@ -11,19 +11,6 @@ class SectionFilterHeader extends StatelessWidget {
         crossAxisAlignment:
             CrossAxisAlignment.start, // ← هذا يجعل العناصر تبدأ من اليسار
         children: [
-          // Drag Handle
-          Center(
-            child: Container(
-              margin: const EdgeInsets.only(top: 8, bottom: 16),
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: Colors.grey.shade300,
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-          ),
-
           // Title with Back Arrow
           Row(
             children: [
