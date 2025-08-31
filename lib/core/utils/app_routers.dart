@@ -13,6 +13,7 @@ import '../../features/Event_Details/presentation/views/Event_Details_view.dart'
 import '../../features/Event_Details/presentation/views/events_view.dart';
 import '../../features/chat_FitBot/presentation/views/chat_view.dart';
 import '../../features/Filters/presentation/views/Filter_view.dart';
+import '../../features/Hotel_Home/presentation/views/Hotel_Home_view.dart';
 import 'package:flutter/material.dart';
 
 class AppRouters {
@@ -34,6 +35,7 @@ class AppRouters {
   static const String kEventsView = '/eventsView';
   static const String kChatView = '/chatView';
   static const String kFilterView = '/filterView';
+  static const String kHotelHomeView = '/hotelHomeView';
 
   static final router = GoRouter(
     initialLocation: kSplashView,
@@ -110,6 +112,10 @@ class AppRouters {
       GoRoute(
         path: kFilterView,
         builder: (context, state) => const FilterView(),
+      ),
+      GoRoute(
+        path: kHotelHomeView,
+        builder: (context, state) => const HotelHomeView(),
       ),
     ],
   );
