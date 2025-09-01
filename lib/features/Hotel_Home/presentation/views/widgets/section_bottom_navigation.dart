@@ -30,7 +30,10 @@ class _SectionBottomNavigationState extends State<SectionBottomNavigation> {
       child: BottomNavigationBar(
         currentIndex: _selectedIndex,
         onTap: (index) {
-          if (index == 1) {
+          if (index == 0) {
+            // Navigate to Home page
+            context.go('/homeView');
+          } else if (index == 1) {
             // Navigate to Events page
             context.go('/eventsView');
           } else if (index == 4) {
