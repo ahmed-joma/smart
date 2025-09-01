@@ -5,6 +5,7 @@ import 'section_header.dart';
 import 'section_profile_info.dart';
 import 'section_about_me.dart';
 import 'section_interests.dart';
+import 'section_saved_items.dart';
 
 class MyProfileBody extends StatefulWidget {
   const MyProfileBody({super.key});
@@ -45,6 +46,9 @@ class _MyProfileBodyState extends State<MyProfileBody> {
 
               // Interests Section
               const SectionInterests(),
+
+              // Saved Items Section
+              const SectionSavedItems(),
 
               const SizedBox(height: 40),
             ],
