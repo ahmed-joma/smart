@@ -2,9 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../../shared/shared.dart';
+import '../../../../../shared/widgets/interactive_bookmark.dart';
 
-class SectionUpcomingEvents extends StatelessWidget {
+class SectionUpcomingEvents extends StatefulWidget {
   const SectionUpcomingEvents({super.key});
+
+  @override
+  State<SectionUpcomingEvents> createState() => _SectionUpcomingEventsState();
+}
+
+class _SectionUpcomingEventsState extends State<SectionUpcomingEvents> {
+  // Track saved state for each event
+  final Map<int, bool> _savedEvents = {};
 
   @override
   Widget build(BuildContext context) {
@@ -59,9 +68,10 @@ class SectionUpcomingEvents extends StatelessWidget {
               if (index.isEven) {
                 return _buildEventCard(
                   context,
+                  index,
                   index % 2 == 0 ? 'City Walk event' : 'Art Promenade',
                   index % 2 == 0
-                      ? 'assets/images/citywaikevents.svg'
+                      ? 'assets/images/citywaikeevents.svg'
                       : 'assets/images/Art Promenade.svg',
                   '10 JUNE',
                   'Jeddah King Abdulaziz Road',
@@ -82,6 +92,7 @@ class SectionUpcomingEvents extends StatelessWidget {
 
   Widget _buildEventCard(
     BuildContext context,
+    int index,
     String title,
     String imagePath,
     String date,
@@ -202,33 +213,33 @@ class SectionUpcomingEvents extends StatelessWidget {
                   ),
                 ),
 
-                // Bookmark Icon
+                // Interactive Bookmark Icon
                 Positioned(
                   top: 12,
                   right: 12,
-                  child: Container(
-                    padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.2),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: Colors.white.withOpacity(0.3),
-                        width: 1,
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.1),
-                          blurRadius: 8,
-                          spreadRadius: 0,
-                          offset: const Offset(0, 2),
+                  child: InteractiveBookmark(
+                    isSaved: _savedEvents[index] ?? false,
+                    onPressed: () {
+                      final newSavedState = !(_savedEvents[index] ?? false);
+                      setState(() {
+                        _savedEvents[index] = newSavedState;
+                      });
+                      // TODO: Call API to save/unsave event
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            newSavedState
+                                ? 'Event saved to favorites!'
+                                : 'Event removed from favorites!',
+                          ),
+                          backgroundColor: AppColors.primary,
+                          duration: const Duration(seconds: 2),
                         ),
-                      ],
-                    ),
-                    child: const Icon(
-                      Icons.bookmark,
-                      color: Color(0xFFF0635A),
-                      size: 22,
-                    ),
+                      );
+                    },
+                    size: 44,
+                    backgroundColor: Colors.white.withOpacity(0.2),
+                    iconColor: AppColors.primary,
                   ),
                 ),
               ],
