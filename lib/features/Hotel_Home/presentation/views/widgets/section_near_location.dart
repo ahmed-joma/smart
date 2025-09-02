@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
+import '../../../../../shared/widgets/interactive_bookmark.dart';
 
 class SectionNearLocation extends StatefulWidget {
   const SectionNearLocation({super.key});
@@ -189,31 +190,10 @@ class _SectionNearLocationState extends State<SectionNearLocation> {
                 Positioned(
                   top: 16,
                   right: 16, // تغيير إلى يمين البطاقة
-                  child: GestureDetector(
-                    onTap: onFavoriteToggle,
-                    child: Container(
-                      width: 40, // زيادة حجم الكونتينر
-                      height: 40, // زيادة حجم الكونتينر
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.2),
-                            blurRadius: 8,
-                            spreadRadius: 2,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
-                      ),
-                      child: Icon(
-                        isFavorite ? Icons.favorite : Icons.favorite_border,
-                        color: isFavorite
-                            ? const Color(0xFF7F2F3A)
-                            : Colors.grey,
-                        size: 24, // زيادة حجم القلب
-                      ),
-                    ),
+                  child: InteractiveBookmark(
+                    isSaved: isFavorite,
+                    onPressed: onFavoriteToggle,
+                    size: 40,
                   ),
                 ),
               ],

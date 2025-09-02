@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '../themes/app_colors.dart';
 
 class InteractiveBookmark extends StatefulWidget {
   final bool isSaved;
