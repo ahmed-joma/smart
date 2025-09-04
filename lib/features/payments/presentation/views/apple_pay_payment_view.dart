@@ -30,7 +30,7 @@ class _ApplePayPaymentViewState extends State<ApplePayPaymentView>
       'name': 'Apple Card',
       'last4': '1234',
       'color': Colors.black,
-      'icon': '🍎',
+      'icon': Icons.apple,
     },
     {
       'name': 'Chase Visa',
@@ -215,7 +215,7 @@ class _ApplePayPaymentViewState extends State<ApplePayPaymentView>
                     ],
                   ),
                   child: const Center(
-                    child: Text('🍎', style: TextStyle(fontSize: 40)),
+                    child: Icon(Icons.apple, size: 40, color: Colors.black),
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -374,7 +374,16 @@ class _ApplePayPaymentViewState extends State<ApplePayPaymentView>
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Center(
-                child: Text(card['icon'], style: const TextStyle(fontSize: 20)),
+                child: card['icon'] is IconData
+                    ? Icon(
+                        card['icon'] as IconData,
+                        size: 20,
+                        color: Colors.white,
+                      )
+                    : Text(
+                        card['icon'] as String,
+                        style: const TextStyle(fontSize: 20),
+                      ),
               ),
             ),
             const SizedBox(width: 16),
@@ -488,12 +497,26 @@ class _ApplePayPaymentViewState extends State<ApplePayPaymentView>
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Center(
-                  child: Text(
-                    _cards.firstWhere(
-                      (card) => card['name'] == _selectedCard,
-                    )['icon'],
-                    style: const TextStyle(fontSize: 20),
-                  ),
+                  child:
+                      _cards.firstWhere(
+                            (card) => card['name'] == _selectedCard,
+                          )['icon']
+                          is IconData
+                      ? Icon(
+                          _cards.firstWhere(
+                                (card) => card['name'] == _selectedCard,
+                              )['icon']
+                              as IconData,
+                          size: 20,
+                          color: Colors.white,
+                        )
+                      : Text(
+                          _cards.firstWhere(
+                                (card) => card['name'] == _selectedCard,
+                              )['icon']
+                              as String,
+                          style: const TextStyle(fontSize: 20),
+                        ),
                 ),
               ),
               const SizedBox(width: 16),
@@ -549,7 +572,7 @@ class _ApplePayPaymentViewState extends State<ApplePayPaymentView>
                   : Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Text('🍎', style: TextStyle(fontSize: 20)),
+                        const Icon(Icons.apple, size: 20, color: Colors.black),
                         const SizedBox(width: 12),
                         Text(
                           'Pay ${widget.totalAmount}',
