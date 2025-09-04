@@ -4,7 +4,7 @@ import 'section_hotel_header.dart';
 import 'section_guests_container.dart';
 import 'section_hotel_details.dart';
 import 'section_hotel_preview.dart';
-import 'section_book_hotel_button.dart';
+import 'section_hotel_details_button.dart';
 
 class HotelDetailsBody extends StatefulWidget {
   final Map<String, dynamic>? hotelData;
@@ -100,7 +100,7 @@ class _HotelDetailsBodyState extends State<HotelDetailsBody>
           ),
 
           // Fixed Book Hotel Button at Bottom
-          SectionBookHotelButton(price: hotel['price']),
+          SectionHotelDetailsButton(hotelData: hotel),
         ],
       ),
     );
