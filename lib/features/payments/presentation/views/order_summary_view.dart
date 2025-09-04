@@ -3,6 +3,8 @@ import 'package:go_router/go_router.dart';
 import 'widgets/section_order_header.dart';
 import 'widgets/section_payment_methods.dart';
 import 'widgets/section_payment_button.dart';
+import 'widgets/section_coupon_discount.dart';
+import 'widgets/section_advanced_payment_methods.dart';
 
 class OrderSummaryView extends StatefulWidget {
   final Map<String, dynamic>? orderData;
@@ -16,6 +18,9 @@ class OrderSummaryView extends StatefulWidget {
 class _OrderSummaryViewState extends State<OrderSummaryView> {
   bool _isCardSelected = true;
   bool _isCryptoSelected = false;
+  String _selectedPaymentMethod = 'card';
+  String _currentTotalPrice = '';
+  double _originalPrice = 0.0;
 
   @override
   Widget build(BuildContext context) {
@@ -32,6 +37,13 @@ class _OrderSummaryViewState extends State<OrderSummaryView> {
           'total': 'SR 138',
           'type': 'event', // 'event' or 'hotel'
         };
+
+    // تحويل السعر إلى رقم
+    if (_originalPrice == 0.0) {
+      final priceStr = orderData['total'] ?? 'SR 138';
+      _originalPrice = double.tryParse(priceStr.replaceAll('SR ', '')) ?? 138.0;
+      _currentTotalPrice = orderData['total'] ?? 'SR 138';
+    }
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -83,20 +95,23 @@ class _OrderSummaryViewState extends State<OrderSummaryView> {
                   _buildPriceDetailsSection(orderData),
                   const SizedBox(height: 24),
 
-                  // Enhanced Payment Methods
-                  SectionPaymentMethods(
-                    isCardSelected: _isCardSelected,
-                    isCryptoSelected: _isCryptoSelected,
-                    onCardSelected: (selected) {
+                  // Coupon Discount Section
+                  SectionCouponDiscount(
+                    originalPrice: _originalPrice,
+                    onCouponApplied: (discountedPrice) {
                       setState(() {
-                        _isCardSelected = selected;
-                        _isCryptoSelected = !selected;
+                        _currentTotalPrice = discountedPrice;
                       });
                     },
-                    onCryptoSelected: (selected) {
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Advanced Payment Methods
+                  SectionAdvancedPaymentMethods(
+                    selectedMethod: _selectedPaymentMethod,
+                    onMethodSelected: (method) {
                       setState(() {
-                        _isCryptoSelected = selected;
-                        _isCardSelected = !selected;
+                        _selectedPaymentMethod = method;
                       });
                     },
                   ),
@@ -107,33 +122,79 @@ class _OrderSummaryViewState extends State<OrderSummaryView> {
 
           // Enhanced Payment Button
           SectionPaymentButton(
-            totalPrice: orderData['total'] ?? 'SR 138',
+            totalPrice: _currentTotalPrice.isNotEmpty
+                ? _currentTotalPrice
+                : (orderData['total'] ?? 'SR 138'),
             onPressed: () {
-              // TODO: Process payment
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Row(
-                    children: [
-                      const Icon(
-                        Icons.check_circle,
-                        color: Colors.white,
-                        size: 20,
-                      ),
-                      const SizedBox(width: 12),
-                      const Text(
-                        'Payment processing...',
-                        style: TextStyle(fontSize: 16),
-                      ),
-                    ],
-                  ),
-                  backgroundColor: const Color(0xFF7F2F3A),
-                  behavior: SnackBarBehavior.floating,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  margin: const EdgeInsets.all(16),
-                ),
-              );
+              // توجيه للصفحة المناسبة حسب طريقة الدفع المختارة
+              switch (_selectedPaymentMethod) {
+                case 'card':
+                  context.push(
+                    '/creditCardPayment',
+                    extra: {
+                      'totalAmount': _currentTotalPrice.isNotEmpty
+                          ? _currentTotalPrice
+                          : (orderData['total'] ?? 'SR 138'),
+                      'orderTitle': orderData['title'] ?? 'Order',
+                    },
+                  );
+                  break;
+                case 'paypal':
+                  context.push(
+                    '/paypalPayment',
+                    extra: {
+                      'totalAmount': _currentTotalPrice.isNotEmpty
+                          ? _currentTotalPrice
+                          : (orderData['total'] ?? 'SR 138'),
+                      'orderTitle': orderData['title'] ?? 'Order',
+                    },
+                  );
+                  break;
+                case 'crypto':
+                  context.push(
+                    '/cryptoPayment',
+                    extra: {
+                      'totalAmount': _currentTotalPrice.isNotEmpty
+                          ? _currentTotalPrice
+                          : (orderData['total'] ?? 'SR 138'),
+                      'orderTitle': orderData['title'] ?? 'Order',
+                    },
+                  );
+                  break;
+                case 'apple_pay':
+                  context.push(
+                    '/applePayPayment',
+                    extra: {
+                      'totalAmount': _currentTotalPrice.isNotEmpty
+                          ? _currentTotalPrice
+                          : (orderData['total'] ?? 'SR 138'),
+                      'orderTitle': orderData['title'] ?? 'Order',
+                    },
+                  );
+                  break;
+                case 'google_pay':
+                  context.push(
+                    '/googlePayPayment',
+                    extra: {
+                      'totalAmount': _currentTotalPrice.isNotEmpty
+                          ? _currentTotalPrice
+                          : (orderData['total'] ?? 'SR 138'),
+                      'orderTitle': orderData['title'] ?? 'Order',
+                    },
+                  );
+                  break;
+                default:
+                  // افتراضياً بطاقة ائتمان
+                  context.push(
+                    '/creditCardPayment',
+                    extra: {
+                      'totalAmount': _currentTotalPrice.isNotEmpty
+                          ? _currentTotalPrice
+                          : (orderData['total'] ?? 'SR 138'),
+                      'orderTitle': orderData['title'] ?? 'Order',
+                    },
+                  );
+              }
             },
           ),
         ],

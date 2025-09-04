@@ -59,12 +59,16 @@ class _SectionPaymentButtonState extends State<SectionPaymentButton>
       padding: const EdgeInsets.symmetric(horizontal: 26, vertical: 19),
       decoration: BoxDecoration(
         color: Colors.white,
+        borderRadius: const BorderRadius.only(
+          topLeft: Radius.circular(24),
+          topRight: Radius.circular(24),
+        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
+            color: Colors.grey.withOpacity(0.15),
             spreadRadius: 2,
-            blurRadius: 20,
-            offset: const Offset(0, -4),
+            blurRadius: 25,
+            offset: const Offset(0, -6),
           ),
         ],
       ),
@@ -157,26 +161,48 @@ class _SectionPaymentButtonState extends State<SectionPaymentButton>
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(
-                              Icons.payment,
-                              color: Colors.white,
-                              size: _isPressed ? 22 : 24,
-                            ),
-                            const SizedBox(width: 8),
-                            const Text(
-                              'Make Payment',
-                              style: TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w400,
+                            // Payment icon with pulse animation
+                            AnimatedContainer(
+                              duration: const Duration(milliseconds: 200),
+                              child: Icon(
+                                Icons.payment,
                                 color: Colors.white,
-                                letterSpacing: 0.5,
+                                size: _isPressed ? 22 : 24,
                               ),
                             ),
-                            const SizedBox(width: 8),
-                            Icon(
-                              Icons.arrow_forward,
-                              color: Colors.white,
-                              size: 20,
+                            const SizedBox(width: 12),
+                            // Text with gradient
+                            ShaderMask(
+                              shaderCallback: (bounds) => LinearGradient(
+                                colors: [
+                                  Colors.white,
+                                  Colors.white.withOpacity(0.9),
+                                ],
+                              ).createShader(bounds),
+                              child: const Text(
+                                'Make Payment',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.white,
+                                  letterSpacing: 0.5,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            // Arrow icon with animation
+                            AnimatedContainer(
+                              duration: const Duration(milliseconds: 200),
+                              transform: Matrix4.translationValues(
+                                _isPressed ? 3 : 0,
+                                0,
+                                0,
+                              ),
+                              child: const Icon(
+                                Icons.arrow_forward,
+                                color: Colors.white,
+                                size: 20,
+                              ),
                             ),
                           ],
                         ),
