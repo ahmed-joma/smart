@@ -102,7 +102,7 @@ class _EventDetailsBodyState extends State<EventDetailsBody>
 
           // Fixed Buy Ticket Button at Bottom
           // Fixed Buy Ticket Button at Bottom (Positioned)
-          SectionBuyTicketButton(price: event['price']),
+          SectionBuyTicketButton(price: event['price'], eventData: event),
         ],
       ),
     );

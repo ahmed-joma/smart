@@ -35,13 +35,16 @@ class SectionBookHotelButton extends StatelessWidget {
                 'location':
                     '${hotelData?['location'] ?? 'Jeddah Corniche'}, ${hotelData?['country'] ?? 'KSA'}',
                 'price': 'SR ${totalPrice.toStringAsFixed(1)}',
+                'tax': 'SR 18',
+                'total': 'SR ${(totalPrice + 18).toStringAsFixed(1)}',
+                'type': 'hotel',
                 'image': hotelData?['image'] ?? 'assets/images/hotel.svg',
                 'rooms': selectedRooms,
                 'beds': selectedBeds,
                 'guests': selectedGuests,
                 'nights': selectedNights,
               };
-              context.push('/paymentMethodSelection', extra: orderData);
+              context.push('/orderSummary', extra: orderData);
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFF7F2F3A),

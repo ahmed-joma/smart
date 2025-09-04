@@ -1,10 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../../../../../../shared/shared.dart';
 
 class SectionBuyTicketButton extends StatelessWidget {
   final String price;
+  final Map<String, dynamic>? eventData;
 
-  const SectionBuyTicketButton({super.key, required this.price});
+  const SectionBuyTicketButton({
+    super.key,
+    required this.price,
+    this.eventData,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -14,7 +20,23 @@ class SectionBuyTicketButton extends StatelessWidget {
       right: 50, // لجعل الزر أضيق
       child: ElevatedButton(
         onPressed: () {
-          // Handle buy ticket action
+          // تحويل السعر من "SR 120" إلى رقم
+          final priceValue =
+              double.tryParse(price.replaceAll('SR ', '')) ?? 120.0;
+          final totalPrice = priceValue + 18.0; // إضافة الضريبة
+
+          final orderData = {
+            'title': eventData?['title'] ?? 'City Walk event',
+            'date': eventData?['date'] ?? '14 December, 2025',
+            'location':
+                '${eventData?['location'] ?? 'Jeddah King Abdulaziz Road'}, ${eventData?['country'] ?? 'KSA'}',
+            'price': price,
+            'tax': 'SR 18',
+            'total': 'SR ${totalPrice.toStringAsFixed(1)}',
+            'type': 'event',
+            'image': eventData?['image'] ?? 'assets/images/citywaikevents.svg',
+          };
+          context.push('/orderSummary', extra: orderData);
         },
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.primary,
