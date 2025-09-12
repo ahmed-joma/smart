@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'widgets/section_order_header.dart';
-import 'widgets/section_payment_methods.dart';
 import 'widgets/section_payment_button.dart';
 import 'widgets/section_coupon_discount.dart';
 import 'widgets/section_advanced_payment_methods.dart';

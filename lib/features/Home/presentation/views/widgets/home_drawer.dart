@@ -110,7 +110,7 @@ class HomeDrawer extends StatelessWidget {
                   ),
                   _buildDrawerItem(
                     icon: Icons.logout,
-                    title: 'Sign in',
+                    title: 'Sign Out',
                     onTap: () {
                       // Navigate to Sign In
                       context.go('/signInView');

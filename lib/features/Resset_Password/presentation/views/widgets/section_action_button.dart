@@ -43,20 +43,13 @@ class SectionActionButton extends StatelessWidget {
         fontSize: 16,
         fontWeight: FontWeight.w600,
         fontFamily: 'Noto Kufi Arabic',
-        suffixWidget: SvgPicture.asset(
-          'assets/images/arrow.svg',
-          width: 24,
-          height: 24,
-          colorFilter: ColorFilter.mode(
-            showPasswordFields
-                ? (isPasswordValid && isConfirmPasswordValid
-                      ? Colors.white
-                      : Colors.grey.shade600)
-                : (isVerificationCodeValid
-                      ? Colors.white
-                      : Colors.grey.shade600),
-            BlendMode.srcIn,
+        suffixWidget: Container(
+          padding: const EdgeInsets.all(6),
+          decoration: BoxDecoration(
+            color: const Color(0xFF3D56F0),
+            borderRadius: BorderRadius.circular(16),
           ),
+          child: const Icon(Icons.arrow_forward, color: Colors.white, size: 16),
         ),
         onPressed: onPressed,
       ),

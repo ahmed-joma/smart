@@ -285,7 +285,7 @@ class _RessetPasswordBodyState extends State<RessetPasswordBody> {
                       ],
                     ],
                   ),
-                  const SizedBox(height: 2044444),
+                  const SizedBox(height: 40),
 
                   // Password Fields Section (shown after email is sent)
                   if (_showPasswordFields) ...[

@@ -33,6 +33,9 @@ class _SectionBottomNavigationState extends State<SectionBottomNavigation> {
           if (index == 1) {
             // Navigate to Events page
             context.go('/eventsView');
+          } else if (index == 3) {
+            // Navigate to Map page
+            context.go('/mapView');
           } else if (index == 4) {
             // Navigate to Profile page
             context.go('/myProfileView');

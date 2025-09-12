@@ -133,10 +133,10 @@ class _VerificationBodyState extends State<VerificationBody> {
                                 message: 'Account created successfully!',
                                 duration: const Duration(seconds: 2),
                               );
-                              // Navigate to sign in page after showing notification
+                              // Navigate to home page after showing notification
                               Future.delayed(const Duration(seconds: 2), () {
                                 if (mounted) {
-                                  context.go('/signInView');
+                                  context.go('/homeView');
                                 }
                               });
                             }
