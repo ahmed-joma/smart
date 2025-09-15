@@ -34,17 +34,31 @@ class _RessetPasswordBodyState extends State<RessetPasswordBody> {
   int _resendTimer = 300; // 5 minutes (300 seconds)
   bool _canResend = false;
 
-  // Email variable - should be passed from previous screen or stored
-  String _userEmail = 'user@example.com'; // This should be dynamic
+  // Email variable - will be received from route parameters
+  String _userEmail = '';
 
   @override
   void initState() {
     super.initState();
     _startTimer();
-    // Auto-focus first field
+
+    // Get email from route parameters
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      final uri = Uri.parse(GoRouterState.of(context).uri.toString());
+      final email = uri.queryParameters['email'];
+      if (email != null) {
+        setState(() {
+          _userEmail = Uri.decodeComponent(email);
+        });
+        print('📧 Email received from route: $_userEmail');
+      } else {
+        print('⚠️ No email found in route parameters');
+      }
+
+      // Auto-focus first field
       _focusNodes[0].requestFocus();
     });
+
     _newPasswordController.addListener(_checkPasswordValidity);
     _confirmPasswordController.addListener(_checkPasswordValidity);
   }
@@ -152,17 +166,34 @@ class _RessetPasswordBodyState extends State<RessetPasswordBody> {
     });
   }
 
-  void _onSendPressed() {
+  void _onSendPressed(BuildContext context) {
     // Verify code first
     if (_verificationCode.length == 4) {
+      print('🔍 Code entered: $_verificationCode for email: $_userEmail');
+
+      // Show password fields - code will be verified when submitting password
       setState(() {
         _showPasswordFields = true;
       });
+
+      // Show info message
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Code accepted! Please enter your new password.'),
+          backgroundColor: Colors.green,
+          duration: Duration(seconds: 2),
+        ),
+      );
     }
   }
 
   void _onConfirmPressed(BuildContext context) {
     if (_isPasswordValid && _isConfirmPasswordValid) {
+      print('🔄 Password Reset Request:');
+      print('📧 Email: $_userEmail');
+      print('🔢 Code: $_verificationCode');
+      print('🔐 Password: ${_newPasswordController.text}');
+
       // Call API to reset password
       context.read<PasswordResetCubit>().resetPassword(
         email: _userEmail,
@@ -174,14 +205,16 @@ class _RessetPasswordBodyState extends State<RessetPasswordBody> {
   }
 
   void _onResendPressed(BuildContext context) {
-    setState(() {
-      _resendTimer = 300; // Reset to 5 minutes
-      _canResend = false;
-    });
-    _startTimer();
+    if (_userEmail.isNotEmpty) {
+      setState(() {
+        _resendTimer = 300; // Reset to 5 minutes
+        _canResend = false;
+      });
+      _startTimer();
 
-    // Call API to resend reset code
-    context.read<PasswordResetCubit>().sendResetCode(_userEmail);
+      // Call API to resend reset code
+      context.read<PasswordResetCubit>().sendResetCode(_userEmail);
+    }
   }
 
   @override
@@ -194,7 +227,7 @@ class _RessetPasswordBodyState extends State<RessetPasswordBody> {
             // Show success notification
             CustomSnackBar.showSuccess(
               context: context,
-              message: 'تم تغيير كلمة المرور بنجاح!',
+              message: 'Password reset successfully!',
               duration: const Duration(seconds: 2),
             );
             // Navigate to sign in after showing notification
@@ -204,11 +237,28 @@ class _RessetPasswordBodyState extends State<RessetPasswordBody> {
               }
             });
           } else if (state is ResetPasswordError) {
-            // Show error notification
+            // Show error notification with debug info
+            print('❌ Reset Password Error: ${state.message}');
+            print('📧 Email used: $_userEmail');
+            print('🔢 Code used: $_verificationCode');
+
+            // Customize error message for better user experience
+            String userMessage = state.message;
+            if (state.message.contains('invalid') ||
+                state.message.contains('expired')) {
+              userMessage =
+                  'The reset code is invalid or has expired. Please request a new code.';
+            } else if (state.message.contains('email')) {
+              userMessage = 'Email not found. Please check your email address.';
+            } else if (state.message.contains('password')) {
+              userMessage =
+                  'Password requirements not met. Please check your password.';
+            }
+
             CustomSnackBar.showError(
               context: context,
-              message: state.message,
-              duration: const Duration(seconds: 3),
+              message: userMessage,
+              duration: const Duration(seconds: 4),
             );
           } else if (state is SendCodeSuccess) {
             // Show success notification for resend
@@ -323,13 +373,7 @@ class _RessetPasswordBodyState extends State<RessetPasswordBody> {
                             ),
                           ] else ...[
                             TextButton(
-                              onPressed: () {
-                                setState(() {
-                                  _resendTimer = 300;
-                                  _canResend = false;
-                                });
-                                _startTimer();
-                              },
+                              onPressed: () => _onResendPressed(context),
                               child: Text(
                                 'Re-send code',
                                 style: TextStyle(
@@ -418,7 +462,7 @@ class _RessetPasswordBodyState extends State<RessetPasswordBody> {
                                       : null)
                                 : (_verificationCode.length == 4 &&
                                           state is! SendCodeLoading
-                                      ? _onSendPressed
+                                      ? () => _onSendPressed(context)
                                       : null),
                             isLoading:
                                 state is ResetPasswordLoading ||

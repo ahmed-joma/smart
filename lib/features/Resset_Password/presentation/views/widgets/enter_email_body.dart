@@ -63,7 +63,9 @@ class _EnterEmailBodyState extends State<EnterEmailBody> {
             // Navigate to reset password page after showing notification
             Future.delayed(const Duration(seconds: 2), () {
               if (mounted) {
-                context.go('/ressetPasswordView');
+                context.go(
+                  '/ressetPasswordView?email=${Uri.encodeComponent(_emailController.text.trim())}',
+                );
               }
             });
           } else if (state is SendCodeError) {
