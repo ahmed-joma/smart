@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:smartshop_map/shared/widgets/custom_snackbar.dart';
+import '../../manager/sign_up_cubit.dart';
 import 'section_header.dart';
 import 'section_form_fields.dart';
 import 'section_signup_button.dart';
@@ -120,60 +123,103 @@ class _SignUpBodyState extends State<SignUpBody> {
       _isConfirmPasswordValid = true;
     });
 
-    // Navigate to verification page
-    context.go('/verificationView');
+    // Call API through Cubit
+    context.read<SignUpCubit>().signUp(
+      name: _fullNameController.text.trim(),
+      email: _emailController.text.trim(),
+      password: _passwordController.text,
+      passwordConfirmation: _confirmPasswordController.text,
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      resizeToAvoidBottomInset: true,
-      body: Container(
-        width: double.infinity,
-        height: double.infinity,
-        decoration: const BoxDecoration(color: Colors.white),
-        child: SafeArea(
-          child: SingleChildScrollView(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Header Section
-                  const SectionHeader(),
+    return BlocProvider(
+      create: (context) => SignUpCubit(),
+      child: BlocListener<SignUpCubit, SignUpState>(
+        listener: (context, state) {
+          if (state is SignUpSuccess) {
+            // Show success notification
+            CustomSnackBar.showSuccess(
+              context: context,
+              message: 'تم إنشاء الحساب بنجاح!',
+              duration: const Duration(seconds: 2),
+            );
 
-                  // Form Fields Section
-                  SectionFormFields(
-                    fullNameController: _fullNameController,
-                    emailController: _emailController,
-                    passwordController: _passwordController,
-                    confirmPasswordController: _confirmPasswordController,
-                    isFullNameValid: _isFullNameValid,
-                    isEmailValid: _isEmailValid,
-                    isPasswordValid: _isPasswordValid,
-                    isConfirmPasswordValid: _isConfirmPasswordValid,
-                    isPasswordVisible: _isPasswordVisible,
-                    isConfirmPasswordVisible: _isConfirmPasswordVisible,
-                    onFullNameChanged: _onFullNameChanged,
-                    onEmailChanged: _onEmailChanged,
-                    onPasswordChanged: _onPasswordChanged,
-                    onConfirmPasswordChanged: _onConfirmPasswordChanged,
-                    onTogglePasswordVisibility: _onTogglePasswordVisibility,
-                    onToggleConfirmPasswordVisibility:
-                        _onToggleConfirmPasswordVisibility,
+            // Navigate to verification page after showing notification
+            Future.delayed(const Duration(seconds: 2), () {
+              if (mounted) {
+                context.go('/verificationView');
+              }
+            });
+          } else if (state is SignUpError) {
+            // Show error notification
+            CustomSnackBar.showError(
+              context: context,
+              message: state.message,
+              duration: const Duration(seconds: 3),
+            );
+          }
+        },
+        child: Scaffold(
+          resizeToAvoidBottomInset: true,
+          body: Container(
+            width: double.infinity,
+            height: double.infinity,
+            decoration: const BoxDecoration(color: Colors.white),
+            child: SafeArea(
+              child: SingleChildScrollView(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Header Section
+                      const SectionHeader(),
+
+                      // Form Fields Section
+                      SectionFormFields(
+                        fullNameController: _fullNameController,
+                        emailController: _emailController,
+                        passwordController: _passwordController,
+                        confirmPasswordController: _confirmPasswordController,
+                        isFullNameValid: _isFullNameValid,
+                        isEmailValid: _isEmailValid,
+                        isPasswordValid: _isPasswordValid,
+                        isConfirmPasswordValid: _isConfirmPasswordValid,
+                        isPasswordVisible: _isPasswordVisible,
+                        isConfirmPasswordVisible: _isConfirmPasswordVisible,
+                        onFullNameChanged: _onFullNameChanged,
+                        onEmailChanged: _onEmailChanged,
+                        onPasswordChanged: _onPasswordChanged,
+                        onConfirmPasswordChanged: _onConfirmPasswordChanged,
+                        onTogglePasswordVisibility: _onTogglePasswordVisibility,
+                        onToggleConfirmPasswordVisibility:
+                            _onToggleConfirmPasswordVisibility,
+                      ),
+
+                      // Sign Up Button Section
+                      BlocBuilder<SignUpCubit, SignUpState>(
+                        builder: (context, state) {
+                          return SectionSignUpButton(
+                            onPressed: state is SignUpLoading
+                                ? null
+                                : _onSignUpPressed,
+                            isLoading: state is SignUpLoading,
+                          );
+                        },
+                      ),
+
+                      // Social Login Section
+                      const SectionSocialLogin(),
+
+                      // Sign In Link Section
+                      const SectionSignInLink(),
+
+                      const SizedBox(height: 20),
+                    ],
                   ),
-
-                  // Sign Up Button Section
-                  SectionSignUpButton(onPressed: _onSignUpPressed),
-
-                  // Social Login Section
-                  const SectionSocialLogin(),
-
-                  // Sign In Link Section
-                  const SectionSignInLink(),
-
-                  const SizedBox(height: 20),
-                ],
+                ),
               ),
             ),
           ),

@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter/services.dart';
 import '../../../../../shared/shared.dart';
 import 'package:smartshop_map/shared/widgets/custom_snackbar.dart';
+import '../../manager/password_reset_cubit.dart';
 import 'section_header.dart';
 import 'section_instructions.dart';
 import 'section_password_fields.dart';
@@ -31,6 +33,9 @@ class _RessetPasswordBodyState extends State<RessetPasswordBody> {
   bool _isConfirmPasswordVisible = false;
   int _resendTimer = 300; // 5 minutes (300 seconds)
   bool _canResend = false;
+
+  // Email variable - should be passed from previous screen or stored
+  String _userEmail = 'user@example.com'; // This should be dynamic
 
   @override
   void initState() {
@@ -148,219 +153,284 @@ class _RessetPasswordBodyState extends State<RessetPasswordBody> {
   }
 
   void _onSendPressed() {
-    // Show password fields immediately
-    setState(() {
-      _showPasswordFields = true;
-    });
+    // Verify code first
+    if (_verificationCode.length == 4) {
+      setState(() {
+        _showPasswordFields = true;
+      });
+    }
   }
 
   void _onConfirmPressed() {
-    CustomSnackBar.showSuccess(
-      context: context,
-      message: 'Password changed successfully!',
-      duration: const Duration(seconds: 2),
-    );
-    // Navigate to sign in after showing notification
-    Future.delayed(const Duration(seconds: 2), () {
-      if (mounted) {
-        context.go('/signInView');
-      }
+    if (_isPasswordValid && _isConfirmPasswordValid) {
+      // Call API to reset password
+      context.read<PasswordResetCubit>().resetPassword(
+        email: _userEmail,
+        code: _verificationCode,
+        password: _newPasswordController.text,
+        passwordConfirmation: _confirmPasswordController.text,
+      );
+    }
+  }
+
+  void _onResendPressed() {
+    setState(() {
+      _resendTimer = 300; // Reset to 5 minutes
+      _canResend = false;
     });
+    _startTimer();
+
+    // Call API to resend reset code
+    context.read<PasswordResetCubit>().sendResetCode(_userEmail);
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      resizeToAvoidBottomInset: true,
-      body: Container(
-        width: double.infinity,
-        height: double.infinity,
-        decoration: const BoxDecoration(color: Colors.white),
-        child: SafeArea(
-          child: SingleChildScrollView(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Header Section
-                  const SectionHeader(),
+    return BlocProvider(
+      create: (context) => PasswordResetCubit(),
+      child: BlocListener<PasswordResetCubit, PasswordResetState>(
+        listener: (context, state) {
+          if (state is ResetPasswordSuccess) {
+            // Show success notification
+            CustomSnackBar.showSuccess(
+              context: context,
+              message: 'تم تغيير كلمة المرور بنجاح!',
+              duration: const Duration(seconds: 2),
+            );
+            // Navigate to sign in after showing notification
+            Future.delayed(const Duration(seconds: 2), () {
+              if (mounted) {
+                context.go('/signInView');
+              }
+            });
+          } else if (state is ResetPasswordError) {
+            // Show error notification
+            CustomSnackBar.showError(
+              context: context,
+              message: state.message,
+              duration: const Duration(seconds: 3),
+            );
+          } else if (state is SendCodeSuccess) {
+            // Show success notification for resend
+            CustomSnackBar.showSuccess(
+              context: context,
+              message: 'Reset code sent again',
+              duration: const Duration(seconds: 2),
+            );
+          } else if (state is SendCodeError) {
+            // Show error notification for resend
+            CustomSnackBar.showError(
+              context: context,
+              message: state.message,
+              duration: const Duration(seconds: 3),
+            );
+          }
+        },
+        child: Scaffold(
+          resizeToAvoidBottomInset: true,
+          body: Container(
+            width: double.infinity,
+            height: double.infinity,
+            decoration: const BoxDecoration(color: Colors.white),
+            child: SafeArea(
+              child: SingleChildScrollView(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Header Section
+                      const SectionHeader(),
 
-                  // Instructions Section
-                  const SectionInstructions(),
+                      // Instructions Section
+                      const SectionInstructions(),
 
-                  // Instructions
-                  const SizedBox(height: 24),
+                      // Instructions
+                      const SizedBox(height: 24),
 
-                  // Verification Code Fields (same as Verification page)
-                  Center(
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: List.generate(4, (index) {
-                        return Container(
-                          width: 60,
-                          height: 60,
-                          margin: const EdgeInsets.symmetric(horizontal: 8),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(14),
-                            border: Border.all(
-                              color: _focusNodes[index].hasFocus
-                                  ? AppColors.primary
-                                  : const Color(0xFFE4DFDF),
-                              width: _focusNodes[index].hasFocus ? 6 : 6,
-                            ),
-                          ),
-                          child: TextField(
-                            controller: _codeControllers[index],
-                            focusNode: _focusNodes[index],
-                            keyboardType: TextInputType.number,
-                            textAlign: TextAlign.center,
-                            maxLength: 1,
-                            inputFormatters: [
-                              FilteringTextInputFormatter.digitsOnly,
-                            ],
-                            style: TextStyle(
-                              fontFamily: 'Inter',
-                              fontWeight: FontWeight.w400,
-                              fontSize: 24,
-                              color: AppColors.primary,
-                            ),
-                            decoration: InputDecoration(
-                              counterText: '',
-                              border: InputBorder.none,
-                              contentPadding: EdgeInsets.zero,
-                              hintText: '-',
-                              hintStyle: TextStyle(
-                                fontFamily: 'Inter',
-                                fontWeight: FontWeight.w400,
-                                fontSize: 24,
-                                color: Colors.grey.shade400,
+                      // Verification Code Fields (same as Verification page)
+                      Center(
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: List.generate(4, (index) {
+                            return Container(
+                              width: 60,
+                              height: 60,
+                              margin: const EdgeInsets.symmetric(horizontal: 8),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(14),
+                                border: Border.all(
+                                  color: _focusNodes[index].hasFocus
+                                      ? AppColors.primary
+                                      : const Color(0xFFE4DFDF),
+                                  width: _focusNodes[index].hasFocus ? 6 : 6,
+                                ),
+                              ),
+                              child: TextField(
+                                controller: _codeControllers[index],
+                                focusNode: _focusNodes[index],
+                                keyboardType: TextInputType.number,
+                                textAlign: TextAlign.center,
+                                maxLength: 1,
+                                inputFormatters: [
+                                  FilteringTextInputFormatter.digitsOnly,
+                                ],
+                                style: TextStyle(
+                                  fontFamily: 'Inter',
+                                  fontWeight: FontWeight.w400,
+                                  fontSize: 24,
+                                  color: AppColors.primary,
+                                ),
+                                decoration: InputDecoration(
+                                  counterText: '',
+                                  border: InputBorder.none,
+                                  contentPadding: EdgeInsets.zero,
+                                  hintText: '-',
+                                  hintStyle: TextStyle(
+                                    fontFamily: 'Inter',
+                                    fontWeight: FontWeight.w400,
+                                    fontSize: 24,
+                                    color: Colors.grey.shade400,
+                                  ),
+                                ),
+                                onChanged: (value) =>
+                                    _onCodeChanged(value, index),
+                              ),
+                            );
+                          }),
+                        ),
+                      ),
+                      const SizedBox(height: 40),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          if (!_canResend) ...[
+                            Text(
+                              'Resend code in ',
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: AppColors.onSurfaceVariant,
                               ),
                             ),
-                            onChanged: (value) => _onCodeChanged(value, index),
-                          ),
-                        );
-                      }),
-                    ),
-                  ),
-                  const SizedBox(height: 40),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      if (!_canResend) ...[
-                        Text(
-                          'Resend code in ',
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: AppColors.onSurfaceVariant,
-                          ),
-                        ),
-                        Text(
-                          _formatTimer(_resendTimer),
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.primary,
-                          ),
-                        ),
-                      ] else ...[
-                        TextButton(
-                          onPressed: () {
-                            setState(() {
-                              _resendTimer = 300;
-                              _canResend = false;
-                            });
-                            _startTimer();
-                          },
-                          child: Text(
-                            'Re-send code',
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                              color: AppColors.primary,
+                            Text(
+                              _formatTimer(_resendTimer),
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.primary,
+                              ),
                             ),
-                          ),
-                        ),
-                      ],
-                    ],
-                  ),
-                  const SizedBox(height: 40),
-
-                  // Password Fields Section (shown after email is sent)
-                  if (_showPasswordFields) ...[
-                    // Password Requirements Info
-                    Container(
-                      padding: const EdgeInsets.all(16),
-                      margin: const EdgeInsets.only(bottom: 16),
-                      decoration: BoxDecoration(
-                        color: AppColors.surfaceVariant.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(
-                          color: AppColors.outline.withOpacity(0.3),
-                        ),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Password Requirements:',
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                              color: AppColors.onSurface,
+                          ] else ...[
+                            TextButton(
+                              onPressed: () {
+                                setState(() {
+                                  _resendTimer = 300;
+                                  _canResend = false;
+                                });
+                                _startTimer();
+                              },
+                              child: Text(
+                                'Re-send code',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColors.primary,
+                                ),
+                              ),
                             ),
-                          ),
-                          const SizedBox(height: 8),
-                          _buildRequirementItem(
-                            'At least 8 characters',
-                            _newPasswordController.text.length >= 8,
-                          ),
-                          _buildRequirementItem(
-                            'Contains at least one number',
-                            _newPasswordController.text.contains(
-                              RegExp(r'[0-9]'),
-                            ),
-                          ),
-                          _buildRequirementItem(
-                            'Contains at least one special character (!@#\$%^&*)',
-                            _newPasswordController.text.contains(
-                              RegExp(r'[!@#$%^&*(),.?":{}|<>]'),
-                            ),
-                          ),
+                          ],
                         ],
                       ),
-                    ),
+                      const SizedBox(height: 40),
 
-                    SectionPasswordFields(
-                      newPasswordController: _newPasswordController,
-                      confirmPasswordController: _confirmPasswordController,
-                      isNewPasswordVisible: _isNewPasswordVisible,
-                      isConfirmPasswordVisible: _isConfirmPasswordVisible,
-                      onToggleNewPasswordVisibility:
-                          _onToggleNewPasswordVisibility,
-                      onToggleConfirmPasswordVisibility:
-                          _onToggleConfirmPasswordVisibility,
-                    ),
-                  ],
+                      // Password Fields Section (shown after email is sent)
+                      if (_showPasswordFields) ...[
+                        // Password Requirements Info
+                        Container(
+                          padding: const EdgeInsets.all(16),
+                          margin: const EdgeInsets.only(bottom: 16),
+                          decoration: BoxDecoration(
+                            color: AppColors.surfaceVariant.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(
+                              color: AppColors.outline.withOpacity(0.3),
+                            ),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Password Requirements:',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColors.onSurface,
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              _buildRequirementItem(
+                                'At least 8 characters',
+                                _newPasswordController.text.length >= 8,
+                              ),
+                              _buildRequirementItem(
+                                'Contains at least one number',
+                                _newPasswordController.text.contains(
+                                  RegExp(r'[0-9]'),
+                                ),
+                              ),
+                              _buildRequirementItem(
+                                'Contains at least one special character (!@#\$%^&*)',
+                                _newPasswordController.text.contains(
+                                  RegExp(r'[!@#$%^&*(),.?":{}|<>]'),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
 
-                  // Action Button Section
-                  SectionActionButton(
-                    showPasswordFields: _showPasswordFields,
-                    isVerificationCodeValid: _verificationCode.length == 4,
-                    isPasswordValid: _isPasswordValid,
-                    isConfirmPasswordValid: _isConfirmPasswordValid,
-                    onPressed: _showPasswordFields
-                        ? (_isPasswordValid && _isConfirmPasswordValid
-                              ? _onConfirmPressed
-                              : null)
-                        : (_verificationCode.length == 4
-                              ? _onSendPressed
-                              : null),
+                        SectionPasswordFields(
+                          newPasswordController: _newPasswordController,
+                          confirmPasswordController: _confirmPasswordController,
+                          isNewPasswordVisible: _isNewPasswordVisible,
+                          isConfirmPasswordVisible: _isConfirmPasswordVisible,
+                          onToggleNewPasswordVisibility:
+                              _onToggleNewPasswordVisibility,
+                          onToggleConfirmPasswordVisibility:
+                              _onToggleConfirmPasswordVisibility,
+                        ),
+                      ],
+
+                      // Action Button Section
+                      BlocBuilder<PasswordResetCubit, PasswordResetState>(
+                        builder: (context, state) {
+                          return SectionActionButton(
+                            showPasswordFields: _showPasswordFields,
+                            isVerificationCodeValid:
+                                _verificationCode.length == 4,
+                            isPasswordValid: _isPasswordValid,
+                            isConfirmPasswordValid: _isConfirmPasswordValid,
+                            onPressed: _showPasswordFields
+                                ? (_isPasswordValid &&
+                                          _isConfirmPasswordValid &&
+                                          state is! ResetPasswordLoading
+                                      ? _onConfirmPressed
+                                      : null)
+                                : (_verificationCode.length == 4 &&
+                                          state is! SendCodeLoading
+                                      ? _onSendPressed
+                                      : null),
+                            isLoading:
+                                state is ResetPasswordLoading ||
+                                state is SendCodeLoading,
+                          );
+                        },
+                      ),
+
+                      const SizedBox(height: 40),
+                    ],
                   ),
-
-                  const SizedBox(height: 40),
-                ],
+                ),
               ),
             ),
           ),

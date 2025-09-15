@@ -1,9 +1,18 @@
 import 'package:flutter/material.dart';
 import 'shared/shared.dart';
 import 'core/utils/app_routers.dart';
+import 'core/utils/service_locator.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await initServiceLocator();
   runApp(const SmartShopMap());
+}
+
+// Reset function for hot reload
+void resetApp() {
+  resetServiceLocator();
+  print('🔄 App Reset - All Services Reset');
 }
 
 class SmartShopMap extends StatelessWidget {

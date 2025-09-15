@@ -22,7 +22,7 @@ import '../../features/payments/presentation/views/paypal_payment_view.dart';
 import '../../features/payments/presentation/views/crypto_payment_view.dart';
 import '../../features/payments/presentation/views/apple_pay_payment_view.dart';
 import '../../features/payments/presentation/views/google_pay_payment_view.dart';
-import '../../features/Map_View/presentation/views/Map_View_view.dart';
+
 
 import 'package:flutter/material.dart';
 
@@ -207,7 +207,6 @@ class AppRouters {
           );
         },
       ),
-      GoRoute(path: kMapView, builder: (context, state) => const MapViewView()),
     ],
   );
 }

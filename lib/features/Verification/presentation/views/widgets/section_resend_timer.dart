@@ -6,6 +6,7 @@ class SectionResendTimer extends StatelessWidget {
   final int resendTimer;
   final VoidCallback onResendPressed;
   final String Function(int) formatTimer;
+  final bool isLoading;
 
   const SectionResendTimer({
     super.key,
@@ -13,12 +14,38 @@ class SectionResendTimer extends StatelessWidget {
     required this.resendTimer,
     required this.onResendPressed,
     required this.formatTimer,
+    this.isLoading = false,
   });
 
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: canResend
+      child: isLoading
+          ? Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const SizedBox(
+                  width: 16,
+                  height: 16,
+                  child: CircularProgressIndicator(
+                    color: AppColors.primary,
+                    strokeWidth: 2,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  'Sending...',
+                  style: TextStyle(
+                    fontFamily: 'Inter',
+                    fontWeight: FontWeight.w400,
+                    fontSize: 16,
+                    height: 23 / 16,
+                    color: AppColors.primary,
+                  ),
+                ),
+              ],
+            )
+          : canResend
           ? GestureDetector(
               onTap: onResendPressed,
               child: Text(

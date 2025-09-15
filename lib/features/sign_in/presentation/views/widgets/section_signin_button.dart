@@ -4,9 +4,14 @@ import 'package:smartshop_map/shared/themes/app_colors.dart';
 import 'package:smartshop_map/shared/widgets/custom_button.dart';
 
 class SectionSignInButton extends StatelessWidget {
-  final VoidCallback onPressed;
+  final VoidCallback? onPressed;
+  final bool isLoading;
 
-  const SectionSignInButton({super.key, required this.onPressed});
+  const SectionSignInButton({
+    super.key,
+    required this.onPressed,
+    this.isLoading = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -15,7 +20,7 @@ class SectionSignInButton extends StatelessWidget {
         // Sign In Button - Centered
         Center(
           child: CustomButton(
-            text: '     SIGN IN',
+            text: isLoading ? 'Signing in...' : '     SIGN IN',
             height: 66,
             width: 271,
             backgroundColor: AppColors.primary,
@@ -25,12 +30,21 @@ class SectionSignInButton extends StatelessWidget {
             fontSize: 16,
             fontWeight: FontWeight.w600,
             fontFamily: 'Noto Kufi Arabic',
-            suffixWidget: SvgPicture.asset(
-              'assets/images/arrow.svg',
-              width: 24,
-              height: 24,
-            ),
-            onPressed: onPressed,
+            suffixWidget: isLoading
+                ? const SizedBox(
+                    width: 24,
+                    height: 24,
+                    child: CircularProgressIndicator(
+                      color: Colors.white,
+                      strokeWidth: 2,
+                    ),
+                  )
+                : SvgPicture.asset(
+                    'assets/images/arrow.svg',
+                    width: 24,
+                    height: 24,
+                  ),
+            onPressed: isLoading ? null : onPressed,
           ),
         ),
 

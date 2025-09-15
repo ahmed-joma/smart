@@ -5,8 +5,13 @@ import 'package:smartshop_map/shared/widgets/custom_button.dart';
 
 class SectionContinueButton extends StatelessWidget {
   final VoidCallback? onPressed;
+  final bool isLoading;
 
-  const SectionContinueButton({super.key, required this.onPressed});
+  const SectionContinueButton({
+    super.key,
+    required this.onPressed,
+    this.isLoading = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -15,7 +20,7 @@ class SectionContinueButton extends StatelessWidget {
         // Continue Button
         Center(
           child: CustomButton(
-            text: '     CONTINUE',
+            text: isLoading ? 'Verifying...' : '     CONTINUE',
             height: 66,
             width: 271,
             backgroundColor: AppColors.primary,
@@ -25,12 +30,21 @@ class SectionContinueButton extends StatelessWidget {
             fontSize: 16,
             fontWeight: FontWeight.w600,
             fontFamily: 'Noto Kufi Arabic',
-            suffixWidget: SvgPicture.asset(
-              'assets/images/arrow.svg',
-              width: 24,
-              height: 24,
-            ),
-            onPressed: onPressed,
+            suffixWidget: isLoading
+                ? const SizedBox(
+                    width: 24,
+                    height: 24,
+                    child: CircularProgressIndicator(
+                      color: Colors.white,
+                      strokeWidth: 2,
+                    ),
+                  )
+                : SvgPicture.asset(
+                    'assets/images/arrow.svg',
+                    width: 24,
+                    height: 24,
+                  ),
+            onPressed: isLoading ? null : onPressed,
           ),
         ),
 

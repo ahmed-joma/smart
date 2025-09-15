@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../../shared/widgets/custom_snackbar.dart';
+import '../../manager/verification_cubit.dart';
 import 'section_header.dart';
 import 'section_email_info.dart';
 import 'section_verification_fields.dart';
@@ -89,73 +91,128 @@ class _VerificationBodyState extends State<VerificationBody> {
       _canResend = false;
     });
     _startTimer();
+
+    // Call API to resend verification code
+    context.read<VerificationCubit>().resendVerificationCode(_userEmail);
+  }
+
+  void _onVerifyPressed() {
+    if (_verificationCode.length == 4) {
+      // Call API to verify email
+      context.read<VerificationCubit>().verifyEmail(
+        email: _userEmail,
+        code: _verificationCode,
+      );
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      resizeToAvoidBottomInset: true,
-      body: Container(
-        width: double.infinity,
-        height: double.infinity,
-        decoration: const BoxDecoration(color: Colors.white),
-        child: SafeArea(
-          child: Column(
-            children: [
-              // Top Section with all components
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Header Section
-                    const SectionHeader(),
+    return BlocProvider(
+      create: (context) => VerificationCubit(),
+      child: BlocListener<VerificationCubit, VerificationState>(
+        listener: (context, state) {
+          if (state is VerificationSuccess) {
+            // Show success notification
+            CustomSnackBar.showSuccess(
+              context: context,
+              message: 'Email verified successfully!',
+              duration: const Duration(seconds: 2),
+            );
+            // Navigate to home page after showing notification
+            Future.delayed(const Duration(seconds: 2), () {
+              if (mounted) {
+                context.go('/homeView');
+              }
+            });
+          } else if (state is VerificationError) {
+            // Show error notification
+            CustomSnackBar.showError(
+              context: context,
+              message: state.message,
+              duration: const Duration(seconds: 3),
+            );
+          } else if (state is ResendCodeSuccess) {
+            // Show success notification for resend
+            CustomSnackBar.showSuccess(
+              context: context,
+              message: 'Verification code sent again',
+              duration: const Duration(seconds: 2),
+            );
+          } else if (state is ResendCodeError) {
+            // Show error notification for resend
+            CustomSnackBar.showError(
+              context: context,
+              message: state.message,
+              duration: const Duration(seconds: 3),
+            );
+          }
+        },
+        child: Scaffold(
+          resizeToAvoidBottomInset: true,
+          body: Container(
+            width: double.infinity,
+            height: double.infinity,
+            decoration: const BoxDecoration(color: Colors.white),
+            child: SafeArea(
+              child: Column(
+                children: [
+                  // Top Section with all components
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Header Section
+                        const SectionHeader(),
 
-                    // Email Info Section
-                    SectionEmailInfo(userEmail: _userEmail),
+                        // Email Info Section
+                        SectionEmailInfo(userEmail: _userEmail),
 
-                    // Verification Fields Section
-                    SectionVerificationFields(
-                      codeControllers: _codeControllers,
-                      focusNodes: _focusNodes,
-                      onCodeChanged: _onCodeChanged,
+                        // Verification Fields Section
+                        SectionVerificationFields(
+                          codeControllers: _codeControllers,
+                          focusNodes: _focusNodes,
+                          onCodeChanged: _onCodeChanged,
+                        ),
+
+                        const SizedBox(height: 40),
+
+                        // Continue Button Section
+                        BlocBuilder<VerificationCubit, VerificationState>(
+                          builder: (context, state) {
+                            return SectionContinueButton(
+                              onPressed:
+                                  _verificationCode.length == 4 &&
+                                      state is! VerificationLoading
+                                  ? _onVerifyPressed
+                                  : null,
+                              isLoading: state is VerificationLoading,
+                            );
+                          },
+                        ),
+
+                        // Resend Timer Section
+                        BlocBuilder<VerificationCubit, VerificationState>(
+                          builder: (context, state) {
+                            return SectionResendTimer(
+                              canResend:
+                                  _canResend && state is! ResendCodeLoading,
+                              resendTimer: _resendTimer,
+                              onResendPressed: _onResendPressed,
+                              formatTimer: _formatTimer,
+                              isLoading: state is ResendCodeLoading,
+                            );
+                          },
+                        ),
+
+                        const SizedBox(height: 40),
+                      ],
                     ),
-
-                    const SizedBox(height: 40),
-
-                    // Continue Button Section
-                    SectionContinueButton(
-                      onPressed: _verificationCode.length == 4
-                          ? () {
-                              // Show success notification
-                              CustomSnackBar.showSuccess(
-                                context: context,
-                                message: 'Account created successfully!',
-                                duration: const Duration(seconds: 2),
-                              );
-                              // Navigate to home page after showing notification
-                              Future.delayed(const Duration(seconds: 2), () {
-                                if (mounted) {
-                                  context.go('/homeView');
-                                }
-                              });
-                            }
-                          : null,
-                    ),
-
-                    // Resend Timer Section
-                    SectionResendTimer(
-                      canResend: _canResend,
-                      resendTimer: _resendTimer,
-                      onResendPressed: _onResendPressed,
-                      formatTimer: _formatTimer,
-                    ),
-
-                    const SizedBox(height: 40),
-                  ],
-                ),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
         ),
       ),
