@@ -1,10 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:smartshop_map/shared/themes/app_colors.dart';
+import 'package:smartshop_map/features/home/presentation/manager/logout_cubit.dart';
 
 class HomeDrawer extends StatelessWidget {
   const HomeDrawer({super.key});
+
+  void _onLogoutPressed(BuildContext context) {
+    context.read<LogoutCubit>().logout();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -108,13 +114,39 @@ class HomeDrawer extends StatelessWidget {
                       context.go('/helpFaqsView');
                     },
                   ),
-                  _buildDrawerItem(
-                    icon: Icons.logout,
-                    title: 'Sign Out',
-                    onTap: () {
-                      // Navigate to Sign In
-                      context.go('/signInView');
-                    },
+                  BlocProvider(
+                    create: (context) => LogoutCubit(),
+                    child: BlocListener<LogoutCubit, LogoutState>(
+                      listener: (context, state) {
+                        if (state is LogoutSuccess) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Logged out successfully!'),
+                              backgroundColor: Colors.green,
+                            ),
+                          );
+                          // Navigate to Sign In
+                          context.go('/signInView');
+                        } else if (state is LogoutError) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(state.message),
+                              backgroundColor: Colors.red,
+                            ),
+                          );
+                        }
+                      },
+                      child: BlocBuilder<LogoutCubit, LogoutState>(
+                        builder: (context, state) {
+                          return _buildDrawerItem(
+                            icon: Icons.logout,
+                            title: 'Sign Out',
+                            onTap: () => _onLogoutPressed(context),
+                            isLoading: state is LogoutLoading,
+                          );
+                        },
+                      ),
+                    ),
                   ),
                 ],
               ),
@@ -166,15 +198,25 @@ class HomeDrawer extends StatelessWidget {
     required IconData icon,
     required String title,
     required VoidCallback onTap,
+    bool isLoading = false,
   }) {
     return ListTile(
-      leading: Icon(
-        icon,
-        color: const Color(0xFF767676), // لون رمادي للأيقونات
-        size: 24,
-      ),
+      leading: isLoading
+          ? const SizedBox(
+              width: 24,
+              height: 24,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF767676)),
+              ),
+            )
+          : Icon(
+              icon,
+              color: const Color(0xFF767676), // لون رمادي للأيقونات
+              size: 24,
+            ),
       title: Text(
-        title,
+        isLoading ? 'Signing out...' : title,
         style: const TextStyle(
           color: Colors.black, // لون أسود للنصوص
           fontSize: 16,
@@ -182,7 +224,7 @@ class HomeDrawer extends StatelessWidget {
           fontFamily: 'Inter',
         ),
       ),
-      onTap: onTap,
+      onTap: isLoading ? null : onTap,
       contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
       // إضافة تأثيرات عند الضغط
       tileColor: Colors.transparent,
