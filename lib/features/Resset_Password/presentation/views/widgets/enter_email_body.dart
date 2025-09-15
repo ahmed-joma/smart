@@ -27,7 +27,7 @@ class _EnterEmailBodyState extends State<EnterEmailBody> {
     }
   }
 
-  void _onConfirmPressed() {
+  void _onConfirmPressed(BuildContext context) {
     if (_emailController.text.trim().isEmpty) {
       setState(() {
         _isEmailValid = false;
@@ -98,7 +98,7 @@ class _EnterEmailBodyState extends State<EnterEmailBody> {
                             : '   CONFIRM',
                         onPressed: state is SendCodeLoading
                             ? null
-                            : _onConfirmPressed,
+                            : () => _onConfirmPressed(context),
                         width: 271,
                         height: 66,
                         fontFamily: 'Noto Kufi Arabic',

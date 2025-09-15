@@ -14,6 +14,9 @@ class AuthRepository {
       // Clear any existing token before register
       _apiService.clearToken();
 
+      // Debug: Print the request data
+      print('🔍 RegisterRequest toJson: ${request.toJson()}');
+
       final response = await _apiService.post<AuthResponse>(
         ApiConstants.register,
         data: request.toJson(),

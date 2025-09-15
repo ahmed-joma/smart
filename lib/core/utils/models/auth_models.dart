@@ -91,7 +91,7 @@ class RegisterRequest {
 
   Map<String, dynamic> toJson() {
     return {
-      'name': name,
+      'full_name': name, // API expects 'full_name' not 'name'
       'email': email,
       'password': password,
       'password_confirmation': passwordConfirmation,

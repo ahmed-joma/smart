@@ -161,7 +161,7 @@ class _RessetPasswordBodyState extends State<RessetPasswordBody> {
     }
   }
 
-  void _onConfirmPressed() {
+  void _onConfirmPressed(BuildContext context) {
     if (_isPasswordValid && _isConfirmPasswordValid) {
       // Call API to reset password
       context.read<PasswordResetCubit>().resetPassword(
@@ -173,7 +173,7 @@ class _RessetPasswordBodyState extends State<RessetPasswordBody> {
     }
   }
 
-  void _onResendPressed() {
+  void _onResendPressed(BuildContext context) {
     setState(() {
       _resendTimer = 300; // Reset to 5 minutes
       _canResend = false;
@@ -414,7 +414,7 @@ class _RessetPasswordBodyState extends State<RessetPasswordBody> {
                                 ? (_isPasswordValid &&
                                           _isConfirmPasswordValid &&
                                           state is! ResetPasswordLoading
-                                      ? _onConfirmPressed
+                                      ? () => _onConfirmPressed(context)
                                       : null)
                                 : (_verificationCode.length == 4 &&
                                           state is! SendCodeLoading

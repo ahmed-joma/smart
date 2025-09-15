@@ -84,7 +84,7 @@ class _SignUpBodyState extends State<SignUpBody> {
     super.dispose();
   }
 
-  void _onSignUpPressed() {
+  void _onSignUpPressed(BuildContext context) {
     // Validate all fields
     bool isValid = true;
 
@@ -142,7 +142,8 @@ class _SignUpBodyState extends State<SignUpBody> {
             // Show success notification
             CustomSnackBar.showSuccess(
               context: context,
-              message: 'تم إنشاء الحساب بنجاح!',
+              message:
+                  'Account created successfully! Please check your email for verification.',
               duration: const Duration(seconds: 2),
             );
 
@@ -153,10 +154,33 @@ class _SignUpBodyState extends State<SignUpBody> {
               }
             });
           } else if (state is SignUpError) {
-            // Show error notification
+            // Show error notification with specific messages
+            String errorMessage = state.message;
+
+            // Customize error messages based on API response
+            if (state.message.contains('email has already been taken')) {
+              errorMessage =
+                  'This email is already registered. Please use a different email or sign in.';
+            } else if (state.message.contains('full name field is required')) {
+              errorMessage = 'Please enter your full name';
+            } else if (state.message.contains('email')) {
+              errorMessage =
+                  'Please enter a valid email address (e.g., user@gmail.com)';
+            } else if (state.message.contains('password')) {
+              errorMessage = 'Password must be at least 6 characters long';
+            } else if (state.message.contains('name')) {
+              errorMessage = 'Please enter your full name';
+            } else if (state.message.contains('Connection timeout')) {
+              errorMessage =
+                  'Connection timeout. Please check your internet connection.';
+            } else if (state.message.contains('Cannot connect')) {
+              errorMessage =
+                  'Cannot connect to server. Please check your internet connection.';
+            }
+
             CustomSnackBar.showError(
               context: context,
-              message: state.message,
+              message: errorMessage,
               duration: const Duration(seconds: 3),
             );
           }
@@ -204,7 +228,7 @@ class _SignUpBodyState extends State<SignUpBody> {
                           return SectionSignUpButton(
                             onPressed: state is SignUpLoading
                                 ? null
-                                : _onSignUpPressed,
+                                : () => _onSignUpPressed(context),
                             isLoading: state is SignUpLoading,
                           );
                         },

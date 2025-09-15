@@ -85,7 +85,7 @@ class _VerificationBodyState extends State<VerificationBody> {
     return '${minutes}:${remainingSeconds.toString().padLeft(2, '0')}';
   }
 
-  void _onResendPressed() {
+  void _onResendPressed(BuildContext context) {
     setState(() {
       _resendTimer = 300; // Reset to 5 minutes
       _canResend = false;
@@ -96,7 +96,7 @@ class _VerificationBodyState extends State<VerificationBody> {
     context.read<VerificationCubit>().resendVerificationCode(_userEmail);
   }
 
-  void _onVerifyPressed() {
+  void _onVerifyPressed(BuildContext context) {
     if (_verificationCode.length == 4) {
       // Call API to verify email
       context.read<VerificationCubit>().verifyEmail(
@@ -185,7 +185,7 @@ class _VerificationBodyState extends State<VerificationBody> {
                               onPressed:
                                   _verificationCode.length == 4 &&
                                       state is! VerificationLoading
-                                  ? _onVerifyPressed
+                                  ? () => _onVerifyPressed(context)
                                   : null,
                               isLoading: state is VerificationLoading,
                             );
@@ -199,7 +199,7 @@ class _VerificationBodyState extends State<VerificationBody> {
                               canResend:
                                   _canResend && state is! ResendCodeLoading,
                               resendTimer: _resendTimer,
-                              onResendPressed: _onResendPressed,
+                              onResendPressed: () => _onResendPressed(context),
                               formatTimer: _formatTimer,
                               isLoading: state is ResendCodeLoading,
                             );
