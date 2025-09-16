@@ -180,14 +180,14 @@ class ApiService {
     if (_tokenManager != null) {
       await _tokenManager!.clearUserData();
     }
-    
+
     _userData = userData;
-    
+
     // Save new user data to SharedPreferences for persistence
     if (_tokenManager != null) {
       await _tokenManager!.saveUserData(userData);
     }
-    
+
     print(
       '👤 User Data Saved: ${userData['full_name']} (${userData['email']})',
     );
