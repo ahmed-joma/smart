@@ -1,6 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:smartshop_map/core/utils/repositories/auth_repository.dart';
 import 'package:smartshop_map/core/utils/service_locator.dart';
+import 'package:smartshop_map/core/utils/api_service.dart';
 
 class LogoutCubit extends Cubit<LogoutState> {
   LogoutCubit() : super(LogoutInitial());
@@ -12,6 +13,9 @@ class LogoutCubit extends Cubit<LogoutState> {
       emit(LogoutLoading());
 
       await _authRepository.logout();
+
+      // Clear all data from ApiService
+      sl<ApiService>().clearAllData();
 
       emit(LogoutSuccess());
     } catch (e) {

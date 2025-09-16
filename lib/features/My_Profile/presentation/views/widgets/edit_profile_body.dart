@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:smartshop_map/shared/widgets/custom_snackbar.dart';
 import 'section_edit_header.dart';
 import 'section_edit_profile_picture.dart';
 import 'section_edit_form.dart';
 import 'section_save_button.dart';
+import '../../../../Profile/presentation/manager/profile_cubit.dart';
 
 // كلاس لتخزين بيانات الملف الشخصي
 class ProfileData extends ChangeNotifier {
@@ -37,13 +40,23 @@ class EditProfileBody extends StatefulWidget {
 class _EditProfileBodyState extends State<EditProfileBody> {
   final _nameController = TextEditingController();
   final _aboutMeController = TextEditingController();
+  bool _isUpdating = false;
 
   @override
   void initState() {
     super.initState();
-    // تحميل البيانات الحالية
-    _nameController.text = profileData.name;
-    _aboutMeController.text = profileData.aboutMe;
+    // تحميل البيانات الحالية من ProfileCubit
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final profileState = context.read<ProfileCubit>().state;
+      if (profileState is ProfileSuccess) {
+        _nameController.text = profileState.data.user.fullName;
+        _aboutMeController.text = profileState.data.user.aboutMe;
+      } else {
+        // Fallback to default data
+        _nameController.text = profileData.name;
+        _aboutMeController.text = profileData.aboutMe;
+      }
+    });
   }
 
   @override
@@ -54,48 +67,75 @@ class _EditProfileBodyState extends State<EditProfileBody> {
   }
 
   void _onSavePressed() {
-    // تحديث البيانات في ProfileData
-    profileData.updateProfile(
-      name: _nameController.text,
+    setState(() {
+      _isUpdating = true;
+    });
+
+    // تحديث البيانات في ProfileCubit
+    context.read<ProfileCubit>().updateProfile(
+      fullName: _nameController.text,
       aboutMe: _aboutMeController.text,
     );
-
-    // العودة لصفحة Profile
-    context.go('/myProfileView');
   }
 
   void _onProfileImageChanged(String newImagePath) {
+    // تحديث البيانات في ProfileData للعرض المحلي
     profileData.updateProfile(profileImage: newImagePath);
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      body: SafeArea(
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
-              // Header Section
-              const SectionEditHeader(),
+    return BlocListener<ProfileCubit, ProfileState>(
+      listener: (context, state) {
+        if (state is ProfileUpdating) {
+          CustomSnackBar.showInfo(
+            context: context,
+            message: 'Updating profile...',
+          );
+        } else if (state is ProfileSuccess && _isUpdating) {
+          CustomSnackBar.showSuccess(
+            context: context,
+            message: 'Profile updated successfully!',
+          );
+          // العودة لصفحة Profile بعد النجاح
+          context.go('/myProfileView');
+        } else if (state is ProfileError) {
+          setState(() {
+            _isUpdating = false;
+          });
+          CustomSnackBar.showError(
+            context: context,
+            message: 'Failed to update profile: ${state.message}',
+          );
+        }
+      },
+      child: Scaffold(
+        backgroundColor: Colors.white,
+        body: SafeArea(
+          child: SingleChildScrollView(
+            child: Column(
+              children: [
+                // Header Section
+                const SectionEditHeader(),
 
-              // Profile Picture Section
-              SectionEditProfilePicture(
-                currentImagePath: profileData.profileImage,
-                onImageChanged: _onProfileImageChanged,
-              ),
+                // Profile Picture Section
+                SectionEditProfilePicture(
+                  currentImagePath: profileData.profileImage,
+                  onImageChanged: _onProfileImageChanged,
+                ),
 
-              // Edit Form Section
-              SectionEditForm(
-                nameController: _nameController,
-                aboutMeController: _aboutMeController,
-              ),
+                // Edit Form Section
+                SectionEditForm(
+                  nameController: _nameController,
+                  aboutMeController: _aboutMeController,
+                ),
 
-              // Save Button Section
-              SectionSaveButton(onSavePressed: _onSavePressed),
+                // Save Button Section
+                SectionSaveButton(onSavePressed: _onSavePressed),
 
-              const SizedBox(height: 40),
-            ],
+                const SizedBox(height: 40),
+              ],
+            ),
           ),
         ),
       ),

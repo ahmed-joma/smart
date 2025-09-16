@@ -163,12 +163,31 @@ class ApiService {
     _token = null;
     _userData = null;
     _tokenManager?.clearToken();
-    print('🗑️ Token Cleared');
+    _tokenManager?.clearUserData();
+    print('🗑️ Token and User Data Cleared');
+  }
+
+  void clearAllData() {
+    _token = null;
+    _userData = null;
+    _tokenManager?.clearAll();
+    print('🗑️ All Data Cleared');
   }
 
   // User data management
-  void setUserData(Map<String, dynamic> userData) {
+  void setUserData(Map<String, dynamic> userData) async {
+    // Clear old user data first
+    if (_tokenManager != null) {
+      await _tokenManager!.clearUserData();
+    }
+    
     _userData = userData;
+    
+    // Save new user data to SharedPreferences for persistence
+    if (_tokenManager != null) {
+      await _tokenManager!.saveUserData(userData);
+    }
+    
     print(
       '👤 User Data Saved: ${userData['full_name']} (${userData['email']})',
     );
@@ -184,6 +203,16 @@ class ApiService {
         print('🔄 Token Loaded: ${_token!.substring(0, 20)}...');
       } else {
         print('🔓 No Token Found in Storage');
+      }
+
+      // Load user data from storage
+      _userData = await _tokenManager!.getUserData();
+      if (_userData != null) {
+        print(
+          '👤 User Data Loaded: ${_userData!['full_name']} (${_userData!['email']})',
+        );
+      } else {
+        print('🔓 No User Data Found in Storage');
       }
     } else {
       print('❌ TokenManager is null - cannot load token');
@@ -240,6 +269,28 @@ class ApiService {
   }) async {
     try {
       final response = await _dio.put(
+        path,
+        data: data,
+        queryParameters: queryParameters,
+      );
+      return ApiResponse.fromJson(response.data, fromJson);
+    } on DioException catch (e) {
+      if (e.error is ApiError) {
+        throw e.error as ApiError;
+      } else {
+        throw _handleError(e);
+      }
+    }
+  }
+
+  Future<ApiResponse<T>> patch<T>(
+    String path, {
+    dynamic data,
+    Map<String, dynamic>? queryParameters,
+    T Function(Map<String, dynamic>)? fromJson,
+  }) async {
+    try {
+      final response = await _dio.patch(
         path,
         data: data,
         queryParameters: queryParameters,

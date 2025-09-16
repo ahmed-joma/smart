@@ -38,6 +38,9 @@ class ProfileRepository {
     try {
       print('🔍 Updating user profile...');
 
+      // Ensure token is loaded before making the request
+      await _apiService.loadToken();
+
       final data = <String, dynamic>{};
       if (fullName != null) data['full_name'] = fullName;
       if (aboutMe != null) data['about_me'] = aboutMe;
@@ -52,6 +55,25 @@ class ProfileRepository {
       );
 
       print('✅ Profile updated successfully');
+
+      // Update user data in ApiService if update was successful
+      if (response.status && response.data != null) {
+        final apiService = sl<ApiService>();
+        if (apiService.userData != null) {
+          if (fullName != null) {
+            apiService.userData!['full_name'] = fullName;
+          }
+          if (aboutMe != null) {
+            apiService.userData!['about_me'] = aboutMe;
+          }
+          if (imageUrl != null) {
+            apiService.userData!['image_url'] = imageUrl;
+          }
+          apiService.setUserData(apiService.userData!);
+          print('🔄 ProfileRepository: Updated user data in ApiService');
+        }
+      }
+
       return response;
     } catch (e) {
       print('❌ Error updating profile: $e');

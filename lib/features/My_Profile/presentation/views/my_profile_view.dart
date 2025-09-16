@@ -15,9 +15,7 @@ class MyProfileView extends StatelessWidget {
         BlocProvider(
           create: (context) => SavedItemsCubit(SavedItemsRepositoryImpl()),
         ),
-        BlocProvider(
-          create: (context) => ProfileCubit()..getProfile(),
-        ),
+        BlocProvider(create: (context) => ProfileCubit()..getProfile()),
       ],
       child: const MyProfileBody(),
     );

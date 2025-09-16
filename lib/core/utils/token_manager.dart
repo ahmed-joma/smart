@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class TokenManager {
@@ -39,19 +40,20 @@ class TokenManager {
 
   // User Data Management
   Future<void> saveUserData(Map<String, dynamic> userData) async {
-    final userJson = userData.toString();
+    final userJson = jsonEncode(userData);
     await _prefs?.setString(_userKey, userJson);
+    print('💾 User data saved to SharedPreferences');
   }
 
   Future<Map<String, dynamic>?> getUserData() async {
     final userJson = _prefs?.getString(_userKey);
     if (userJson != null) {
-      // Parse the string back to Map
-      // Note: This is a simple implementation. In production, use proper JSON serialization
       try {
-        // You might want to use jsonDecode here for proper parsing
-        return {}; // Placeholder - implement proper JSON parsing
+        final userData = jsonDecode(userJson) as Map<String, dynamic>;
+        print('🔄 User data retrieved from SharedPreferences');
+        return userData;
       } catch (e) {
+        print('❌ Error parsing user data: $e');
         return null;
       }
     }
