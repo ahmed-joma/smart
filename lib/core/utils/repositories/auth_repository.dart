@@ -52,6 +52,7 @@ class AuthRepository {
 
       if (response.isSuccess && response.data != null) {
         _apiService.setToken(response.data!.token);
+        _apiService.setUserData(response.data!.user.toJson());
         print('✅ Login Successful!');
       } else {
         print('❌ Login Failed: ${response.msg}');

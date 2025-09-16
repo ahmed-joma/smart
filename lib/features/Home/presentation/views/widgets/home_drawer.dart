@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:smartshop_map/shared/themes/app_colors.dart';
-import 'package:smartshop_map/features/home/presentation/manager/logout_cubit.dart';
+import 'package:smartshop_map/shared/widgets/profile_avatar.dart';
+import '../../manager/logout_cubit.dart';
+import '../../../../../core/utils/service_locator.dart';
+import '../../../../../core/utils/api_service.dart';
+import 'package:smartshop_map/features/Profile/presentation/manager/profile_cubit.dart';
 
 class HomeDrawer extends StatelessWidget {
   const HomeDrawer({super.key});
@@ -24,48 +27,45 @@ class HomeDrawer extends StatelessWidget {
               width: double.infinity,
               padding: const EdgeInsets.only(top: 60, bottom: 20),
               decoration: const BoxDecoration(color: AppColors.primary),
-              child: Column(
-                children: [
-                  // Profile Picture
-                  Container(
-                    width: 80,
-                    height: 80,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(color: Colors.white, width: 3),
-                    ),
-                    child: ClipOval(
-                      child: SvgPicture.asset(
-                        'assets/images/profile.svg',
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) {
-                          return Container(
-                            decoration: const BoxDecoration(
-                              color: Colors.white,
-                              shape: BoxShape.circle,
-                            ),
-                            child: const Icon(
-                              Icons.person,
-                              size: 40,
-                              color: AppColors.primary,
-                            ),
-                          );
-                        },
+              child: BlocBuilder<ProfileCubit, ProfileState>(
+                builder: (context, state) {
+                  String imageUrl = '';
+                  String userName = 'User';
+
+                  if (state is ProfileSuccess) {
+                    // Use data from ProfileCubit if available
+                    imageUrl = state.data.user.imageUrl;
+                    userName = state.data.user.fullName;
+                  } else {
+                    // Fallback to ApiService data
+                    final apiService = sl<ApiService>();
+                    imageUrl = apiService.userData?['image_url'] ?? '';
+                    userName = apiService.userData?['full_name'] ?? 'User';
+                  }
+
+                  return Column(
+                    children: [
+                      // Profile Picture
+                      ProfileAvatar(
+                        imageUrl: imageUrl,
+                        name: userName,
+                        size: 80,
+                        showEditIcon: false,
                       ),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  // Profile Name
-                  const Text(
-                    'Ahlam',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 24,
-                      fontWeight: FontWeight.w400,
-                      fontFamily: 'Inter',
-                    ),
-                  ),
-                ],
+                      const SizedBox(height: 16),
+                      // Profile Name
+                      Text(
+                        userName,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 24,
+                          fontWeight: FontWeight.w400,
+                          fontFamily: 'Inter',
+                        ),
+                      ),
+                    ],
+                  );
+                },
               ),
             ),
 

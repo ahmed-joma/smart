@@ -18,53 +18,38 @@ class CustomSnackBar {
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: iconColor,
+                color: backgroundColor,
                 shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
-                    blurRadius: 4,
-                    spreadRadius: 0,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
               ),
               child: Icon(
-                isSuccess ? Icons.check : Icons.info,
-                color: backgroundColor,
+                isSuccess ? Icons.check : Icons.error,
+                color: iconColor,
                 size: 20,
               ),
             ),
-            const SizedBox(width: 16),
+            const SizedBox(width: 12),
             Expanded(
               child: Text(
                 message,
                 style: TextStyle(
-                  fontFamily: 'Inter',
-                  fontWeight: FontWeight.w600,
-                  fontSize: 16,
                   color: textColor,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
             ),
           ],
         ),
-        backgroundColor: backgroundColor.withOpacity(
-          0.95,
-        ), // زيادة عدم الشفافية
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-          side: BorderSide(color: backgroundColor.withOpacity(0.3), width: 1),
-        ),
-        margin: const EdgeInsets.all(16),
+        backgroundColor: Colors.white,
         duration: duration,
-        elevation: 8, // إضافة ظل أقوى
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        margin: const EdgeInsets.all(16),
+        elevation: 4,
       ),
     );
   }
 
-  // Success SnackBar
   static void showSuccess({
     required BuildContext context,
     required String message,
@@ -75,30 +60,28 @@ class CustomSnackBar {
       message: message,
       backgroundColor: Colors.green,
       iconColor: Colors.white,
-      textColor: AppColors.primary,
+      textColor: Colors.green.shade800,
       duration: duration,
       isSuccess: true,
     );
   }
 
-  // Error SnackBar
   static void showError({
     required BuildContext context,
     required String message,
-    Duration duration = const Duration(seconds: 3),
+    Duration duration = const Duration(seconds: 4),
   }) {
     show(
       context: context,
       message: message,
       backgroundColor: Colors.red,
       iconColor: Colors.white,
-      textColor: AppColors.primary,
+      textColor: Colors.red.shade800,
       duration: duration,
       isSuccess: false,
     );
   }
 
-  // Info SnackBar
   static void showInfo({
     required BuildContext context,
     required String message,
@@ -109,13 +92,12 @@ class CustomSnackBar {
       message: message,
       backgroundColor: Colors.blue,
       iconColor: Colors.white,
-      textColor: AppColors.primary,
+      textColor: Colors.blue.shade800,
       duration: duration,
-      isSuccess: false,
+      isSuccess: true,
     );
   }
 
-  // Warning SnackBar
   static void showWarning({
     required BuildContext context,
     required String message,
@@ -126,7 +108,7 @@ class CustomSnackBar {
       message: message,
       backgroundColor: Colors.orange,
       iconColor: Colors.white,
-      textColor: AppColors.primary,
+      textColor: Colors.orange.shade800,
       duration: duration,
       isSuccess: false,
     );

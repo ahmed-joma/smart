@@ -1,0 +1,10 @@
+[33m28184be[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m)[m Enhance password reset flow with email parameter handling
+[33mffdf677[m Implement logout functionality in HomeDrawer with Bloc integration
+[33m61dffcd[m Update authentication models and UI interactions
+[33m919ea7f[m Refactor Map View functionality and integrate service locator
+[33m3d49a49[m Add Map View functionality and integrate location services
+[33m9fca281[m Refactor Apple Pay view to use Icons instead of text emojis
+[33mbb3e850[m Add advanced payment methods and enhance order summary view
+[33m46efd43[m Add order summary view and enhance ticket booking functionality
+[33m2098a4f[m Add hotel booking functionality and refactor hotel details button
+[33mbfa1640[m Refactor SectionNearLocation to use InteractiveBookmark for favorite functionality

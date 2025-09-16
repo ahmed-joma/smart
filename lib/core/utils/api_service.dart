@@ -1,7 +1,9 @@
+import 'dart:io';
 import 'package:dio/dio.dart';
 import 'constants/api_constants.dart';
 import 'models/api_response.dart';
 import 'models/api_error.dart';
+import 'token_manager.dart';
 
 class ApiService {
   static final ApiService _instance = ApiService._internal();
@@ -10,6 +12,8 @@ class ApiService {
 
   late Dio _dio;
   String? _token;
+  TokenManager? _tokenManager;
+  Map<String, dynamic>? _userData;
 
   void initialize() {
     _dio = Dio(
@@ -26,6 +30,14 @@ class ApiService {
     _dio.interceptors.add(_createAuthInterceptor());
     _dio.interceptors.add(_createLoggingInterceptor());
     _dio.interceptors.add(_createErrorInterceptor());
+
+    print('✅ ApiService initialized');
+  }
+
+  // Set token manager reference
+  void setTokenManager(TokenManager tokenManager) {
+    _tokenManager = tokenManager;
+    print('🔗 TokenManager linked to ApiService');
   }
 
   // Reset function for hot reload
@@ -39,9 +51,11 @@ class ApiService {
       onRequest: (options, handler) {
         if (_token != null) {
           options.headers['Authorization'] = 'Bearer $_token';
-          print('🔑 Using Token: ${_token!.substring(0, 20)}...');
+          print(
+            '🔑 Using Token: ${_token!.substring(0, 20)}... for ${options.path}',
+          );
         } else {
-          print('🔓 No Token - Making public request');
+          print('🔓 No Token - Making public request to ${options.path}');
         }
         handler.next(options);
       },
@@ -141,12 +155,39 @@ class ApiService {
   // Token management
   void setToken(String token) {
     _token = token;
+    _tokenManager?.saveToken(token);
     print('💾 Token Saved: ${token.substring(0, 20)}...');
   }
 
   void clearToken() {
     _token = null;
+    _userData = null;
+    _tokenManager?.clearToken();
     print('🗑️ Token Cleared');
+  }
+
+  // User data management
+  void setUserData(Map<String, dynamic> userData) {
+    _userData = userData;
+    print(
+      '👤 User Data Saved: ${userData['full_name']} (${userData['email']})',
+    );
+  }
+
+  Map<String, dynamic>? get userData => _userData;
+
+  // Load token from storage
+  Future<void> loadToken() async {
+    if (_tokenManager != null) {
+      _token = await _tokenManager!.getToken();
+      if (_token != null) {
+        print('🔄 Token Loaded: ${_token!.substring(0, 20)}...');
+      } else {
+        print('🔓 No Token Found in Storage');
+      }
+    } else {
+      print('❌ TokenManager is null - cannot load token');
+    }
   }
 
   String? get token => _token;
@@ -225,6 +266,43 @@ class ApiService {
         data: data,
         queryParameters: queryParameters,
       );
+      return ApiResponse.fromJson(response.data, fromJson);
+    } on DioException catch (e) {
+      if (e.error is ApiError) {
+        throw e.error as ApiError;
+      } else {
+        throw _handleError(e);
+      }
+    }
+  }
+
+  // Multipart file upload method
+  Future<ApiResponse<T>> postMultipart<T>(
+    String path, {
+    required File file,
+    required String fieldName,
+    Map<String, dynamic>? additionalFields,
+    T Function(Map<String, dynamic>)? fromJson,
+  }) async {
+    try {
+      print('📤 Uploading file: ${file.path}');
+
+      // Create FormData for multipart upload
+      FormData formData = FormData.fromMap({
+        fieldName: await MultipartFile.fromFile(
+          file.path,
+          filename: file.path.split('/').last,
+        ),
+        ...?additionalFields,
+      });
+
+      final response = await _dio.post(
+        path,
+        data: formData,
+        options: Options(headers: {'Content-Type': 'multipart/form-data'}),
+      );
+
+      print('✅ File uploaded successfully');
       return ApiResponse.fromJson(response.data, fromJson);
     } on DioException catch (e) {
       if (e.error is ApiError) {

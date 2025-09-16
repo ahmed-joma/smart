@@ -1,47 +1,87 @@
+import 'dart:io';
 import '../api_service.dart';
 import '../constants/api_constants.dart';
 import '../models/api_response.dart';
-import '../models/auth_models.dart';
-import '../models/api_error.dart';
+import '../models/profile_models.dart';
+import '../service_locator.dart';
 
 class ProfileRepository {
-  final ApiService _apiService = ApiService();
+  final ApiService _apiService = sl<ApiService>();
 
-  // Get Profile
-  Future<ApiResponse<User>> getProfile() async {
+  // Get user profile with favorites
+  Future<ApiResponse<ProfileData>> getProfile() async {
     try {
-      return await _apiService.get<User>(
+      print('🔍 Fetching user profile...');
+
+      // Ensure token is loaded before making the request
+      await _apiService.loadToken();
+
+      final response = await _apiService.get<ProfileData>(
         ApiConstants.profile,
-        fromJson: (json) => User.fromJson(json),
+        fromJson: (json) => ProfileData.fromJson(json),
       );
-    } on ApiError catch (e) {
-      throw e;
+
+      print('✅ Profile fetched successfully');
+      return response;
     } catch (e) {
-      throw ApiError.fromException(e);
+      print('❌ Error fetching profile: $e');
+      rethrow;
     }
   }
 
-  // Update Profile
-  Future<ApiResponse<User>> updateProfile({
-    String? name,
-    String? phone,
-    String? image,
+  // Update user profile
+  Future<ApiResponse<UserProfile>> updateProfile({
+    String? fullName,
+    String? aboutMe,
+    String? imageUrl,
   }) async {
     try {
-      final data = <String, dynamic>{};
-      if (name != null) data['name'] = name;
-      if (phone != null) data['phone'] = phone;
-      if (image != null) data['image'] = image;
+      print('🔍 Updating user profile...');
 
-      return await _apiService.post<User>(
+      final data = <String, dynamic>{};
+      if (fullName != null) data['full_name'] = fullName;
+      if (aboutMe != null) data['about_me'] = aboutMe;
+      if (imageUrl != null) data['image_url'] = imageUrl;
+
+      print('📦 Update data: $data');
+
+      final response = await _apiService.post<UserProfile>(
         ApiConstants.profile,
         data: data,
-        fromJson: (json) => User.fromJson(json),
+        fromJson: (json) => UserProfile.fromJson(json),
       );
-    } on ApiError catch (e) {
-      throw e;
+
+      print('✅ Profile updated successfully');
+      return response;
     } catch (e) {
-      throw ApiError.fromException(e);
+      print('❌ Error updating profile: $e');
+      rethrow;
+    }
+  }
+
+  // Upload profile image
+  Future<ApiResponse<ImageUploadResponse>> uploadProfileImage(
+    File imageFile,
+  ) async {
+    try {
+      print('📸 Uploading profile image...');
+      print('📁 Image path: ${imageFile.path}');
+
+      // Ensure token is loaded before making the request
+      await _apiService.loadToken();
+
+      final response = await _apiService.postMultipart<ImageUploadResponse>(
+        ApiConstants.uploadProfileImage,
+        file: imageFile,
+        fieldName: 'image', // Field name for the image file
+        fromJson: (json) => ImageUploadResponse.fromJson(json),
+      );
+
+      print('✅ Profile image uploaded successfully');
+      return response;
+    } catch (e) {
+      print('❌ Error uploading profile image: $e');
+      rethrow;
     }
   }
 }

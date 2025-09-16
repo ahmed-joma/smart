@@ -4,6 +4,8 @@ class User {
   final String email;
   final String? phone;
   final String? image;
+  final String? aboutMe;
+  final String? imageUrl;
   final bool isEmailVerified;
   final DateTime? createdAt;
   final DateTime? updatedAt;
@@ -14,6 +16,8 @@ class User {
     required this.email,
     this.phone,
     this.image,
+    this.aboutMe,
+    this.imageUrl,
     required this.isEmailVerified,
     this.createdAt,
     this.updatedAt,
@@ -22,11 +26,18 @@ class User {
   factory User.fromJson(Map<String, dynamic> json) {
     return User(
       id: json['id'] ?? 0,
-      name: json['name'] ?? '',
+      name:
+          json['full_name'] ??
+          json['name'] ??
+          '', // Support both full_name and name
       email: json['email'] ?? '',
       phone: json['phone'],
       image: json['image'],
-      isEmailVerified: json['is_email_verified'] ?? false,
+      aboutMe: json['about_me'],
+      imageUrl: json['image_url'],
+      isEmailVerified:
+          json['email_verified_at'] != null ||
+          json['is_email_verified'] == true,
       createdAt: json['created_at'] != null
           ? DateTime.parse(json['created_at'])
           : null,
@@ -39,10 +50,16 @@ class User {
   Map<String, dynamic> toJson() {
     return {
       'id': id,
+      'full_name': name, // Use full_name for consistency with API
       'name': name,
       'email': email,
       'phone': phone,
       'image': image,
+      'about_me': aboutMe,
+      'image_url': imageUrl,
+      'email_verified_at': isEmailVerified
+          ? DateTime.now().toIso8601String()
+          : null,
       'is_email_verified': isEmailVerified,
       'created_at': createdAt?.toIso8601String(),
       'updated_at': updatedAt?.toIso8601String(),

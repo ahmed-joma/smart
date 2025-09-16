@@ -19,8 +19,8 @@ Future<void> initServiceLocator() async {
   sl.registerLazySingleton(() => sharedPreferences);
 
   // Core
-  sl.registerLazySingleton(() => ApiService());
   sl.registerLazySingleton(() => TokenManager.instance);
+  sl.registerLazySingleton(() => ApiService());
 
   // Repository
   sl.registerLazySingleton(() => AuthRepository());
@@ -35,6 +35,12 @@ Future<void> initServiceLocator() async {
   // Initialize services
   await sl<TokenManager>().initialize();
   sl<ApiService>().initialize();
+  sl<ApiService>().setTokenManager(sl<TokenManager>());
+
+  // Load token from storage
+  await sl<ApiService>().loadToken();
+
+  print('✅ Service Locator initialized successfully');
 }
 
 // Reset function for hot reload
