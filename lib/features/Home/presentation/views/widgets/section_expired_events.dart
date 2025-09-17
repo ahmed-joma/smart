@@ -149,15 +149,34 @@ class _SectionExpiredEventsState extends State<SectionExpiredEvents> {
                                       : Image.network(
                                           event.imageUrl,
                                           fit: BoxFit.cover,
+                                          loadingBuilder:
+                                              (
+                                                context,
+                                                child,
+                                                loadingProgress,
+                                              ) {
+                                                if (loadingProgress == null)
+                                                  return child;
+                                                return const Center(
+                                                  child:
+                                                      CircularProgressIndicator(),
+                                                );
+                                              },
                                           errorBuilder:
-                                              (context, error, stackTrace) =>
-                                                  const Center(
+                                              (context, error, stackTrace) {
+                                                return Container(
+                                                  color: const Color(
+                                                    0xFFF0F0F0,
+                                                  ),
+                                                  child: const Center(
                                                     child: Icon(
                                                       Icons.image_not_supported,
-                                                      size: 50,
-                                                      color: Colors.grey,
+                                                      color: Color(0xFF9E9E9E),
+                                                      size: 40,
                                                     ),
                                                   ),
+                                                );
+                                              },
                                         ))
                                 : const Center(
                                     child: Icon(
@@ -220,11 +239,12 @@ class _SectionExpiredEventsState extends State<SectionExpiredEvents> {
               ),
 
               // Content Section
-              Expanded(
+              Flexible(
                 child: Padding(
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(12),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
                     children: [
                       // Date
                       Text(
@@ -235,7 +255,7 @@ class _SectionExpiredEventsState extends State<SectionExpiredEvents> {
                           fontWeight: FontWeight.w500,
                         ),
                       ),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: 4),
 
                       // Event Title (using venue as title)
                       Text(
@@ -248,7 +268,7 @@ class _SectionExpiredEventsState extends State<SectionExpiredEvents> {
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: 4),
 
                       // Location
                       Row(
@@ -271,7 +291,7 @@ class _SectionExpiredEventsState extends State<SectionExpiredEvents> {
                           ),
                         ],
                       ),
-                      const Spacer(),
+                      const SizedBox(height: 4),
 
                       // Attendees
                       if (event.attendeesImages.isNotEmpty)
@@ -280,6 +300,9 @@ class _SectionExpiredEventsState extends State<SectionExpiredEvents> {
                             // Attendees Images
                             SizedBox(
                               height: 24,
+                              width: event.attendeesImages.length > 3
+                                  ? 56 // 3 * 16 + 24
+                                  : event.attendeesImages.length * 16 + 8,
                               child: Stack(
                                 children: List.generate(
                                   event.attendeesImages.length > 3
