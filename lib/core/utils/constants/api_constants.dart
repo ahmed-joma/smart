@@ -16,10 +16,8 @@ class ApiConstants {
 
   // Profile Endpoints
   static const String profile = '/profile';
-  static const String updateProfile =
-      '/profile/update'; // Added for profile update
-  static const String uploadProfileImage =
-      '/profile/upload-image'; // Added for image upload
+  static const String updateProfile = '/profile/update';
+  static const String uploadProfileImage = '/profile/upload-image';
 
   // Home Endpoints
   static const String home = '/home';

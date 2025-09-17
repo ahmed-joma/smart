@@ -99,6 +99,10 @@ class _EditProfileBodyState extends State<EditProfileBody> {
           );
           // العودة لصفحة Profile بعد النجاح
           context.go('/myProfileView');
+          // إعادة تعيين _isUpdating
+          setState(() {
+            _isUpdating = false;
+          });
         } else if (state is ProfileError) {
           setState(() {
             _isUpdating = false;

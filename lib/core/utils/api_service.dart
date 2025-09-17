@@ -163,8 +163,7 @@ class ApiService {
     _token = null;
     _userData = null;
     _tokenManager?.clearToken();
-    _tokenManager?.clearUserData();
-    print('🗑️ Token and User Data Cleared');
+    print('🗑️ Token Cleared (User Data Preserved)');
   }
 
   void clearAllData() {
@@ -175,7 +174,7 @@ class ApiService {
   }
 
   // User data management
-  void setUserData(Map<String, dynamic> userData) async {
+  Future<void> setUserData(Map<String, dynamic> userData) async {
     // Clear old user data first
     if (_tokenManager != null) {
       await _tokenManager!.clearUserData();

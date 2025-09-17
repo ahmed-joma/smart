@@ -16,6 +16,8 @@ class SectionProfileInfo extends StatefulWidget {
 }
 
 class _SectionProfileInfoState extends State<SectionProfileInfo> {
+  bool _isUploadingImage = false;
+
   Future<void> _changeProfileImage(BuildContext context) async {
     try {
       final File? imageFile = await ImagePickerWidget.showImageSourceDialog(
@@ -34,6 +36,9 @@ class _SectionProfileInfoState extends State<SectionProfileInfo> {
         );
 
         // Upload the image
+        setState(() {
+          _isUploadingImage = true;
+        });
         context.read<ProfileCubit>().uploadProfileImage(imageFile);
       }
     } catch (e) {
@@ -61,13 +66,16 @@ class _SectionProfileInfoState extends State<SectionProfileInfo> {
             message: 'Uploading image...',
             duration: const Duration(seconds: 2),
           );
-        } else if (state is ProfileSuccess) {
+        } else if (state is ProfileSuccess && _isUploadingImage) {
           // Check if this is after an image upload
           CustomSnackBar.showSuccess(
             context: context,
             message: 'Profile image updated successfully!',
             duration: const Duration(seconds: 2),
           );
+          setState(() {
+            _isUploadingImage = false;
+          });
         }
       },
       child: BlocBuilder<ProfileCubit, ProfileState>(

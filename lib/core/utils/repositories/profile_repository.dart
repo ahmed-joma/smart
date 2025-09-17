@@ -48,32 +48,13 @@ class ProfileRepository {
 
       print('📦 Update data: $data');
 
-      final response = await _apiService.post<UserProfile>(
-        ApiConstants.profile,
+      final response = await _apiService.put<UserProfile>(
+        ApiConstants.updateProfile,
         data: data,
         fromJson: (json) => UserProfile.fromJson(json),
       );
 
       print('✅ Profile updated successfully');
-
-      // Update user data in ApiService if update was successful
-      if (response.status && response.data != null) {
-        final apiService = sl<ApiService>();
-        if (apiService.userData != null) {
-          if (fullName != null) {
-            apiService.userData!['full_name'] = fullName;
-          }
-          if (aboutMe != null) {
-            apiService.userData!['about_me'] = aboutMe;
-          }
-          if (imageUrl != null) {
-            apiService.userData!['image_url'] = imageUrl;
-          }
-          apiService.setUserData(apiService.userData!);
-          print('🔄 ProfileRepository: Updated user data in ApiService');
-        }
-      }
-
       return response;
     } catch (e) {
       print('❌ Error updating profile: $e');

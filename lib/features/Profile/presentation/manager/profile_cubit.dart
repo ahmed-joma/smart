@@ -83,44 +83,26 @@ class ProfileCubit extends Cubit<ProfileState> {
     emit(ProfileUpdating());
 
     try {
-      // Update user data in ApiService directly (local storage)
-      final apiService = sl<ApiService>();
-      if (apiService.userData != null) {
-        if (fullName != null) {
-          apiService.userData!['full_name'] = fullName;
-        }
-        if (aboutMe != null) {
-          apiService.userData!['about_me'] = aboutMe;
-        }
-        if (imageUrl != null) {
-          apiService.userData!['image_url'] = imageUrl;
-        }
-        await apiService.setUserData(apiService.userData!);
-        print('🔄 ProfileCubit: Updated user data in ApiService');
-      }
+      print('🔄 ProfileCubit: Starting profile update...');
 
-      // Update current state with new data
-      final currentState = state;
-      if (currentState is ProfileSuccess) {
-        final updatedUser = UserProfile(
-          id: currentState.data.user.id,
-          imageUrl: currentState.data.user.imageUrl,
-          fullName: fullName ?? currentState.data.user.fullName,
-          aboutMe: aboutMe ?? currentState.data.user.aboutMe,
-        );
+      // Update via API only
+      final response = await _profileRepository.updateProfile(
+        fullName: fullName,
+        aboutMe: aboutMe,
+        imageUrl: imageUrl,
+      );
 
-        final updatedProfileData = ProfileData(
-          user: updatedUser,
-          favorites: currentState.data.favorites,
-        );
-
-        emit(ProfileSuccess(updatedProfileData));
-      } else {
-        // If no current state, refresh profile
+      if (response.status && response.data != null) {
+        print('✅ ProfileCubit: Profile updated successfully via API');
+        // Refresh profile data from API
         await getProfile();
+      } else {
+        print('❌ ProfileCubit: API update failed');
+        emit(ProfileError('Failed to update profile: ${response.msg}'));
       }
     } catch (e) {
-      emit(ProfileError(e.toString()));
+      print('❌ ProfileCubit: Error updating profile: $e');
+      emit(ProfileError('Failed to update profile: ${e.toString()}'));
     }
   }
 
