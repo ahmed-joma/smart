@@ -5,16 +5,16 @@ import '../../../../../shared/shared.dart';
 import '../../../../../shared/widgets/interactive_bookmark.dart';
 import '../../../data/models/home_models.dart';
 
-class SectionUpcomingEvents extends StatefulWidget {
+class SectionOngoingEvents extends StatefulWidget {
   final List<HomeEvent> events;
 
-  const SectionUpcomingEvents({super.key, required this.events});
+  const SectionOngoingEvents({super.key, required this.events});
 
   @override
-  State<SectionUpcomingEvents> createState() => _SectionUpcomingEventsState();
+  State<SectionOngoingEvents> createState() => _SectionOngoingEventsState();
 }
 
-class _SectionUpcomingEventsState extends State<SectionUpcomingEvents> {
+class _SectionOngoingEventsState extends State<SectionOngoingEvents> {
   // Track saved state for each event
   final Map<int, bool> _savedEvents = {};
 
@@ -33,7 +33,7 @@ class _SectionUpcomingEventsState extends State<SectionUpcomingEvents> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               const Text(
-                'Upcoming Events',
+                'Ongoing Events',
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.w400,
@@ -155,7 +155,7 @@ class _SectionUpcomingEventsState extends State<SectionUpcomingEvents> {
                       },
                     ),
                   ),
-                  // Upcoming Badge
+                  // Ongoing Badge
                   Positioned(
                     top: 12,
                     left: 12,
@@ -165,11 +165,11 @@ class _SectionUpcomingEventsState extends State<SectionUpcomingEvents> {
                         vertical: 4,
                       ),
                       decoration: BoxDecoration(
-                        color: AppColors.primary,
+                        color: Colors.orange,
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: const Text(
-                        'UPCOMING',
+                        'ONGOING',
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 10,

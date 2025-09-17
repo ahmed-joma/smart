@@ -5,16 +5,16 @@ import '../../../../../shared/shared.dart';
 import '../../../../../shared/widgets/interactive_bookmark.dart';
 import '../../../data/models/home_models.dart';
 
-class SectionUpcomingEvents extends StatefulWidget {
+class SectionExpiredEvents extends StatefulWidget {
   final List<HomeEvent> events;
 
-  const SectionUpcomingEvents({super.key, required this.events});
+  const SectionExpiredEvents({super.key, required this.events});
 
   @override
-  State<SectionUpcomingEvents> createState() => _SectionUpcomingEventsState();
+  State<SectionExpiredEvents> createState() => _SectionExpiredEventsState();
 }
 
-class _SectionUpcomingEventsState extends State<SectionUpcomingEvents> {
+class _SectionExpiredEventsState extends State<SectionExpiredEvents> {
   // Track saved state for each event
   final Map<int, bool> _savedEvents = {};
 
@@ -33,7 +33,7 @@ class _SectionUpcomingEventsState extends State<SectionUpcomingEvents> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               const Text(
-                'Upcoming Events',
+                'Past Events',
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.w400,
@@ -109,36 +109,74 @@ class _SectionUpcomingEventsState extends State<SectionUpcomingEvents> {
                       height: 160,
                       width: double.infinity,
                       decoration: const BoxDecoration(color: Color(0xFFF5F5F5)),
-                      child: event.imageUrl.isNotEmpty
-                          ? (event.imageUrl.endsWith('.svg')
-                                ? SvgPicture.network(
-                                    event.imageUrl,
-                                    fit: BoxFit.cover,
-                                    placeholderBuilder: (context) =>
-                                        const Center(
-                                          child: CircularProgressIndicator(),
-                                        ),
-                                  )
-                                : Image.network(
-                                    event.imageUrl,
-                                    fit: BoxFit.cover,
-                                    errorBuilder:
-                                        (context, error, stackTrace) =>
-                                            const Center(
-                                              child: Icon(
-                                                Icons.image_not_supported,
-                                                size: 50,
-                                                color: Colors.grey,
+                      child: Stack(
+                        children: [
+                          // Image with grayscale filter for expired events
+                          ColorFiltered(
+                            colorFilter: const ColorFilter.matrix([
+                              0.2126,
+                              0.7152,
+                              0.0722,
+                              0,
+                              0,
+                              0.2126,
+                              0.7152,
+                              0.0722,
+                              0,
+                              0,
+                              0.2126,
+                              0.7152,
+                              0.0722,
+                              0,
+                              0,
+                              0,
+                              0,
+                              0,
+                              1,
+                              0,
+                            ]),
+                            child: event.imageUrl.isNotEmpty
+                                ? (event.imageUrl.endsWith('.svg')
+                                      ? SvgPicture.network(
+                                          event.imageUrl,
+                                          fit: BoxFit.cover,
+                                          placeholderBuilder: (context) =>
+                                              const Center(
+                                                child:
+                                                    CircularProgressIndicator(),
                                               ),
-                                            ),
-                                  ))
-                          : const Center(
-                              child: Icon(
-                                Icons.event,
-                                size: 50,
-                                color: Colors.grey,
-                              ),
+                                        )
+                                      : Image.network(
+                                          event.imageUrl,
+                                          fit: BoxFit.cover,
+                                          errorBuilder:
+                                              (context, error, stackTrace) =>
+                                                  const Center(
+                                                    child: Icon(
+                                                      Icons.image_not_supported,
+                                                      size: 50,
+                                                      color: Colors.grey,
+                                                    ),
+                                                  ),
+                                        ))
+                                : const Center(
+                                    child: Icon(
+                                      Icons.event,
+                                      size: 50,
+                                      color: Colors.grey,
+                                    ),
+                                  ),
+                          ),
+                          // Overlay for expired effect
+                          Container(
+                            height: 160,
+                            width: double.infinity,
+                            decoration: BoxDecoration(
+                              color: Colors.black.withOpacity(0.3),
                             ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                   // Bookmark
@@ -155,7 +193,7 @@ class _SectionUpcomingEventsState extends State<SectionUpcomingEvents> {
                       },
                     ),
                   ),
-                  // Upcoming Badge
+                  // Expired Badge
                   Positioned(
                     top: 12,
                     left: 12,
@@ -165,11 +203,11 @@ class _SectionUpcomingEventsState extends State<SectionUpcomingEvents> {
                         vertical: 4,
                       ),
                       decoration: BoxDecoration(
-                        color: AppColors.primary,
+                        color: Colors.grey,
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: const Text(
-                        'UPCOMING',
+                        'EXPIRED',
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 10,
@@ -202,10 +240,10 @@ class _SectionUpcomingEventsState extends State<SectionUpcomingEvents> {
                       // Event Title (using venue as title)
                       Text(
                         event.venue,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
-                          color: Color(0xFF1D1E25),
+                          color: const Color(0xFF1D1E25).withOpacity(0.7),
                         ),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
@@ -260,19 +298,45 @@ class _SectionUpcomingEventsState extends State<SectionUpcomingEvents> {
                                         ),
                                       ),
                                       child: ClipOval(
-                                        child: Image.network(
-                                          event.attendeesImages[attendeeIndex],
-                                          fit: BoxFit.cover,
-                                          errorBuilder:
-                                              (context, error, stackTrace) =>
-                                                  Container(
-                                                    color: AppColors.primary,
-                                                    child: const Icon(
-                                                      Icons.person,
-                                                      size: 12,
-                                                      color: Colors.white,
+                                        child: ColorFiltered(
+                                          colorFilter:
+                                              const ColorFilter.matrix([
+                                                0.2126,
+                                                0.7152,
+                                                0.0722,
+                                                0,
+                                                0,
+                                                0.2126,
+                                                0.7152,
+                                                0.0722,
+                                                0,
+                                                0,
+                                                0.2126,
+                                                0.7152,
+                                                0.0722,
+                                                0,
+                                                0,
+                                                0,
+                                                0,
+                                                0,
+                                                1,
+                                                0,
+                                              ]),
+                                          child: Image.network(
+                                            event
+                                                .attendeesImages[attendeeIndex],
+                                            fit: BoxFit.cover,
+                                            errorBuilder:
+                                                (context, error, stackTrace) =>
+                                                    Container(
+                                                      color: Colors.grey,
+                                                      child: const Icon(
+                                                        Icons.person,
+                                                        size: 12,
+                                                        color: Colors.white,
+                                                      ),
                                                     ),
-                                                  ),
+                                          ),
                                         ),
                                       ),
                                     ),
