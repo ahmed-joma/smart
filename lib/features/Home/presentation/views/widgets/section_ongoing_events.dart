@@ -167,26 +167,62 @@ class _SectionOngoingEventsState extends State<SectionOngoingEvents> {
                       },
                     ),
                   ),
-                  // Ongoing Badge
+                  // Date Badge
                   Positioned(
                     top: 12,
                     left: 12,
                     child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 4,
-                      ),
+                      width: 45,
+                      height: 45,
                       decoration: BoxDecoration(
-                        color: Colors.orange,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: const Text(
-                        'ONGOING',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 10,
-                          fontWeight: FontWeight.bold,
+                        gradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [
+                            Colors.white.withOpacity(0.95),
+                            Colors.white.withOpacity(0.85),
+                          ],
                         ),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: Colors.white.withOpacity(0.3),
+                          width: 1,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.1),
+                            blurRadius: 15,
+                            offset: const Offset(0, 5),
+                          ),
+                          BoxShadow(
+                            color: Colors.white.withOpacity(0.8),
+                            blurRadius: 5,
+                            offset: const Offset(-2, -2),
+                          ),
+                        ],
+                      ),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            _extractDay(event.formattedStartAt),
+                            style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFFF0635A),
+                            ),
+                          ),
+                          const SizedBox(height: 1),
+                          Text(
+                            _extractMonth(event.formattedStartAt),
+                            style: const TextStyle(
+                              fontSize: 9,
+                              fontWeight: FontWeight.w600,
+                              color: Color(0xFFF0635A),
+                              letterSpacing: 0.5,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ),
@@ -319,5 +355,33 @@ class _SectionOngoingEventsState extends State<SectionOngoingEvents> {
         ),
       ),
     );
+  }
+
+  // Helper methods to extract day and month from formatted date
+  String _extractDay(String formattedDate) {
+    // Format: "26th Sep - Fri - 12:00 AM"
+    try {
+      final parts = formattedDate.split(' ');
+      if (parts.isNotEmpty) {
+        // Extract number from "26th"
+        return parts[0].replaceAll(RegExp(r'[^\d]'), '');
+      }
+    } catch (e) {
+      // Fallback
+    }
+    return '10';
+  }
+
+  String _extractMonth(String formattedDate) {
+    // Format: "26th Sep - Fri - 12:00 AM"
+    try {
+      final parts = formattedDate.split(' ');
+      if (parts.length > 1) {
+        return parts[1].toUpperCase();
+      }
+    } catch (e) {
+      // Fallback
+    }
+    return 'JUN';
   }
 }
