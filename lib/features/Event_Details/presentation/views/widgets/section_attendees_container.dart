@@ -64,15 +64,58 @@ class SectionAttendeesContainer extends StatelessWidget {
 
                             return Positioned(
                               left: index * 20.0,
-                              child: CircleAvatar(
-                                radius: 18,
-                                backgroundColor: const Color(0xFF3F38DD),
-                                child: Text(
-                                  _extractTextFromPlaceholder(imageUrl),
-                                  style: const TextStyle(
+                              child: Container(
+                                width: 36,
+                                height: 36,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
                                     color: Colors.white,
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.bold,
+                                    width: 2,
+                                  ),
+                                ),
+                                child: ClipOval(
+                                  child: Image.network(
+                                    imageUrl,
+                                    fit: BoxFit.cover,
+                                    loadingBuilder:
+                                        (context, child, loadingProgress) {
+                                          if (loadingProgress == null)
+                                            return child;
+                                          return Container(
+                                            color: AppColors.primary,
+                                            child: const Center(
+                                              child: SizedBox(
+                                                width: 16,
+                                                height: 16,
+                                                child:
+                                                    CircularProgressIndicator(
+                                                      color: Colors.white,
+                                                      strokeWidth: 2,
+                                                    ),
+                                              ),
+                                            ),
+                                          );
+                                        },
+                                    errorBuilder: (context, error, stackTrace) {
+                                      print('❌ Error loading image: $error');
+                                      // Fallback to text if image fails
+                                      return Container(
+                                        color: AppColors.primary,
+                                        child: Center(
+                                          child: Text(
+                                            _extractTextFromPlaceholder(
+                                              imageUrl,
+                                            ),
+                                            style: const TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                        ),
+                                      );
+                                    },
                                   ),
                                 ),
                               ),
