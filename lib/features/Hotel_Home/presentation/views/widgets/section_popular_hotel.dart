@@ -78,12 +78,12 @@ class SectionPopularHotel extends StatelessWidget {
           'date': '14 December, 2025',
           'day': 'Tuesday',
           'time': 'Check-in: 3:00PM',
-          'location': hotel.shortVenue,
+          'location': hotel.fullVenue,
           'country': 'KSA',
           'organizer': 'Hotel Management',
           'organizerCountry': 'KSA',
           'about':
-              'Luxury hotel with world-class amenities and exceptional service in ${hotel.city}.',
+              'Luxury hotel with world-class amenities and exceptional service in ${hotel.city}. Located at ${hotel.fullVenue}.',
           'guests': '+50 Guests',
           'price': hotel.formattedPrice,
           'image': hotel.coverUrl,
@@ -93,8 +93,8 @@ class SectionPopularHotel extends StatelessWidget {
       child: Container(
         width: double.infinity, // عرض كامل للشاشة
         constraints: const BoxConstraints(
-          minHeight: 120, // ارتفاع ثابت لجميع البطاقات
-          maxHeight: 120,
+          minHeight: 140, // زيادة الارتفاع من 120 إلى 140
+          maxHeight: 140,
         ),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
@@ -168,16 +168,53 @@ class SectionPopularHotel extends StatelessWidget {
                   ),
 
                   const SizedBox(height: 6), // مسافة متوازنة
-                  // Description
-                  Text(
-                    hotel.city,
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.grey[600],
-                      fontWeight: FontWeight.w400,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
+                  // City
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.location_city,
+                        size: 14,
+                        color: Colors.grey[600],
+                      ),
+                      const SizedBox(width: 4),
+                      Expanded(
+                        child: Text(
+                          hotel.city,
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: Colors.grey[600],
+                            fontWeight: FontWeight.w400,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 4), // مسافة أصغر
+                  // Venue
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.location_on,
+                        size: 14,
+                        color: Colors.grey[500],
+                      ),
+                      const SizedBox(width: 4),
+                      Expanded(
+                        child: Text(
+                          hotel.shortVenue,
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey[500],
+                            fontWeight: FontWeight.w300,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
                   ),
 
                   const SizedBox(height: 8), // مسافة متوازنة

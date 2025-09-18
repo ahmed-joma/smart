@@ -56,7 +56,8 @@ class _SectionNearLocationState extends State<SectionNearLocation> {
 
           // Horizontal scrollable hotel cards
           SizedBox(
-            height: 370, // زيادة الارتفاع ليتناسب مع البطاقات الأكبر
+            height:
+                340, // تقليل الارتفاع من 370 إلى 340 ليتناسب مع البطاقات الجديدة
             child: widget.hotels.isEmpty
                 ? const Center(
                     child: Text(
@@ -97,12 +98,12 @@ class _SectionNearLocationState extends State<SectionNearLocation> {
           'date': '14 December, 2025',
           'day': 'Tuesday',
           'time': 'Check-in: 3:00PM',
-          'location': hotel.shortVenue,
+          'location': hotel.fullVenue,
           'country': 'KSA',
           'organizer': 'Hotel Management',
           'organizerCountry': 'KSA',
           'about':
-              'Luxury hotel with world-class amenities and exceptional service in ${hotel.city}.',
+              'Luxury hotel with world-class amenities and exceptional service in ${hotel.city}. Located at ${hotel.fullVenue}.',
           'guests': '+50 Guests',
           'price': hotel.formattedPrice,
           'image': hotel.coverUrl,
@@ -111,15 +112,21 @@ class _SectionNearLocationState extends State<SectionNearLocation> {
       },
       child: Container(
         width: 250, // زيادة العرض من 200 إلى 250
-        height: 350, // زيادة الارتفاع أكثر لتجنب overflow نهائياً
+        height: 350, // تقليل الارتفاع من 350 إلى 320
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: Colors.grey.withOpacity(0.1),
-              spreadRadius: 1,
-              blurRadius: 10,
+              color: Colors.grey.withOpacity(0.15),
+              spreadRadius: 0,
+              blurRadius: 8,
+              offset: const Offset(0, 4),
+            ),
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.08),
+              spreadRadius: 0,
+              blurRadius: 4,
               offset: const Offset(0, 2),
             ),
           ],
@@ -139,13 +146,13 @@ class _SectionNearLocationState extends State<SectionNearLocation> {
                   child: Image.network(
                     hotel.coverUrl,
                     width: 250,
-                    height: 180, // زيادة ارتفاع الصورة
+                    height: 160, // تقليل ارتفاع الصورة من 180 إلى 160
                     fit: BoxFit.cover,
                     loadingBuilder: (context, child, loadingProgress) {
                       if (loadingProgress == null) return child;
                       return Container(
                         width: 250,
-                        height: 180,
+                        height: 160,
                         color: Colors.grey[300],
                         child: const Center(child: CircularProgressIndicator()),
                       );
@@ -154,7 +161,7 @@ class _SectionNearLocationState extends State<SectionNearLocation> {
                       print('Error loading hotel image: $error');
                       return Container(
                         width: 250,
-                        height: 180,
+                        height: 160,
                         color: Colors.grey[300],
                         child: const Icon(
                           Icons.hotel,
@@ -216,20 +223,57 @@ class _SectionNearLocationState extends State<SectionNearLocation> {
                     ],
                   ),
 
-                  const SizedBox(height: 10), // مسافة متوازنة
-                  // Description
-                  Text(
-                    hotel.city,
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.grey[600],
-                      fontWeight: FontWeight.w400,
-                    ),
-                    maxLines: 1, // تقليل عدد الأسطر لتجنب overflow
-                    overflow: TextOverflow.ellipsis,
+                  const SizedBox(height: 8), // مسافة متوازنة
+                  // City
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.location_city,
+                        size: 14,
+                        color: Colors.grey[600],
+                      ),
+                      const SizedBox(width: 4),
+                      Expanded(
+                        child: Text(
+                          hotel.city,
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: Colors.grey[600],
+                            fontWeight: FontWeight.w400,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
                   ),
 
-                  const SizedBox(height: 16), // مسافة متوازنة
+                  const SizedBox(height: 6), // مسافة أصغر
+                  // Venue
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.location_on,
+                        size: 14,
+                        color: Colors.grey[600],
+                      ),
+                      const SizedBox(width: 4),
+                      Expanded(
+                        child: Text(
+                          hotel.shortVenue,
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey[500],
+                            fontWeight: FontWeight.w300,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 12), // مسافة متوازنة
                   // Price
                   Row(
                     children: [

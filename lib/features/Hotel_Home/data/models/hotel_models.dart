@@ -104,7 +104,32 @@ class Hotel {
 
   // Helper method to get short venue (first line only)
   String get shortVenue {
+    if (venue.isEmpty) return 'Location not specified';
+
     final lines = venue.split('\n');
-    return lines.isNotEmpty ? lines.first : venue;
+    String firstLine = lines.isNotEmpty ? lines.first : venue;
+
+    // Clean up common patterns in addresses
+    firstLine = firstLine.replaceAll(RegExp(r'\s+'), ' ').trim();
+
+    // If too long, truncate smartly
+    if (firstLine.length > 35) {
+      final words = firstLine.split(' ');
+      String result = '';
+      for (String word in words) {
+        if ((result + word).length > 32) break;
+        result += (result.isEmpty ? '' : ' ') + word;
+      }
+      return result.isNotEmpty
+          ? '$result...'
+          : firstLine.substring(0, 32) + '...';
+    }
+
+    return firstLine;
+  }
+
+  // Helper method to get full venue address
+  String get fullVenue {
+    return venue.replaceAll('\n', ', ');
   }
 }
