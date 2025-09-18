@@ -204,6 +204,7 @@ class _SectionExpiredEventsState extends State<SectionExpiredEvents> {
                     right: 12,
                     child: InteractiveBookmark(
                       isSaved: _savedEvents[event.id] ?? event.isFavorite,
+                      size: 28,
                       onPressed: () {
                         setState(() {
                           _savedEvents[event.id] =
@@ -270,30 +271,7 @@ class _SectionExpiredEventsState extends State<SectionExpiredEvents> {
                       ),
                       const SizedBox(height: 4),
 
-                      // Location
-                      Row(
-                        children: [
-                          const Icon(
-                            Icons.location_on_outlined,
-                            size: 16,
-                            color: Color(0xFF747688),
-                          ),
-                          const SizedBox(width: 4),
-                          Expanded(
-                            child: Text(
-                              event.cityName,
-                              style: const TextStyle(
-                                fontSize: 12,
-                                color: Color(0xFF747688),
-                              ),
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 4),
-
-                      // Attendees
+                      // Attendees (moved up)
                       if (event.attendeesImages.isNotEmpty)
                         Row(
                           children: [
@@ -367,7 +345,7 @@ class _SectionExpiredEventsState extends State<SectionExpiredEvents> {
                                 ),
                               ),
                             ),
-                            const SizedBox(width: 50),
+                            const SizedBox(width: 4),
 
                             // More attendees count
                             if (event.attendeesImages.length > 3)
@@ -375,12 +353,35 @@ class _SectionExpiredEventsState extends State<SectionExpiredEvents> {
                                 '+${event.attendeesImages.length - 3}',
                                 style: const TextStyle(
                                   fontSize: 12,
-                                  color: Color(0xFF747688),
-                                  fontWeight: FontWeight.w500,
+                                  color: Color(0xFF3F38DD),
+                                  fontWeight: FontWeight.w600,
                                 ),
                               ),
                           ],
                         ),
+                      const SizedBox(height: 4),
+
+                      // Location (moved down)
+                      Row(
+                        children: [
+                          const Icon(
+                            Icons.location_on_outlined,
+                            size: 16,
+                            color: Color(0xFF747688),
+                          ),
+                          const SizedBox(width: 4),
+                          Expanded(
+                            child: Text(
+                              event.cityName,
+                              style: const TextStyle(
+                                fontSize: 12,
+                                color: Color(0xFF747688),
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
                     ],
                   ),
                 ),
