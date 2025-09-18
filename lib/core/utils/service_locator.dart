@@ -10,6 +10,8 @@ import '../../features/Event_Details/data/repos/event_repository.dart'
 import 'repositories/order_repository.dart';
 import 'repositories/hotel_repository.dart';
 import 'repositories/favorite_repository.dart';
+import '../../features/Hotel_Home/data/repos/Hotel_Home_repo.dart';
+import '../../features/Hotel_Home/data/repos/Hotel_Home_repo_imple.dart';
 import 'token_manager.dart';
 
 final GetIt sl = GetIt.instance;
@@ -33,6 +35,7 @@ Future<void> initServiceLocator() async {
   );
   sl.registerLazySingleton(() => OrderRepository());
   sl.registerLazySingleton(() => HotelRepository());
+  sl.registerLazySingleton<HotelHomeRepo>(() => HotelHomeRepoImpl(sl()));
   sl.registerLazySingleton(() => FavoriteRepository());
 
   // Initialize services

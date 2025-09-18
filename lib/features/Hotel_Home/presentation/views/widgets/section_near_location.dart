@@ -1,26 +1,24 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../../shared/widgets/interactive_bookmark.dart';
+import '../../../data/models/hotel_models.dart';
 
 class SectionNearLocation extends StatefulWidget {
-  const SectionNearLocation({super.key});
+  final List<Hotel> hotels;
+
+  const SectionNearLocation({super.key, required this.hotels});
 
   @override
   State<SectionNearLocation> createState() => _SectionNearLocationState();
 }
 
 class _SectionNearLocationState extends State<SectionNearLocation> {
-  // Map to track favorite status for each hotel
-  final Map<String, bool> _favorites = {
-    'Hilton': true,
-    'DAMAC': true,
-    'Marriott': true,
-  };
-
-  void _toggleFavorite(String hotelName) {
+  void _toggleFavorite(int hotelId) {
+    // TODO: Implement API call to toggle favorite
+    print('🏨 Toggle favorite for hotel ID: $hotelId');
     setState(() {
-      _favorites[hotelName] = !(_favorites[hotelName] ?? false);
+      // For now, just trigger a rebuild
+      // In a real implementation, you would update the hotel's favorite status
     });
   }
 
@@ -59,43 +57,27 @@ class _SectionNearLocationState extends State<SectionNearLocation> {
           // Horizontal scrollable hotel cards
           SizedBox(
             height: 370, // زيادة الارتفاع ليتناسب مع البطاقات الأكبر
-            child: ListView(
-              scrollDirection: Axis.horizontal,
-              children: [
-                _buildHotelCard(
-                  context: context,
-                  image: 'assets/images/hotel.svg',
-                  name: 'Hilton',
-                  rating: '5.0',
-                  description: 'Jeddah Memorable',
-                  price: '200.7',
-                  isFavorite: _favorites['Hilton'] ?? false,
-                  onFavoriteToggle: () => _toggleFavorite('Hilton'),
-                ),
-                const SizedBox(width: 20), // مسافة أكبر بين البطاقات
-                _buildHotelCard(
-                  context: context,
-                  image: 'assets/images/hotel.svg',
-                  name: 'DAMAC',
-                  rating: '5.0',
-                  description: 'Prime Location',
-                  price: '175.9',
-                  isFavorite: _favorites['DAMAC'] ?? false,
-                  onFavoriteToggle: () => _toggleFavorite('DAMAC'),
-                ),
-                const SizedBox(width: 20), // مسافة أكبر بين البطاقات
-                _buildHotelCard(
-                  context: context,
-                  image: 'assets/images/hotel.svg',
-                  name: 'Marriott',
-                  rating: '4.8',
-                  description: 'Luxury Experience',
-                  price: '220.0',
-                  isFavorite: _favorites['Marriott'] ?? false,
-                  onFavoriteToggle: () => _toggleFavorite('Marriott'),
-                ),
-              ],
-            ),
+            child: widget.hotels.isEmpty
+                ? const Center(
+                    child: Text(
+                      'No hotels found',
+                      style: TextStyle(fontSize: 16, color: Colors.grey),
+                    ),
+                  )
+                : ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: widget.hotels.length,
+                    itemBuilder: (context, index) {
+                      final hotel = widget.hotels[index];
+                      return Padding(
+                        padding: EdgeInsets.only(
+                          left: index == 0 ? 0 : 20,
+                          right: index == widget.hotels.length - 1 ? 20 : 0,
+                        ),
+                        child: _buildHotelCard(context: context, hotel: hotel),
+                      );
+                    },
+                  ),
           ),
         ],
       ),
@@ -104,32 +86,26 @@ class _SectionNearLocationState extends State<SectionNearLocation> {
 
   Widget _buildHotelCard({
     required BuildContext context,
-    required String image,
-    required String name,
-    required String rating,
-    required String description,
-    required String price,
-    required bool isFavorite,
-    required VoidCallback onFavoriteToggle,
+    required Hotel hotel,
   }) {
     return GestureDetector(
       onTap: () {
         // Navigate to Hotel Details with hotel data
         final hotelData = {
-          'id': 'hotel_${DateTime.now().millisecondsSinceEpoch}',
-          'title': name,
+          'id': hotel.id,
+          'title': hotel.name,
           'date': '14 December, 2025',
           'day': 'Tuesday',
           'time': 'Check-in: 3:00PM',
-          'location': description,
+          'location': hotel.shortVenue,
           'country': 'KSA',
-          'organizer': 'Marriott International',
-          'organizerCountry': 'USA',
+          'organizer': 'Hotel Management',
+          'organizerCountry': 'KSA',
           'about':
-              'Luxury hotel with stunning sea views, world-class amenities, and exceptional service in the heart of Jeddah.',
+              'Luxury hotel with world-class amenities and exceptional service in ${hotel.city}.',
           'guests': '+50 Guests',
-          'price': 'SR$price',
-          'image': image,
+          'price': hotel.formattedPrice,
+          'image': hotel.coverUrl,
         };
         context.push('/hotelDetailsView', extra: hotelData);
       },
@@ -160,19 +136,22 @@ class _SectionNearLocationState extends State<SectionNearLocation> {
                     topLeft: Radius.circular(16),
                     topRight: Radius.circular(16),
                   ),
-                  child: SvgPicture.asset(
-                    image,
+                  child: Image.network(
+                    hotel.coverUrl,
                     width: 250,
                     height: 180, // زيادة ارتفاع الصورة
                     fit: BoxFit.cover,
-                    placeholderBuilder: (context) => Container(
-                      width: 250,
-                      height: 180,
-                      color: Colors.grey[300],
-                      child: const Center(child: CircularProgressIndicator()),
-                    ),
+                    loadingBuilder: (context, child, loadingProgress) {
+                      if (loadingProgress == null) return child;
+                      return Container(
+                        width: 250,
+                        height: 180,
+                        color: Colors.grey[300],
+                        child: const Center(child: CircularProgressIndicator()),
+                      );
+                    },
                     errorBuilder: (context, error, stackTrace) {
-                      print('Error loading image: $error');
+                      print('Error loading hotel image: $error');
                       return Container(
                         width: 250,
                         height: 180,
@@ -191,8 +170,8 @@ class _SectionNearLocationState extends State<SectionNearLocation> {
                   top: 16,
                   right: 16, // تغيير إلى يمين البطاقة
                   child: InteractiveBookmark(
-                    isSaved: isFavorite,
-                    onPressed: onFavoriteToggle,
+                    isSaved: hotel.isFavorite,
+                    onPressed: () => _toggleFavorite(hotel.id),
                     size: 40,
                   ),
                 ),
@@ -211,7 +190,7 @@ class _SectionNearLocationState extends State<SectionNearLocation> {
                     children: [
                       Expanded(
                         child: Text(
-                          name,
+                          hotel.name,
                           style: const TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
@@ -225,7 +204,7 @@ class _SectionNearLocationState extends State<SectionNearLocation> {
                           const Icon(Icons.star, color: Colors.amber, size: 16),
                           const SizedBox(width: 4),
                           Text(
-                            rating,
+                            hotel.ratingAsDouble.toString(),
                             style: const TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.w400,
@@ -240,7 +219,7 @@ class _SectionNearLocationState extends State<SectionNearLocation> {
                   const SizedBox(height: 10), // مسافة متوازنة
                   // Description
                   Text(
-                    description,
+                    hotel.city,
                     style: TextStyle(
                       fontSize: 14,
                       color: Colors.grey[600],
@@ -255,7 +234,7 @@ class _SectionNearLocationState extends State<SectionNearLocation> {
                   Row(
                     children: [
                       Text(
-                        'SR$price',
+                        hotel.formattedPrice,
                         style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,

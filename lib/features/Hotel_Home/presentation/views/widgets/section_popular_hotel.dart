@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
+import '../../../data/models/hotel_models.dart';
 
 class SectionPopularHotel extends StatelessWidget {
-  const SectionPopularHotel({super.key});
+  final List<Hotel> hotels;
+
+  const SectionPopularHotel({super.key, required this.hotels});
 
   @override
   Widget build(BuildContext context) {
@@ -38,36 +40,26 @@ class SectionPopularHotel extends StatelessWidget {
           const SizedBox(height: 20),
 
           // Vertical list of popular hotel cards
-          Column(
-            children: [
-              _buildPopularHotelCard(
-                context: context,
-                image: 'assets/images/hotel1.svg',
-                name: 'Four Points by Sheraton',
-                description: 'Jeddah Corniche',
-                price: '165.3',
-                rating: '5.0',
-              ),
-              const SizedBox(height: 20), // مسافة أكبر بين البطاقات
-              _buildPopularHotelCard(
-                context: context,
-                image: 'assets/images/hotel1.svg',
-                name: 'InterContinental',
-                description: 'Jeddah City Center',
-                price: '185.0',
-                rating: '4.9',
-              ),
-              const SizedBox(height: 20), // مسافة أكبر بين البطاقات
-              _buildPopularHotelCard(
-                context: context,
-                image: 'assets/images/hotel1.svg',
-                name: 'Crowne Plaza',
-                description: 'Jeddah Airport',
-                price: '155.5',
-                rating: '4.7',
-              ),
-            ],
-          ),
+          hotels.isEmpty
+              ? const Center(
+                  child: Text(
+                    'No popular hotels found',
+                    style: TextStyle(fontSize: 16, color: Colors.grey),
+                  ),
+                )
+              : Column(
+                  children: hotels.asMap().entries.map((entry) {
+                    final index = entry.key;
+                    final hotel = entry.value;
+                    return Column(
+                      children: [
+                        _buildPopularHotelCard(context: context, hotel: hotel),
+                        if (index < hotels.length - 1)
+                          const SizedBox(height: 20), // مسافة أكبر بين البطاقات
+                      ],
+                    );
+                  }).toList(),
+                ),
         ],
       ),
     );
@@ -75,30 +67,26 @@ class SectionPopularHotel extends StatelessWidget {
 
   Widget _buildPopularHotelCard({
     required BuildContext context,
-    required String image,
-    required String name,
-    required String description,
-    required String price,
-    required String rating,
+    required Hotel hotel,
   }) {
     return GestureDetector(
       onTap: () {
         // Navigate to Hotel Details with hotel data
         final hotelData = {
-          'id': 'hotel_${DateTime.now().millisecondsSinceEpoch}',
-          'title': name,
+          'id': hotel.id,
+          'title': hotel.name,
           'date': '14 December, 2025',
           'day': 'Tuesday',
           'time': 'Check-in: 3:00PM',
-          'location': description,
+          'location': hotel.shortVenue,
           'country': 'KSA',
-          'organizer': 'Marriott International',
-          'organizerCountry': 'USA',
+          'organizer': 'Hotel Management',
+          'organizerCountry': 'KSA',
           'about':
-              'Luxury hotel with stunning sea views, world-class amenities, and exceptional service in the heart of Jeddah.',
+              'Luxury hotel with world-class amenities and exceptional service in ${hotel.city}.',
           'guests': '+50 Guests',
-          'price': 'SR$price',
-          'image': image,
+          'price': hotel.formattedPrice,
+          'image': hotel.coverUrl,
         };
         context.push('/hotelDetailsView', extra: hotelData);
       },
@@ -127,19 +115,22 @@ class SectionPopularHotel extends StatelessWidget {
             // Hotel Image
             ClipRRect(
               borderRadius: BorderRadius.circular(12),
-              child: SvgPicture.asset(
-                image,
+              child: Image.network(
+                hotel.coverUrl,
                 width: 100,
                 height: 100,
                 fit: BoxFit.cover,
-                placeholderBuilder: (context) => Container(
-                  width: 100,
-                  height: 100,
-                  color: Colors.grey[300],
-                  child: const Center(child: CircularProgressIndicator()),
-                ),
+                loadingBuilder: (context, child, loadingProgress) {
+                  if (loadingProgress == null) return child;
+                  return Container(
+                    width: 100,
+                    height: 100,
+                    color: Colors.grey[300],
+                    child: const Center(child: CircularProgressIndicator()),
+                  );
+                },
                 errorBuilder: (context, error, stackTrace) {
-                  print('Error loading image: $error');
+                  print('Error loading hotel image: $error');
                   return Container(
                     width: 100,
                     height: 100,
@@ -166,7 +157,7 @@ class SectionPopularHotel extends StatelessWidget {
                 children: [
                   // Hotel Name
                   Text(
-                    name,
+                    hotel.name,
                     style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w400,
@@ -179,7 +170,7 @@ class SectionPopularHotel extends StatelessWidget {
                   const SizedBox(height: 6), // مسافة متوازنة
                   // Description
                   Text(
-                    description,
+                    hotel.city,
                     style: TextStyle(
                       fontSize: 14,
                       color: Colors.grey[600],
@@ -192,7 +183,7 @@ class SectionPopularHotel extends StatelessWidget {
                   const SizedBox(height: 8), // مسافة متوازنة
                   // Price
                   Text(
-                    'SR$price /night',
+                    '${hotel.formattedPrice} /night',
                     style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w400,
@@ -214,7 +205,7 @@ class SectionPopularHotel extends StatelessWidget {
                     const Icon(Icons.star, color: Colors.amber, size: 18),
                     const SizedBox(width: 6),
                     Text(
-                      rating,
+                      hotel.ratingAsDouble.toString(),
                       style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w400,
