@@ -32,6 +32,7 @@ class ApiConstants {
 
   // Hotel Endpoints
   static const String hotel = '/hotel';
+  static const String hotelDetails = '/hotel'; // GET /hotel/{id}
 
   // Favorite Endpoints
   static const String favoriteUpdate = '/favorite/update';

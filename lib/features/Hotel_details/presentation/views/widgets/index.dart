@@ -8,6 +8,5 @@ export 'section_book_hotel_button.dart';
 export 'Hotel_Details_body.dart';
 export 'section_hotel_header.dart';
 export 'section_hotel_details.dart';
-export 'section_hotel_preview.dart';
-export 'section_guests_container.dart';
+export 'section_hotel_rating.dart';
 export 'section_hotel_details_button.dart';

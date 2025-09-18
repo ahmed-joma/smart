@@ -23,7 +23,7 @@ class SectionHotelDetails extends StatelessWidget {
                 children: [
                   // Hotel Title
                   Text(
-                    hotel['title'],
+                    hotel['title']?.toString() ?? 'Hotel Name',
                     style: const TextStyle(
                       fontSize: 40,
                       fontWeight: FontWeight.w400,
@@ -36,8 +36,9 @@ class SectionHotelDetails extends StatelessWidget {
                   _buildDetailRow(
                     icon: Icons.calendar_today,
                     iconColor: AppColors.primary,
-                    title: hotel['date'],
-                    subtitle: '${hotel['day']}, ${hotel['time']}',
+                    title: hotel['date']?.toString() ?? 'Check-in Date',
+                    subtitle:
+                        '${hotel['day']?.toString() ?? 'Day'}, ${hotel['time']?.toString() ?? 'Time'}',
                   ),
                   const SizedBox(height: 20),
 
@@ -45,17 +46,73 @@ class SectionHotelDetails extends StatelessWidget {
                   _buildDetailRow(
                     icon: Icons.location_on,
                     iconColor: AppColors.primary,
-                    title: hotel['location'],
-                    subtitle: hotel['country'],
+                    title: hotel['location']?.toString() ?? 'Location',
+                    subtitle: hotel['country']?.toString() ?? 'Country',
                   ),
                   const SizedBox(height: 20),
 
                   // Hotel Chain
                   _buildHotelChainRow(
-                    chain: hotel['organizer'],
-                    country: hotel['organizerCountry'],
+                    chain: hotel['organizer']?.toString() ?? 'Hotel Management',
+                    country: hotel['organizerCountry']?.toString() ?? 'KSA',
                   ),
                   const SizedBox(height: 32),
+
+                  // Hotel Services (if available)
+                  if (hotel['services'] != null &&
+                      (hotel['services'] as List).isNotEmpty) ...[
+                    const Text(
+                      'Hotel Services',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.primary,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: (hotel['services'] as List<String>).map((
+                        service,
+                      ) {
+                        return Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 6,
+                          ),
+                          decoration: BoxDecoration(
+                            color: AppColors.primary.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(
+                              color: AppColors.primary.withOpacity(0.3),
+                              width: 1,
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.check_circle,
+                                size: 16,
+                                color: AppColors.primary,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                service,
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: AppColors.primary,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      }).toList(),
+                    ),
+                    const SizedBox(height: 24),
+                  ],
 
                   // About Hotel
                   const Text(
@@ -68,7 +125,7 @@ class SectionHotelDetails extends StatelessWidget {
                   ),
                   const SizedBox(height: 12),
                   Text(
-                    hotel['about'],
+                    hotel['about']?.toString() ?? 'No description available',
                     style: TextStyle(
                       fontSize: 16,
                       color: AppColors.primary.withOpacity(0.8),
