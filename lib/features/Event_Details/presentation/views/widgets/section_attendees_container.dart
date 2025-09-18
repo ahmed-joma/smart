@@ -1,14 +1,22 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import '../../../../../../shared/shared.dart';
 
 class SectionAttendeesContainer extends StatelessWidget {
   final String attendees;
+  final List<String>? attendeesImages;
 
-  const SectionAttendeesContainer({super.key, required this.attendees});
+  const SectionAttendeesContainer({
+    super.key,
+    required this.attendees,
+    this.attendeesImages,
+  });
 
   @override
   Widget build(BuildContext context) {
+    print('🔍 SectionAttendeesContainer: attendees=$attendees');
+    print('📊 attendeesImages: $attendeesImages');
+    print('📊 attendeesImages length: ${attendeesImages?.length ?? 0}');
+
     return Positioned(
       top: 320, // يتحكم بمكان الفلوتينج
       left: 20,
@@ -30,50 +38,95 @@ class SectionAttendeesContainer extends StatelessWidget {
         child: Row(
           children: [
             // Profile Images
-            Row(
-              children: [
-                CircleAvatar(
-                  radius: 20,
-                  backgroundColor: Colors.grey.shade300,
-                  child: SvgPicture.asset(
-                    'assets/images/person1.svg',
-                    width: 32,
-                    errorBuilder: (context, error, stackTrace) {
-                      return const Icon(Icons.person, color: Colors.grey);
-                    },
-                  ),
-                ),
-                Transform.translate(
-                  offset: const Offset(-10, 0), // تداخل أكثر مع الصورة الأولى
-                  child: CircleAvatar(
-                    radius: 20,
-                    backgroundColor: Colors.grey.shade300,
-                    child: SvgPicture.asset(
-                      'assets/images/person2.svg',
-                      width: 32,
-                      errorBuilder: (context, error, stackTrace) {
-                        return const Icon(Icons.person, color: Colors.grey);
-                      },
-                    ),
-                  ),
-                ),
-                Transform.translate(
-                  offset: const Offset(-20, 0), // تداخل أكثر مع الصورة الثانية
-                  child: CircleAvatar(
-                    radius: 20,
-                    backgroundColor: Colors.grey.shade300,
-                    child: SvgPicture.asset(
-                      'assets/images/person3.svg',
-                      width: 32,
-                      errorBuilder: (context, error, stackTrace) {
-                        return const Icon(Icons.person, color: Colors.grey);
-                      },
-                    ),
-                  ),
-                ),
-              ],
+            SizedBox(
+              height: 40,
+              width: attendeesImages != null && attendeesImages!.isNotEmpty
+                  ? (attendeesImages!.length > 3
+                        ? 76 // مساحة محسوبة للصور الثلاث مع التداخل (20*2 + 36)
+                        : attendeesImages!.length * 20 + 16)
+                  : 76,
+              child: Stack(
+                children: attendeesImages != null && attendeesImages!.isNotEmpty
+                    ? (() {
+                        print('✅ Condition met: Creating attendee avatars');
+                        print(
+                          '📊 Will create ${attendeesImages!.length > 3 ? 3 : attendeesImages!.length} avatars',
+                        );
+                        return List.generate(
+                          attendeesImages!.length > 3
+                              ? 3
+                              : attendeesImages!.length,
+                          (index) {
+                            final imageUrl = attendeesImages![index];
+                            print(
+                              '🖼️ Creating CircleAvatar $index with URL: $imageUrl',
+                            );
+
+                            return Positioned(
+                              left: index * 20.0,
+                              child: CircleAvatar(
+                                radius: 18,
+                                backgroundColor: const Color(0xFF3F38DD),
+                                child: Text(
+                                  _extractTextFromPlaceholder(imageUrl),
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            );
+                          },
+                        );
+                      })()
+                    : (() {
+                        print(
+                          '❌ Using fallback images - no attendeesImages data',
+                        );
+                        return [
+                          // Fallback images if no attendees images
+                          const Positioned(
+                            left: 0,
+                            child: CircleAvatar(
+                              radius: 18,
+                              backgroundColor: Colors.grey,
+                              child: Icon(
+                                Icons.person,
+                                color: Colors.white,
+                                size: 16,
+                              ),
+                            ),
+                          ),
+                          const Positioned(
+                            left: 20,
+                            child: CircleAvatar(
+                              radius: 18,
+                              backgroundColor: Colors.grey,
+                              child: Icon(
+                                Icons.person,
+                                color: Colors.white,
+                                size: 16,
+                              ),
+                            ),
+                          ),
+                          const Positioned(
+                            left: 40,
+                            child: CircleAvatar(
+                              radius: 18,
+                              backgroundColor: Colors.grey,
+                              child: Icon(
+                                Icons.person,
+                                color: Colors.white,
+                                size: 16,
+                              ),
+                            ),
+                          ),
+                        ];
+                      })(),
+              ),
             ),
-            const SizedBox(width: 12),
+            const SizedBox(width: 20),
             Text(
               attendees,
               style: const TextStyle(
@@ -103,5 +156,20 @@ class SectionAttendeesContainer extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  // Extract text from placeholder URL
+  String _extractTextFromPlaceholder(String url) {
+    try {
+      // Extract text from URL like: https://placehold.co/600x400/00695c/FFF/?font=raleway&text=KM
+      final uri = Uri.parse(url);
+      final textParam = uri.queryParameters['text'];
+      if (textParam != null && textParam.isNotEmpty) {
+        return textParam.toUpperCase();
+      }
+    } catch (e) {
+      print('❌ Error extracting text from URL: $e');
+    }
+    return '?';
   }
 }

@@ -78,8 +78,6 @@ class SectionEventHeader extends StatelessWidget {
                       child: Icon(Icons.event, color: Colors.white, size: 80),
                     ),
                   ),
-            // Red overlay
-            Container(color: AppColors.primary.withOpacity(0.8)),
           ],
         ),
       ),

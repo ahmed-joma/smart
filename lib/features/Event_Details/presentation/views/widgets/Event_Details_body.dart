@@ -201,6 +201,7 @@ class _EventDetailsBodyState extends State<EventDetailsBody>
               // Floating Attendees Container
               SectionAttendeesContainer(
                 attendees: event['attendees']?.toString() ?? '+0 Going',
+                attendeesImages: _getAttendeesImages(state),
               ),
 
               // Scroll Listener for Beautiful Physics
@@ -226,5 +227,13 @@ class _EventDetailsBodyState extends State<EventDetailsBody>
         },
       ),
     );
+  }
+
+  // Helper method to extract attendees images from state
+  List<String>? _getAttendeesImages(EventDetailsState state) {
+    if (state is EventDetailsSuccess) {
+      return state.event.attendeesImages;
+    }
+    return null;
   }
 }
