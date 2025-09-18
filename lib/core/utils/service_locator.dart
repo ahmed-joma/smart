@@ -5,7 +5,8 @@ import 'repositories/auth_repository.dart';
 import 'repositories/filter_repository.dart';
 import 'repositories/profile_repository.dart';
 import 'repositories/home_repository.dart';
-import 'repositories/event_repository.dart';
+import '../../features/Event_Details/data/repos/event_repository.dart'
+    as event_details;
 import 'repositories/order_repository.dart';
 import 'repositories/hotel_repository.dart';
 import 'repositories/favorite_repository.dart';
@@ -27,7 +28,9 @@ Future<void> initServiceLocator() async {
   sl.registerLazySingleton(() => FilterRepository());
   sl.registerLazySingleton(() => ProfileRepository());
   sl.registerLazySingleton(() => HomeRepository());
-  sl.registerLazySingleton(() => EventRepository());
+  sl.registerLazySingleton<event_details.EventRepository>(
+    () => event_details.EventRepositoryImpl(),
+  );
   sl.registerLazySingleton(() => OrderRepository());
   sl.registerLazySingleton(() => HotelRepository());
   sl.registerLazySingleton(() => FavoriteRepository());

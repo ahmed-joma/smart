@@ -89,10 +89,14 @@ class _SectionUpcomingEventsState extends State<SectionUpcomingEvents> {
         child: InkWell(
           borderRadius: BorderRadius.circular(16),
           onTap: () {
-            context.push(
-              '/eventDetailsView',
-              extra: {'eventId': event.id, 'eventData': event.toJson()},
-            );
+            print('🚀 Navigation: Tapped event with ID: ${event.id}');
+            final navigationData = {
+              'eventId': event.id,
+              'eventData': event.toJson(),
+            };
+            print('📦 Navigation data: $navigationData');
+
+            context.push('/eventDetailsView', extra: navigationData);
           },
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,

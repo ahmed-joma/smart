@@ -24,6 +24,7 @@ class ApiConstants {
 
   // Event Endpoints
   static const String event = '/event';
+  static const String eventDetails = '/event'; // GET /event/{id}
 
   // Order Endpoints
   static const String orderStore = '/order/store';

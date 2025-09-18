@@ -23,7 +23,7 @@ class SectionEventDetails extends StatelessWidget {
                 children: [
                   // Event Title
                   Text(
-                    event['title'],
+                    event['title']?.toString() ?? 'Event Title',
                     style: const TextStyle(
                       fontSize: 40,
                       fontWeight: FontWeight.w400,
@@ -36,8 +36,9 @@ class SectionEventDetails extends StatelessWidget {
                   _buildDetailRow(
                     icon: Icons.calendar_today,
                     iconColor: AppColors.primary,
-                    title: event['date'],
-                    subtitle: '${event['day']}, ${event['time']}',
+                    title: event['date']?.toString() ?? 'Date',
+                    subtitle:
+                        '${event['day']?.toString() ?? 'Day'}, ${event['time']?.toString() ?? 'Time'}',
                   ),
                   const SizedBox(height: 20),
 
@@ -45,15 +46,15 @@ class SectionEventDetails extends StatelessWidget {
                   _buildDetailRow(
                     icon: Icons.location_on,
                     iconColor: AppColors.primary,
-                    title: event['location'],
-                    subtitle: event['country'],
+                    title: event['location']?.toString() ?? 'Location',
+                    subtitle: event['country']?.toString() ?? 'Country',
                   ),
                   const SizedBox(height: 20),
 
                   // Organizer
                   _buildOrganizerRow(
-                    organizer: event['organizer'],
-                    country: event['organizerCountry'],
+                    organizer: event['organizer']?.toString() ?? 'Organizer',
+                    country: event['organizerCountry']?.toString() ?? 'Country',
                   ),
                   const SizedBox(height: 32),
 
@@ -68,7 +69,7 @@ class SectionEventDetails extends StatelessWidget {
                   ),
                   const SizedBox(height: 12),
                   Text(
-                    event['about'],
+                    event['about']?.toString() ?? 'Event description',
                     style: TextStyle(
                       fontSize: 16,
                       color: AppColors.primary.withOpacity(0.8),

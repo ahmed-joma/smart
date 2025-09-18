@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import '../../../../../../shared/shared.dart';
 
 class SectionEventHeader extends StatelessWidget {
-  const SectionEventHeader({super.key});
+  final String? imageUrl;
+
+  const SectionEventHeader({super.key, this.imageUrl});
 
   @override
   Widget build(BuildContext context) {
@@ -44,18 +46,38 @@ class SectionEventHeader extends StatelessWidget {
           fit: StackFit.expand,
           children: [
             // Background Image
-            Image.asset(
-              'assets/images/citywaikevents.svg',
-              fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) {
-                return Container(
-                  color: AppColors.primary,
-                  child: const Center(
-                    child: Icon(Icons.image, color: Colors.white, size: 80),
+            (imageUrl != null && imageUrl!.isNotEmpty && imageUrl != 'null')
+                ? Image.network(
+                    imageUrl!,
+                    fit: BoxFit.cover,
+                    loadingBuilder: (context, child, loadingProgress) {
+                      if (loadingProgress == null) return child;
+                      return Container(
+                        color: AppColors.primary,
+                        child: const Center(
+                          child: CircularProgressIndicator(color: Colors.white),
+                        ),
+                      );
+                    },
+                    errorBuilder: (context, error, stackTrace) {
+                      return Container(
+                        color: AppColors.primary,
+                        child: const Center(
+                          child: Icon(
+                            Icons.image,
+                            color: Colors.white,
+                            size: 80,
+                          ),
+                        ),
+                      );
+                    },
+                  )
+                : Container(
+                    color: AppColors.primary,
+                    child: const Center(
+                      child: Icon(Icons.event, color: Colors.white, size: 80),
+                    ),
                   ),
-                );
-              },
-            ),
             // Red overlay
             Container(color: AppColors.primary.withOpacity(0.8)),
           ],
