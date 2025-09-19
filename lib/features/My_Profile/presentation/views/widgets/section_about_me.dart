@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:smartshop_map/shared/themes/app_colors.dart';
 import '../../../../Profile/presentation/manager/profile_cubit.dart';
-import 'edit_profile_body.dart'; // استيراد ProfileData
+// Removed unused import
 
 class SectionAboutMe extends StatefulWidget {
   const SectionAboutMe({super.key});

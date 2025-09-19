@@ -8,27 +8,17 @@ import 'section_edit_form.dart';
 import 'section_save_button.dart';
 import '../../../../Profile/presentation/manager/profile_cubit.dart';
 
-// كلاس لتخزين بيانات الملف الشخصي
-class ProfileData extends ChangeNotifier {
-  String _name = 'AHLAM';
-  String _aboutMe =
-      'Enjoy your favorite dishe and a lovely your friends and family and have a great time. Food from local food trucks will be available for purchase.';
-  String _profileImage = 'assets/images/profile.svg';
+// Simple class to hold profile image data for UI
+class ProfileImageData {
+  String profileImage = 'assets/images/profile.svg';
 
-  String get name => _name;
-  String get aboutMe => _aboutMe;
-  String get profileImage => _profileImage;
-
-  void updateProfile({String? name, String? aboutMe, String? profileImage}) {
-    if (name != null) _name = name;
-    if (aboutMe != null) _aboutMe = aboutMe;
-    if (profileImage != null) _profileImage = profileImage;
-    notifyListeners();
+  void updateProfileImage(String newImagePath) {
+    profileImage = newImagePath;
   }
 }
 
-// متغير عام لتقاسم البيانات
-final ProfileData profileData = ProfileData();
+// Instance for profile image data
+final ProfileImageData profileImageData = ProfileImageData();
 
 class EditProfileBody extends StatefulWidget {
   const EditProfileBody({super.key});
@@ -52,9 +42,11 @@ class _EditProfileBodyState extends State<EditProfileBody> {
         _nameController.text = profileState.data.user.fullName;
         _aboutMeController.text = profileState.data.user.aboutMe;
       } else {
-        // Fallback to default data
-        _nameController.text = profileData.name;
-        _aboutMeController.text = profileData.aboutMe;
+        // Load profile if not loaded yet
+        context.read<ProfileCubit>().getProfile();
+        // Use empty strings as fallback
+        _nameController.text = '';
+        _aboutMeController.text = '';
       }
     });
   }
@@ -96,8 +88,8 @@ class _EditProfileBodyState extends State<EditProfileBody> {
   }
 
   void _onProfileImageChanged(String newImagePath) {
-    // تحديث البيانات في ProfileData للعرض المحلي
-    profileData.updateProfile(profileImage: newImagePath);
+    // تحديث البيانات في ProfileImageData للعرض المحلي
+    profileImageData.updateProfileImage(newImagePath);
   }
 
   @override
@@ -109,17 +101,24 @@ class _EditProfileBodyState extends State<EditProfileBody> {
             context: context,
             message: 'Updating profile...',
           );
-        } else if (state is ProfileSuccess && _isUpdating) {
-          CustomSnackBar.showSuccess(
-            context: context,
-            message: 'Profile updated successfully!',
-          );
-          // العودة لصفحة Profile بعد النجاح
-          context.go('/myProfileView');
-          // إعادة تعيين _isUpdating
-          setState(() {
-            _isUpdating = false;
-          });
+        } else if (state is ProfileSuccess) {
+          // Update text controllers with loaded data
+          if (!_isUpdating) {
+            _nameController.text = state.data.user.fullName;
+            _aboutMeController.text = state.data.user.aboutMe;
+          } else {
+            // Profile updated successfully
+            CustomSnackBar.showSuccess(
+              context: context,
+              message: 'Profile updated successfully!',
+            );
+            // العودة لصفحة Profile بعد النجاح
+            context.go('/myProfileView');
+            // إعادة تعيين _isUpdating
+            setState(() {
+              _isUpdating = false;
+            });
+          }
         } else if (state is ProfileError) {
           setState(() {
             _isUpdating = false;
@@ -141,7 +140,7 @@ class _EditProfileBodyState extends State<EditProfileBody> {
 
                 // Profile Picture Section
                 SectionEditProfilePicture(
-                  currentImagePath: profileData.profileImage,
+                  currentImagePath: profileImageData.profileImage,
                   onImageChanged: _onProfileImageChanged,
                 ),
 
