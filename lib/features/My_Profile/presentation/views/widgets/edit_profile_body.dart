@@ -67,14 +67,31 @@ class _EditProfileBodyState extends State<EditProfileBody> {
   }
 
   void _onSavePressed() {
+    // التحقق من أن الحقول مملوءة
+    if (_nameController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Full name is required')));
+      return;
+    }
+
+    if (_aboutMeController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('About me is required')));
+      return;
+    }
+
     setState(() {
       _isUpdating = true;
     });
 
-    // تحديث البيانات في ProfileCubit
+    // تحديث البيانات في ProfileCubit مع الحقول المطلوبة
     context.read<ProfileCubit>().updateProfile(
-      fullName: _nameController.text,
-      aboutMe: _aboutMeController.text,
+      fullName: _nameController.text.trim(),
+      aboutMe: _aboutMeController.text.trim(),
+      // TODO: إضافة دعم رفع الصورة لاحقاً
+      imageFile: null,
     );
   }
 

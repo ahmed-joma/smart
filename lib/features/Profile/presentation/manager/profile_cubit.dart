@@ -76,28 +76,32 @@ class ProfileCubit extends Cubit<ProfileState> {
 
   // Update user profile
   Future<void> updateProfile({
-    String? fullName,
-    String? aboutMe,
-    String? imageUrl,
+    required String fullName, // ✅ Required field
+    required String aboutMe, // ✅ Required field
+    File? imageFile, // ✅ Optional image file
   }) async {
     emit(ProfileUpdating());
 
     try {
       print('🔄 ProfileCubit: Starting profile update...');
+      print('📝 Full Name: $fullName');
+      print('📝 About Me: $aboutMe');
+      print('📷 Image File: ${imageFile?.path ?? 'No image'}');
 
       // Update via API only
       final response = await _profileRepository.updateProfile(
         fullName: fullName,
         aboutMe: aboutMe,
-        imageUrl: imageUrl,
+        imageFile: imageFile,
       );
 
-      if (response.status && response.data != null) {
+      if (response.status) {
         print('✅ ProfileCubit: Profile updated successfully via API');
-        // Refresh profile data from API
+        print('📦 Update response: ${response.msg}');
+        // Refresh profile data from API to get updated info
         await getProfile();
       } else {
-        print('❌ ProfileCubit: API update failed');
+        print('❌ ProfileCubit: API update failed: ${response.msg}');
         emit(ProfileError('Failed to update profile: ${response.msg}'));
       }
     } catch (e) {

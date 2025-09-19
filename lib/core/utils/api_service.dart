@@ -362,4 +362,46 @@ class ApiService {
       }
     }
   }
+
+  // Multipart form data with optional file upload
+  Future<ApiResponse<T>> postMultipartForm<T>(
+    String path, {
+    required Map<String, String> fields,
+    File? file,
+    String? fileFieldName,
+    T Function(Map<String, dynamic>)? fromJson,
+  }) async {
+    try {
+      print('📤 Posting multipart form data to: $path');
+      print('📝 Fields: $fields');
+      print('📷 File: ${file?.path ?? 'No file'}');
+
+      // Create FormData for multipart upload
+      Map<String, dynamic> formDataMap = {...fields};
+
+      if (file != null && fileFieldName != null) {
+        formDataMap[fileFieldName] = await MultipartFile.fromFile(
+          file.path,
+          filename: file.path.split('/').last,
+        );
+      }
+
+      FormData formData = FormData.fromMap(formDataMap);
+
+      final response = await _dio.post(
+        path,
+        data: formData,
+        options: Options(headers: {'Content-Type': 'multipart/form-data'}),
+      );
+
+      print('✅ Multipart form data posted successfully');
+      return ApiResponse.fromJson(response.data, fromJson);
+    } on DioException catch (e) {
+      if (e.error is ApiError) {
+        throw e.error as ApiError;
+      } else {
+        throw _handleError(e);
+      }
+    }
+  }
 }

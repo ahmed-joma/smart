@@ -30,31 +30,32 @@ class ProfileRepository {
   }
 
   // Update user profile
-  Future<ApiResponse<UserProfile>> updateProfile({
-    String? fullName,
-    String? aboutMe,
-    String? imageUrl,
+  Future<ApiResponse<Map<String, dynamic>>> updateProfile({
+    required String fullName, // ✅ Required field
+    required String aboutMe, // ✅ Required field
+    File? imageFile, // ✅ Optional image file
   }) async {
     try {
       print('🔍 Updating user profile...');
+      print('📝 Full Name: $fullName');
+      print('📝 About Me: $aboutMe');
+      print('📷 Image File: ${imageFile?.path ?? 'No image'}');
 
       // Ensure token is loaded before making the request
       await _apiService.loadToken();
 
-      final data = <String, dynamic>{};
-      if (fullName != null) data['full_name'] = fullName;
-      if (aboutMe != null) data['about_me'] = aboutMe;
-      if (imageUrl != null) data['image_url'] = imageUrl;
-
-      print('📦 Update data: $data');
-
-      final response = await _apiService.put<UserProfile>(
-        ApiConstants.updateProfile,
-        data: data,
-        fromJson: (json) => UserProfile.fromJson(json),
-      );
+      // Use multipart form data as required by API
+      final response = await _apiService
+          .postMultipartForm<Map<String, dynamic>>(
+            ApiConstants.profile, // POST /profile (not /profile/update)
+            fields: {'full_name': fullName, 'about_me': aboutMe},
+            file: imageFile,
+            fileFieldName: 'image',
+            fromJson: (json) => json, // Just return the JSON as-is
+          );
 
       print('✅ Profile updated successfully');
+      print('📦 Response: ${response.data}');
       return response;
     } catch (e) {
       print('❌ Error updating profile: $e');
