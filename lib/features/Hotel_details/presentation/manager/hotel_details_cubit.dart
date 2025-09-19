@@ -2,6 +2,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
 import '../../data/models/hotel_details_model.dart';
 import '../../data/repos/hotel_repository.dart';
+import '../../../../core/utils/repositories/favorite_repository.dart';
 
 // States
 abstract class HotelDetailsState extends Equatable {
@@ -36,8 +37,10 @@ final class HotelDetailsError extends HotelDetailsState {
 // Cubit
 class HotelDetailsCubit extends Cubit<HotelDetailsState> {
   final HotelRepository _hotelRepository;
+  final FavoriteRepository _favoriteRepository;
 
-  HotelDetailsCubit(this._hotelRepository) : super(HotelDetailsInitial());
+  HotelDetailsCubit(this._hotelRepository, this._favoriteRepository)
+    : super(HotelDetailsInitial());
 
   Future<void> getHotelDetails(int hotelId) async {
     print('🏨 HotelDetailsCubit: Loading hotel details for ID: $hotelId');
@@ -59,12 +62,26 @@ class HotelDetailsCubit extends Cubit<HotelDetailsState> {
   }
 
   Future<void> toggleFavorite(int hotelId) async {
-    // TODO: Implement favorite toggle API call
     print('💖 HotelDetailsCubit: Toggle favorite for hotel ID: $hotelId');
 
-    // For now, just refresh the data
-    // In a real implementation, you would call an API to update favorite status
-    // and then refresh the data
-    await refreshHotelDetails(hotelId);
+    try {
+      final response = await _favoriteRepository.toggleHotelFavorite(hotelId);
+
+      if (response.status && response.data != null) {
+        final isFavorite = response.data!['is_favorite'] as bool;
+        print(
+          '✅ HotelDetailsCubit: Favorite toggled successfully. Is favorite: $isFavorite',
+        );
+
+        // Refresh hotel details to get updated favorite status
+        await refreshHotelDetails(hotelId);
+      } else {
+        print('❌ HotelDetailsCubit: Failed to toggle favorite');
+        emit(HotelDetailsError('Failed to update favorite status'));
+      }
+    } catch (e) {
+      print('❌ HotelDetailsCubit: Error toggling favorite: $e');
+      emit(HotelDetailsError('Failed to update favorite: ${e.toString()}'));
+    }
   }
 }

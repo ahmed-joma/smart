@@ -5,6 +5,10 @@ import 'package:go_router/go_router.dart';
 import 'package:smartshop_map/shared/themes/app_colors.dart';
 import '../../manager/saved_items_cubit.dart';
 import '../../../data/models/saved_item_model.dart';
+import '../../../../Profile/presentation/manager/profile_cubit.dart';
+import '../../../../../core/utils/cubits/favorite_cubit.dart';
+import '../../../../../core/utils/cubits/favorite_state.dart';
+import '../../../../../core/utils/models/profile_models.dart';
 
 class SectionSavedItems extends StatefulWidget {
   const SectionSavedItems({super.key});
@@ -30,8 +34,8 @@ class _SectionSavedItemsState extends State<SectionSavedItems>
 
     // Load saved items when widget initializes
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<SavedItemsCubit>().loadSavedEvents();
-      context.read<SavedItemsCubit>().loadSavedHotels();
+      // Refresh profile to get updated favorites from API
+      context.read<ProfileCubit>().getProfile();
     });
   }
 
@@ -43,25 +47,58 @@ class _SectionSavedItemsState extends State<SectionSavedItems>
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<SavedItemsCubit, SavedItemsState>(
-      listener: (context, state) {
-        if (state is SaveSuccess) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(state.message),
-              backgroundColor: Colors.green,
-            ),
-          );
-        } else if (state is RemoveSuccess) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(state.message), backgroundColor: Colors.red),
-          );
-        } else if (state is SavedItemsError) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(state.message), backgroundColor: Colors.red),
-          );
-        }
-      },
+    return MultiBlocListener(
+      listeners: [
+        BlocListener<SavedItemsCubit, SavedItemsState>(
+          listener: (context, state) {
+            if (state is SaveSuccess) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(state.message),
+                  backgroundColor: Colors.green,
+                ),
+              );
+            } else if (state is RemoveSuccess) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(state.message),
+                  backgroundColor: Colors.red,
+                ),
+              );
+            } else if (state is SavedItemsError) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(state.message),
+                  backgroundColor: Colors.red,
+                ),
+              );
+            }
+          },
+        ),
+        BlocListener<FavoriteCubit, FavoriteState>(
+          listener: (context, state) {
+            if (state is FavoriteSuccess) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(state.message),
+                  backgroundColor: Colors.green,
+                  duration: const Duration(seconds: 2),
+                ),
+              );
+              // Refresh profile to get updated favorites
+              context.read<ProfileCubit>().getProfile();
+            } else if (state is FavoriteError) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(state.message),
+                  backgroundColor: Colors.red,
+                  duration: const Duration(seconds: 3),
+                ),
+              );
+            }
+          },
+        ),
+      ],
       child: Container(
         margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
         child: Column(
@@ -185,12 +222,13 @@ class _SectionSavedItemsState extends State<SectionSavedItems>
   }
 
   Widget _buildEventsList() {
-    return BlocBuilder<SavedItemsCubit, SavedItemsState>(
+    return BlocBuilder<ProfileCubit, ProfileState>(
       builder: (context, state) {
-        if (state is SavedItemsLoading) {
+        if (state is ProfileLoading) {
           return const Center(child: CircularProgressIndicator());
-        } else if (state is SavedEventsLoaded) {
-          if (state.events.isEmpty) {
+        } else if (state is ProfileSuccess) {
+          final favoriteEvents = state.data.favorites.events;
+          if (favoriteEvents.isEmpty) {
             return _buildEmptyState(
               'No saved events',
               'assets/images/events.svg',
@@ -199,13 +237,13 @@ class _SectionSavedItemsState extends State<SectionSavedItems>
           return ListView.builder(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
-            itemCount: state.events.length,
+            itemCount: favoriteEvents.length,
             itemBuilder: (context, index) {
-              final event = state.events[index];
-              return _buildEventCard(event);
+              final event = favoriteEvents[index];
+              return _buildFavoriteEventCard(event);
             },
           );
-        } else if (state is SavedItemsError) {
+        } else if (state is ProfileError) {
           return Center(
             child: Text(
               state.message,
@@ -219,12 +257,13 @@ class _SectionSavedItemsState extends State<SectionSavedItems>
   }
 
   Widget _buildHotelsList() {
-    return BlocBuilder<SavedItemsCubit, SavedItemsState>(
+    return BlocBuilder<ProfileCubit, ProfileState>(
       builder: (context, state) {
-        if (state is SavedItemsLoading) {
+        if (state is ProfileLoading) {
           return const Center(child: CircularProgressIndicator());
-        } else if (state is SavedHotelsLoaded) {
-          if (state.hotels.isEmpty) {
+        } else if (state is ProfileSuccess) {
+          final favoriteHotels = state.data.favorites.hotels;
+          if (favoriteHotels.isEmpty) {
             return _buildEmptyState(
               'No saved hotels',
               'assets/images/hotel.svg',
@@ -233,13 +272,13 @@ class _SectionSavedItemsState extends State<SectionSavedItems>
           return ListView.builder(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
-            itemCount: state.hotels.length,
+            itemCount: favoriteHotels.length,
             itemBuilder: (context, index) {
-              final hotel = state.hotels[index];
-              return _buildHotelCard(hotel);
+              final hotel = favoriteHotels[index];
+              return _buildFavoriteHotelCard(hotel);
             },
           );
-        } else if (state is SavedItemsError) {
+        } else if (state is ProfileError) {
           return Center(
             child: Text(
               state.message,
@@ -249,6 +288,327 @@ class _SectionSavedItemsState extends State<SectionSavedItems>
         }
         return _buildEmptyState('No saved hotels', 'assets/images/hotel.svg');
       },
+    );
+  }
+
+  // New methods for API favorites
+  Widget _buildFavoriteEventCard(FavoriteEvent event) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(16),
+          onTap: () {
+            // Navigate to event details
+            final eventData = {
+              'id': event.id,
+              'title': event.title,
+              'city': event.city,
+              'venue': event.venue,
+              'start_at': event.startAt,
+              'end_at': event.endAt,
+              'price': event.price,
+              'event_status': event.eventStatus,
+              'image_url': event.imageUrl,
+            };
+            context.push('/eventDetailsView', extra: eventData);
+          },
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              children: [
+                // Event Image
+                Container(
+                  width: 80,
+                  height: 80,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(12),
+                    color: AppColors.primary.withOpacity(0.1),
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: event.imageUrl.isNotEmpty
+                        ? Image.network(
+                            event.imageUrl,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) {
+                              return Container(
+                                decoration: BoxDecoration(
+                                  color: AppColors.primary.withOpacity(0.1),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Icon(
+                                  Icons.event,
+                                  color: AppColors.primary,
+                                  size: 30,
+                                ),
+                              );
+                            },
+                          )
+                        : Icon(Icons.event, color: AppColors.primary, size: 30),
+                  ),
+                ),
+
+                const SizedBox(width: 16),
+
+                // Event Details
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        event.title,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          fontFamily: 'Inter',
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 6),
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.location_on,
+                            size: 14,
+                            color: Colors.grey.shade600,
+                          ),
+                          const SizedBox(width: 4),
+                          Expanded(
+                            child: Text(
+                              '${event.city}, ${event.venue}',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.grey.shade600,
+                                fontFamily: 'Inter',
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 6),
+                      Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color: AppColors.primary.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Text(
+                              event.eventStatus,
+                              style: TextStyle(
+                                fontSize: 10,
+                                color: AppColors.primary,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ),
+                          const Spacer(),
+                          Text(
+                            'SR ${event.price}',
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.primary,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+
+                // Remove Button
+                IconButton(
+                  onPressed: () {
+                    _removeFavoriteEvent(event.id);
+                  },
+                  icon: Icon(
+                    Icons.bookmark_remove,
+                    color: Colors.red.shade400,
+                    size: 24,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFavoriteHotelCard(FavoriteHotel hotel) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(16),
+          onTap: () {
+            // Navigate to hotel details
+            final hotelData = {
+              'id': hotel.id,
+              'title': hotel.name,
+              'city': hotel.city,
+              'venue': hotel.venue,
+              'price_per_night': hotel.pricePerNight,
+              'rate': hotel.rate,
+              'cover_url': hotel.coverUrl,
+              'services': hotel.services,
+            };
+            context.push('/hotelDetailsView', extra: hotelData);
+          },
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              children: [
+                // Hotel Image
+                Container(
+                  width: 80,
+                  height: 80,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(12),
+                    color: AppColors.primary.withOpacity(0.1),
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: hotel.coverUrl.isNotEmpty
+                        ? Image.network(
+                            hotel.coverUrl,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) {
+                              return Container(
+                                decoration: BoxDecoration(
+                                  color: AppColors.primary.withOpacity(0.1),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Icon(
+                                  Icons.hotel,
+                                  color: AppColors.primary,
+                                  size: 30,
+                                ),
+                              );
+                            },
+                          )
+                        : Icon(Icons.hotel, color: AppColors.primary, size: 30),
+                  ),
+                ),
+
+                const SizedBox(width: 16),
+
+                // Hotel Details
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        hotel.name,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          fontFamily: 'Inter',
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 6),
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.location_on,
+                            size: 14,
+                            color: Colors.grey.shade600,
+                          ),
+                          const SizedBox(width: 4),
+                          Expanded(
+                            child: Text(
+                              '${hotel.city}, ${hotel.venue}',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.grey.shade600,
+                                fontFamily: 'Inter',
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 6),
+                      Row(
+                        children: [
+                          Row(
+                            children: List.generate(5, (index) {
+                              return Icon(
+                                index < hotel.rate
+                                    ? Icons.star
+                                    : Icons.star_border,
+                                size: 14,
+                                color: Colors.amber,
+                              );
+                            }),
+                          ),
+                          const Spacer(),
+                          Text(
+                            'SR ${hotel.pricePerNight}/night',
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.primary,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+
+                // Remove Button
+                IconButton(
+                  onPressed: () {
+                    _removeFavoriteHotel(hotel.id);
+                  },
+                  icon: Icon(
+                    Icons.bookmark_remove,
+                    color: Colors.red.shade400,
+                    size: 24,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 
@@ -637,5 +997,14 @@ class _SectionSavedItemsState extends State<SectionSavedItems>
 
   void _removeSavedHotel(String hotelId) {
     context.read<SavedItemsCubit>().removeSavedHotel(hotelId);
+  }
+
+  // New methods for API favorites
+  void _removeFavoriteEvent(int eventId) {
+    context.read<FavoriteCubit>().toggleEventFavorite(eventId);
+  }
+
+  void _removeFavoriteHotel(int hotelId) {
+    context.read<FavoriteCubit>().toggleHotelFavorite(hotelId);
   }
 }

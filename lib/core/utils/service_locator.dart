@@ -41,7 +41,7 @@ Future<void> initServiceLocator() async {
   sl.registerLazySingleton<hotel_details.HotelRepository>(
     () => hotel_details.HotelRepositoryImpl(),
   );
-  sl.registerLazySingleton(() => FavoriteRepository());
+  sl.registerLazySingleton(() => FavoriteRepository(sl<ApiService>()));
 
   // Initialize services
   await sl<TokenManager>().initialize();

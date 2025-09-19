@@ -5,6 +5,8 @@ import '../manager/hotel_cubit.dart';
 import '../manager/hotel_details_cubit.dart';
 import '../../data/repos/hotel_repository.dart' as hotel_repo;
 import '../../../../core/utils/service_locator.dart';
+import '../../../../core/utils/cubits/favorite_cubit.dart';
+import '../../../../core/utils/repositories/favorite_repository.dart';
 
 class HotelDetailsView extends StatelessWidget {
   final Map<String, dynamic>? hotelData;
@@ -31,8 +33,13 @@ class HotelDetailsView extends StatelessWidget {
           create: (context) => HotelCubit(hotel_repo.HotelRepositoryImpl()),
         ),
         BlocProvider(
-          create: (context) =>
-              HotelDetailsCubit(sl<hotel_repo.HotelRepository>()),
+          create: (context) => HotelDetailsCubit(
+            sl<hotel_repo.HotelRepository>(),
+            sl<FavoriteRepository>(),
+          ),
+        ),
+        BlocProvider(
+          create: (context) => FavoriteCubit(sl<FavoriteRepository>()),
         ),
       ],
       child: Scaffold(

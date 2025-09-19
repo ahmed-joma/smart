@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../../shared/shared.dart';
 import '../../../../../shared/widgets/interactive_bookmark.dart';
 import '../../../data/models/home_models.dart';
+import '../../../../../core/utils/cubits/favorite_cubit.dart';
 
 class SectionUpcomingEvents extends StatefulWidget {
   final List<HomeEvent> events;
@@ -164,6 +166,9 @@ class _SectionUpcomingEventsState extends State<SectionUpcomingEvents> {
                       isSaved: _savedEvents[event.id] ?? event.isFavorite,
                       size: 28,
                       onPressed: () {
+                        context.read<FavoriteCubit>().toggleEventFavorite(
+                          event.id,
+                        );
                         setState(() {
                           _savedEvents[event.id] =
                               !(_savedEvents[event.id] ?? event.isFavorite);

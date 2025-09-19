@@ -5,6 +5,8 @@ import 'widgets/Event_Details_body.dart';
 import '../manager/event_details_cubit.dart';
 import '../../data/repos/event_repository.dart' as event_repo;
 import '../../../../../core/utils/service_locator.dart';
+import '../../../../core/utils/cubits/favorite_cubit.dart';
+import '../../../../core/utils/repositories/favorite_repository.dart';
 
 class EventDetailsView extends StatelessWidget {
   final Map<String, dynamic>? eventData;
@@ -23,8 +25,18 @@ class EventDetailsView extends StatelessWidget {
       }
     }
 
-    return BlocProvider(
-      create: (context) => EventDetailsCubit(sl<event_repo.EventRepository>()),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(
+          create: (context) => EventDetailsCubit(
+            sl<event_repo.EventRepository>(),
+            sl<FavoriteRepository>(),
+          ),
+        ),
+        BlocProvider(
+          create: (context) => FavoriteCubit(sl<FavoriteRepository>()),
+        ),
+      ],
       child: Scaffold(
         body: EventDetailsBody(eventData: eventData, eventId: eventId),
       ),

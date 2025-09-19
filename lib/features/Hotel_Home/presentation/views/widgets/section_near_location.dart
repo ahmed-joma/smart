@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../../shared/widgets/interactive_bookmark.dart';
 import '../../../data/models/hotel_models.dart';
+import '../../../../../core/utils/cubits/favorite_cubit.dart';
 
 class SectionNearLocation extends StatefulWidget {
   final List<Hotel> hotels;
@@ -14,12 +16,8 @@ class SectionNearLocation extends StatefulWidget {
 
 class _SectionNearLocationState extends State<SectionNearLocation> {
   void _toggleFavorite(int hotelId) {
-    // TODO: Implement API call to toggle favorite
     print('🏨 Toggle favorite for hotel ID: $hotelId');
-    setState(() {
-      // For now, just trigger a rebuild
-      // In a real implementation, you would update the hotel's favorite status
-    });
+    context.read<FavoriteCubit>().toggleHotelFavorite(hotelId);
   }
 
   @override

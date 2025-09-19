@@ -1,90 +1,60 @@
 import '../api_service.dart';
-import '../constants/api_constants.dart';
 import '../models/api_response.dart';
-import '../models/favorite_models.dart';
-import '../models/api_error.dart';
+import '../constants/api_constants.dart';
 
 class FavoriteRepository {
-  final ApiService _apiService = ApiService();
+  final ApiService _apiService;
 
-  // Update Favorite (Toggle)
-  Future<ApiResponse<FavoriteResponse>> updateFavorite(
-    FavoriteRequest request,
-  ) async {
+  FavoriteRepository(this._apiService);
+
+  /// Toggle favorite status for an item (Hotel or Event)
+  /// favoritable_type: "App\\Models\\Hotel" or "App\\Models\\Event"
+  /// favoritable_id: ID of the hotel or event
+  Future<ApiResponse<Map<String, dynamic>>> toggleFavorite({
+    required String
+    favoriteType, // "App\\Models\\Hotel" or "App\\Models\\Event"
+    required int favoriteId,
+  }) async {
     try {
-      return await _apiService.post<FavoriteResponse>(
-        ApiConstants.favoriteUpdate,
-        data: request.toJson(),
-        fromJson: (json) => FavoriteResponse.fromJson(json),
+      print(
+        '🔄 FavoriteRepository: Toggling favorite for $favoriteType ID: $favoriteId',
       );
-    } on ApiError catch (e) {
-      throw e;
+
+      final response = await _apiService
+          .postMultipartForm<Map<String, dynamic>>(
+            ApiConstants.favoriteUpdate,
+            fields: {
+              'favoritable_type': favoriteType,
+              'favoritable_id': favoriteId.toString(),
+            },
+            fromJson: (json) => json, // Return raw JSON response
+          );
+
+      print('✅ FavoriteRepository: Toggle favorite response: ${response.data}');
+      return response;
     } catch (e) {
-      throw ApiError.fromException(e);
+      print('❌ FavoriteRepository: Error toggling favorite: $e');
+      rethrow;
     }
   }
 
-  // Add Event to Favorites
-  Future<ApiResponse<FavoriteResponse>> addEventToFavorites(int eventId) async {
-    try {
-      final request = FavoriteRequest(
-        favoritableType: 'App\\Models\\Event',
-        favoritableId: eventId,
-      );
-      return await updateFavorite(request);
-    } on ApiError catch (e) {
-      throw e;
-    } catch (e) {
-      throw ApiError.fromException(e);
-    }
-  }
-
-  // Add Hotel to Favorites
-  Future<ApiResponse<FavoriteResponse>> addHotelToFavorites(int hotelId) async {
-    try {
-      final request = FavoriteRequest(
-        favoritableType: 'App\\Models\\Hotel',
-        favoritableId: hotelId,
-      );
-      return await updateFavorite(request);
-    } on ApiError catch (e) {
-      throw e;
-    } catch (e) {
-      throw ApiError.fromException(e);
-    }
-  }
-
-  // Remove Event from Favorites
-  Future<ApiResponse<FavoriteResponse>> removeEventFromFavorites(
-    int eventId,
-  ) async {
-    try {
-      final request = FavoriteRequest(
-        favoritableType: 'App\\Models\\Event',
-        favoritableId: eventId,
-      );
-      return await updateFavorite(request);
-    } on ApiError catch (e) {
-      throw e;
-    } catch (e) {
-      throw ApiError.fromException(e);
-    }
-  }
-
-  // Remove Hotel from Favorites
-  Future<ApiResponse<FavoriteResponse>> removeHotelFromFavorites(
+  /// Helper method to toggle hotel favorite
+  Future<ApiResponse<Map<String, dynamic>>> toggleHotelFavorite(
     int hotelId,
   ) async {
-    try {
-      final request = FavoriteRequest(
-        favoritableType: 'App\\Models\\Hotel',
-        favoritableId: hotelId,
-      );
-      return await updateFavorite(request);
-    } on ApiError catch (e) {
-      throw e;
-    } catch (e) {
-      throw ApiError.fromException(e);
-    }
+    return await toggleFavorite(
+      favoriteType: 'App\\Models\\Hotel',
+      favoriteId: hotelId,
+    );
+  }
+
+  /// Helper method to toggle event favorite
+  Future<ApiResponse<Map<String, dynamic>>> toggleEventFavorite(
+    int eventId,
+  ) async {
+    return await toggleFavorite(
+      favoriteType: 'App\\Models\\Event',
+      favoriteId: eventId,
+    );
   }
 }

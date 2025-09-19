@@ -3,8 +3,15 @@ import '../../../../../../shared/shared.dart';
 
 class SectionEventHeader extends StatelessWidget {
   final String? imageUrl;
+  final bool? isFavorite;
+  final VoidCallback? onFavoriteToggle;
 
-  const SectionEventHeader({super.key, this.imageUrl});
+  const SectionEventHeader({
+    super.key,
+    this.imageUrl,
+    this.isFavorite,
+    this.onFavoriteToggle,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -31,14 +38,21 @@ class SectionEventHeader extends StatelessWidget {
         ),
       ),
       actions: [
-        Container(
-          margin: const EdgeInsets.only(right: 16),
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: const Color(0x4DFFFFFF), // 30% شفافية
-            borderRadius: BorderRadius.circular(15.31),
+        GestureDetector(
+          onTap: onFavoriteToggle,
+          child: Container(
+            margin: const EdgeInsets.only(right: 16),
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: const Color(0x4DFFFFFF), // 30% شفافية
+              borderRadius: BorderRadius.circular(15.31),
+            ),
+            child: Icon(
+              isFavorite == true ? Icons.bookmark : Icons.bookmark_border,
+              color: isFavorite == true ? Colors.red : Colors.white,
+              size: 24,
+            ),
           ),
-          child: const Icon(Icons.bookmark, color: Colors.white, size: 24),
         ),
       ],
       flexibleSpace: FlexibleSpaceBar(
