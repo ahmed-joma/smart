@@ -5,34 +5,51 @@ import '../models/filter_models.dart';
 import '../models/api_error.dart';
 
 class FilterRepository {
-  final ApiService _apiService = ApiService();
+  final ApiService _apiService;
 
-  // Get Filter Details (Cities and Tags)
+  FilterRepository(this._apiService);
+
+  // Get Filter Details (Cities and Tags) - API Integration
   Future<ApiResponse<FilterDetails>> getDetails() async {
     try {
-      return await _apiService.get<FilterDetails>(
+      print('🔍 FilterRepository: Fetching filter details (cities & tags)...');
+
+      final response = await _apiService.get<FilterDetails>(
         ApiConstants.getDetails,
         fromJson: (json) => FilterDetails.fromJson(json),
       );
-    } on ApiError catch (e) {
-      throw e;
+
+      print('✅ FilterRepository: Filter details fetched successfully');
+      print('🏙️ Cities count: ${response.data?.cities.length ?? 0}');
+      print('🏷️ Tags count: ${response.data?.tags.length ?? 0}');
+
+      return response;
     } catch (e) {
-      throw ApiError.fromException(e);
+      print('❌ FilterRepository: Error fetching filter details: $e');
+      rethrow;
     }
   }
 
-  // Filter Events and Hotels
+  // Filter Events and Hotels - API Integration
   Future<ApiResponse<FilterResult>> filter(FilterRequest request) async {
     try {
-      return await _apiService.get<FilterResult>(
+      print('🔍 FilterRepository: Applying filters...');
+      print('📊 Filter params: ${request.toJson()}');
+
+      final response = await _apiService.get<FilterResult>(
         ApiConstants.filter,
         queryParameters: request.toQueryParams(),
         fromJson: (json) => FilterResult.fromJson(json),
       );
-    } on ApiError catch (e) {
-      throw e;
+
+      print('✅ FilterRepository: Filter applied successfully');
+      print('🎉 Events found: ${response.data?.events.length ?? 0}');
+      print('🏨 Hotels found: ${response.data?.hotels.length ?? 0}');
+
+      return response;
     } catch (e) {
-      throw ApiError.fromException(e);
+      print('❌ FilterRepository: Error applying filter: $e');
+      rethrow;
     }
   }
 

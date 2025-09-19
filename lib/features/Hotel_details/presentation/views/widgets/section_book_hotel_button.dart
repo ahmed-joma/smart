@@ -4,7 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../../../shared/shared.dart';
 import '../../../../../../core/utils/cubits/order_cubit.dart';
 import '../../../../../../core/utils/models/order_models.dart';
-import '../../../../../../core/utils/service_locator.dart';
+
 
 class SectionBookHotelButton extends StatelessWidget {
   final double totalPrice;

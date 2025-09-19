@@ -8,7 +8,6 @@ import 'repositories/home_repository.dart';
 import '../../features/Event_Details/data/repos/event_repository.dart'
     as event_details;
 import 'repositories/order_repository.dart';
-import 'repositories/hotel_repository.dart';
 import 'repositories/favorite_repository.dart';
 import '../../features/Hotel_Home/data/repos/Hotel_Home_repo.dart';
 import '../../features/Hotel_Home/data/repos/Hotel_Home_repo_imple.dart';
@@ -29,14 +28,13 @@ Future<void> initServiceLocator() async {
 
   // Repository
   sl.registerLazySingleton(() => AuthRepository());
-  sl.registerLazySingleton(() => FilterRepository());
+  sl.registerLazySingleton(() => FilterRepository(sl<ApiService>()));
   sl.registerLazySingleton(() => ProfileRepository());
   sl.registerLazySingleton(() => HomeRepository());
   sl.registerLazySingleton<event_details.EventRepository>(
     () => event_details.EventRepositoryImpl(),
   );
   sl.registerLazySingleton(() => OrderRepository());
-  sl.registerLazySingleton(() => HotelRepository());
   sl.registerLazySingleton<HotelHomeRepo>(() => HotelHomeRepoImpl(sl()));
   sl.registerLazySingleton<hotel_details.HotelRepository>(
     () => hotel_details.HotelRepositoryImpl(),

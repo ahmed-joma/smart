@@ -51,7 +51,7 @@ class SectionSearchBar extends StatelessWidget {
                 context: context,
                 isScrollControlled: true,
                 backgroundColor: Colors.transparent,
-                builder: (context) => const FilterPage(),
+                builder: (bottomSheetContext) => const FilterPage(),
               );
             },
             child: Container(

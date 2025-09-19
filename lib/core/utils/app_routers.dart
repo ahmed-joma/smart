@@ -116,7 +116,10 @@ class AppRouters {
       ),
       GoRoute(
         path: kSearchView,
-        builder: (context, state) => const SearchView(),
+        builder: (context, state) {
+          final searchData = state.extra as Map<String, dynamic>?;
+          return SearchView(searchData: searchData);
+        },
       ),
       GoRoute(
         path: kEventDetailsView,
