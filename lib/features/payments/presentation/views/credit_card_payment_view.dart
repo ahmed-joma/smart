@@ -1,15 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../../core/utils/cubits/order_cubit.dart';
+import '../../../../core/utils/models/order_models.dart';
 
 class CreditCardPaymentView extends StatefulWidget {
   final String totalAmount;
   final String orderTitle;
+  final Map<String, dynamic>? orderData;
 
   const CreditCardPaymentView({
     super.key,
     required this.totalAmount,
     required this.orderTitle,
+    this.orderData,
   });
 
   @override
@@ -81,7 +86,19 @@ class _CreditCardPaymentViewState extends State<CreditCardPaymentView>
   void _processPayment() {
     setState(() => _isProcessing = true);
 
-    // محاكاة عملية الدفع
+    // Check if API integration is enabled
+    final orderData = widget.orderData;
+    final isApiIntegration = orderData?['api_integration'] == true;
+
+    if (isApiIntegration) {
+      _processAPIPayment();
+    } else {
+      _processSimulatedPayment();
+    }
+  }
+
+  void _processSimulatedPayment() {
+    // محاكاة عملية الدفع (الطريقة القديمة)
     Future.delayed(const Duration(seconds: 3), () {
       setState(() => _isProcessing = false);
 
@@ -106,6 +123,101 @@ class _CreditCardPaymentViewState extends State<CreditCardPaymentView>
       // العودة للصفحة السابقة
       context.pop();
     });
+  }
+
+  void _processAPIPayment() {
+    final orderData = widget.orderData!;
+    final orderType = orderData['type']; // 'hotel' or 'event'
+
+    print('🚀 Processing API payment for $orderType');
+    print('📦 Order data: $orderData');
+
+    // Create OrderCubit for API integration
+    final orderCubit = OrderCubit();
+
+    // Show API processing dialog
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext dialogContext) {
+        return BlocProvider.value(
+          value: orderCubit,
+          child: BlocConsumer<OrderCubit, OrderState>(
+            listener: (context, state) {
+              if (state is OrderSuccess) {
+                Navigator.of(dialogContext).pop(); // Close loading dialog
+                setState(() => _isProcessing = false);
+
+                if (orderType == 'hotel' && state.orderData.booking != null) {
+                  _showHotelBookingSuccess(state.orderData.booking!);
+                } else if (orderType == 'event' &&
+                    state.orderData.ticket != null) {
+                  _showEventTicketSuccess(state.orderData.ticket!);
+                } else {
+                  _showGenericSuccess();
+                }
+              } else if (state is OrderError) {
+                Navigator.of(dialogContext).pop(); // Close loading dialog
+                setState(() => _isProcessing = false);
+
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Payment failed: ${state.message}'),
+                    backgroundColor: Colors.red,
+                  ),
+                );
+              }
+            },
+            builder: (context, state) {
+              return AlertDialog(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                content: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const CircularProgressIndicator(),
+                    const SizedBox(height: 16),
+                    Text(
+                      state is OrderLoading
+                          ? 'Processing your payment...'
+                          : 'Initializing payment...',
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+        );
+      },
+    );
+
+    // Start API order process
+    if (orderType == 'hotel') {
+      final hotelId = orderData['hotel_id'] as int?;
+      final totalPrice = orderData['total_price'] as double?;
+
+      if (hotelId != null && totalPrice != null) {
+        orderCubit.bookHotel(hotelId: hotelId, totalPrice: totalPrice);
+      } else {
+        setState(() => _isProcessing = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Missing hotel booking data')),
+        );
+      }
+    } else if (orderType == 'event') {
+      final eventId = orderData['event_id'] as int?;
+      final totalPrice = orderData['total_price'] as double?;
+
+      if (eventId != null && totalPrice != null) {
+        orderCubit.buyEventTicket(eventId: eventId, totalPrice: totalPrice);
+      } else {
+        setState(() => _isProcessing = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Missing event ticket data')),
+        );
+      }
+    }
   }
 
   @override
@@ -652,5 +764,31 @@ class _CreditCardPaymentViewState extends State<CreditCardPaymentView>
               ),
       ),
     );
+  }
+
+  void _showHotelBookingSuccess(HotelBooking booking) {
+    // Navigate to a success page showing the hotel booking details
+    context.go(
+      '/bookingSuccess',
+      extra: {'type': 'hotel', 'booking': booking.toJson()},
+    );
+  }
+
+  void _showEventTicketSuccess(EventTicket ticket) {
+    // Navigate to a success page showing the event ticket details
+    context.go(
+      '/ticketSuccess',
+      extra: {'type': 'event', 'ticket': ticket.toJson()},
+    );
+  }
+
+  void _showGenericSuccess() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Payment successful!'),
+        backgroundColor: Colors.green,
+      ),
+    );
+    context.pop();
   }
 }
