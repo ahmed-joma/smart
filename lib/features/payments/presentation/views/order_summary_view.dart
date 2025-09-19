@@ -169,7 +169,8 @@ class _OrderSummaryViewState extends State<OrderSummaryView> {
                           ? _currentTotalPrice
                           : (orderData['total'] ?? 'SR 138'),
                       'orderTitle': orderData['title'] ?? 'Order',
-                      'orderData': orderData,
+                      'orderData':
+                          orderData, // Pass full order data with API info
                     },
                   );
                   break;
@@ -181,7 +182,8 @@ class _OrderSummaryViewState extends State<OrderSummaryView> {
                           ? _currentTotalPrice
                           : (orderData['total'] ?? 'SR 138'),
                       'orderTitle': orderData['title'] ?? 'Order',
-                      'orderData': orderData,
+                      'orderData':
+                          orderData, // Pass full order data with API info
                     },
                   );
                   break;
@@ -193,7 +195,8 @@ class _OrderSummaryViewState extends State<OrderSummaryView> {
                           ? _currentTotalPrice
                           : (orderData['total'] ?? 'SR 138'),
                       'orderTitle': orderData['title'] ?? 'Order',
-                      'orderData': orderData,
+                      'orderData':
+                          orderData, // Pass full order data with API info
                     },
                   );
                   break;
@@ -205,7 +208,8 @@ class _OrderSummaryViewState extends State<OrderSummaryView> {
                           ? _currentTotalPrice
                           : (orderData['total'] ?? 'SR 138'),
                       'orderTitle': orderData['title'] ?? 'Order',
-                      'orderData': orderData,
+                      'orderData':
+                          orderData, // Pass full order data with API info
                     },
                   );
                   break;
@@ -218,7 +222,8 @@ class _OrderSummaryViewState extends State<OrderSummaryView> {
                           ? _currentTotalPrice
                           : (orderData['total'] ?? 'SR 138'),
                       'orderTitle': orderData['title'] ?? 'Order',
-                      'orderData': orderData,
+                      'orderData':
+                          orderData, // Pass full order data with API info
                     },
                   );
               }

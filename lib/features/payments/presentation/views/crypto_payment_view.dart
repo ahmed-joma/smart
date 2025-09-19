@@ -1,14 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../../core/utils/cubits/order_cubit.dart';
 
 class CryptoPaymentView extends StatefulWidget {
   final String totalAmount;
   final String orderTitle;
+  final Map<String, dynamic>? orderData;
 
   const CryptoPaymentView({
     super.key,
     required this.totalAmount,
     required this.orderTitle,
+    this.orderData,
   });
 
   @override
@@ -111,7 +115,19 @@ class _CryptoPaymentViewState extends State<CryptoPaymentView>
   void _processPayment() {
     setState(() => _isProcessing = true);
 
-    // محاكاة عملية الدفع
+    // Check if API integration is enabled
+    final orderData = widget.orderData;
+    final isApiIntegration = orderData?['api_integration'] == true;
+
+    if (isApiIntegration) {
+      _processAPIPayment();
+    } else {
+      _processSimulatedPayment();
+    }
+  }
+
+  void _processSimulatedPayment() {
+    // محاكاة عملية الدفع (الطريقة القديمة)
     Future.delayed(const Duration(seconds: 3), () {
       setState(() => _isProcessing = false);
 
@@ -121,7 +137,7 @@ class _CryptoPaymentViewState extends State<CryptoPaymentView>
             children: [
               const Icon(Icons.check_circle, color: Colors.white, size: 20),
               const SizedBox(width: 12),
-              const Text('Payment successful!'),
+              const Text('Crypto payment successful!'),
             ],
           ),
           backgroundColor: Colors.green,
@@ -136,6 +152,91 @@ class _CryptoPaymentViewState extends State<CryptoPaymentView>
       // العودة للصفحة السابقة
       context.pop();
     });
+  }
+
+  void _processAPIPayment() {
+    final orderData = widget.orderData!;
+    final orderType = orderData['type'];
+
+    print('🚀 Crypto: Processing API payment for $orderType');
+
+    final orderCubit = OrderCubit();
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext dialogContext) {
+        return BlocProvider.value(
+          value: orderCubit,
+          child: BlocConsumer<OrderCubit, OrderState>(
+            listener: (context, state) {
+              if (state is OrderSuccess) {
+                Navigator.of(dialogContext).pop();
+                setState(() => _isProcessing = false);
+
+                if (orderType == 'hotel' && state.orderData.booking != null) {
+                  context.go(
+                    '/bookingSuccess',
+                    extra: {
+                      'type': 'hotel',
+                      'booking': state.orderData.booking!.toJson(),
+                    },
+                  );
+                } else if (orderType == 'event' &&
+                    state.orderData.ticket != null) {
+                  context.go(
+                    '/ticketSuccess',
+                    extra: {
+                      'type': 'event',
+                      'ticket': state.orderData.ticket!.toJson(),
+                    },
+                  );
+                }
+              } else if (state is OrderError) {
+                Navigator.of(dialogContext).pop();
+                setState(() => _isProcessing = false);
+
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Payment failed: ${state.message}'),
+                    backgroundColor: Colors.red,
+                  ),
+                );
+              }
+            },
+            builder: (context, state) {
+              return AlertDialog(
+                content: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const CircularProgressIndicator(),
+                    const SizedBox(height: 16),
+                    const Text('Processing Crypto payment...'),
+                  ],
+                ),
+              );
+            },
+          ),
+        );
+      },
+    );
+
+    // Start API order process
+    if (orderType == 'hotel') {
+      final hotelId = orderData['hotel_id'] as int?;
+      final totalPrice = orderData['total_price'] as double?;
+
+      if (hotelId != null && totalPrice != null) {
+        orderCubit.bookHotel(hotelId: hotelId, totalPrice: totalPrice);
+      }
+    } else if (orderType == 'event') {
+      final eventId = orderData['event_id'] as int?;
+      final totalPrice = orderData['total_price'] as double?;
+
+      if (eventId != null && totalPrice != null) {
+        orderCubit.buyEventTicket(eventId: eventId, totalPrice: totalPrice);
+      }
+    }
   }
 
   double _getCryptoAmount() {

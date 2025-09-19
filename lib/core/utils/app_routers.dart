@@ -177,6 +177,7 @@ class AppRouters {
           return PayPalPaymentView(
             totalAmount: paymentData?['totalAmount'] ?? 'SR 138',
             orderTitle: paymentData?['orderTitle'] ?? 'Order',
+            orderData: paymentData?['orderData'] as Map<String, dynamic>?,
           );
         },
       ),
@@ -187,6 +188,7 @@ class AppRouters {
           return CryptoPaymentView(
             totalAmount: paymentData?['totalAmount'] ?? 'SR 138',
             orderTitle: paymentData?['orderTitle'] ?? 'Order',
+            orderData: paymentData?['orderData'] as Map<String, dynamic>?,
           );
         },
       ),
@@ -197,6 +199,7 @@ class AppRouters {
           return ApplePayPaymentView(
             totalAmount: paymentData?['totalAmount'] ?? 'SR 138',
             orderTitle: paymentData?['orderTitle'] ?? 'Order',
+            orderData: paymentData?['orderData'] as Map<String, dynamic>?,
           );
         },
       ),
@@ -207,6 +210,7 @@ class AppRouters {
           return GooglePayPaymentView(
             totalAmount: paymentData?['totalAmount'] ?? 'SR 138',
             orderTitle: paymentData?['orderTitle'] ?? 'Order',
+            orderData: paymentData?['orderData'] as Map<String, dynamic>?,
           );
         },
       ),
