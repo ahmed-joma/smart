@@ -32,9 +32,25 @@ class SectionHotelInfoCard extends StatelessWidget {
                 color: const Color(0xFF7F2F3A),
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: const Center(
-                child: Icon(Icons.hotel, color: Colors.white, size: 40),
-              ),
+              child: hotelData?['image']?.toString().startsWith('http') == true
+                  ? Image.network(
+                      hotelData!['image'],
+                      width: 80,
+                      height: 80,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) {
+                        return const Center(
+                          child: Icon(
+                            Icons.hotel,
+                            color: Colors.white,
+                            size: 40,
+                          ),
+                        );
+                      },
+                    )
+                  : const Center(
+                      child: Icon(Icons.hotel, color: Colors.white, size: 40),
+                    ),
             ),
           ),
           const SizedBox(width: 16),
@@ -62,9 +78,9 @@ class SectionHotelInfoCard extends StatelessWidget {
                   children: [
                     const Icon(Icons.star, color: Colors.amber, size: 16),
                     const SizedBox(width: 4),
-                    const Text(
-                      '4.8',
-                      style: TextStyle(
+                    Text(
+                      '${hotelData?['rating']?.toString() ?? '4.8'}',
+                      style: const TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
                       ),
@@ -79,6 +95,37 @@ class SectionHotelInfoCard extends StatelessWidget {
                     ),
                   ],
                 ),
+                const SizedBox(height: 6),
+                // Services/Amenities
+                if (hotelData?['services'] != null &&
+                    hotelData!['services'] is List) ...[
+                  Wrap(
+                    spacing: 4,
+                    children: (hotelData!['services'] as List)
+                        .take(3)
+                        .map<Widget>((service) {
+                          return Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 6,
+                              vertical: 2,
+                            ),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF7F2F3A).withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Text(
+                              service.toString(),
+                              style: const TextStyle(
+                                fontSize: 10,
+                                color: Color(0xFF7F2F3A),
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          );
+                        })
+                        .toList(),
+                  ),
+                ],
               ],
             ),
           ),

@@ -409,25 +409,31 @@ class SectionBookHotelButton extends StatelessWidget {
       return;
     }
 
-    // Navigate to payment page with hotel booking data
+    // Navigate to payment page with hotel booking data (using real API data)
     final orderData = {
+      // Real API data
       'title': hotelData?['title'] ?? 'Four Points by Sheraton',
-      'date': hotelData?['date'] ?? 'Nov 15 2025',
-      'location':
-          '${hotelData?['location'] ?? 'Jeddah Corniche'}, ${hotelData?['country'] ?? 'KSA'}',
+      'date': 'Check-in: ${hotelData?['date'] ?? 'Nov 15 2025'}',
+      'location': hotelData?['location'] ?? 'Jeddah Corniche, KSA',
+      'image': hotelData?['image'] ?? 'assets/images/hotel.svg',
+      // Pricing
       'price': 'SR ${totalPrice.toStringAsFixed(1)}',
       'tax': 'SR 18',
       'total': 'SR ${totalWithTax.toStringAsFixed(1)}',
       'type': 'hotel',
-      'image': hotelData?['image'] ?? 'assets/images/hotel.svg',
+      // Booking details
       'rooms': selectedRooms,
       'beds': selectedBeds,
       'guests': selectedGuests,
       'nights': selectedNights,
-      // Add API integration data
+      // API integration data
       'hotel_id': hotelId,
       'total_price': totalWithTax,
-      'api_integration': true, // Flag to indicate API integration
+      'api_integration': true,
+      // Additional API data for display
+      'city': hotelData?['city'],
+      'rate': hotelData?['rating'],
+      'services': hotelData?['services'],
     };
 
     context.push('/orderSummary', extra: orderData);

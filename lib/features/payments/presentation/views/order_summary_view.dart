@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
 import 'widgets/section_order_header.dart';
 import 'widgets/section_payment_button.dart';
 import 'widgets/section_coupon_discount.dart';
@@ -15,34 +17,53 @@ class OrderSummaryView extends StatefulWidget {
 }
 
 class _OrderSummaryViewState extends State<OrderSummaryView> {
-  bool _isCardSelected = true;
-  bool _isCryptoSelected = false;
   String _selectedPaymentMethod = 'card';
   String _currentTotalPrice = '';
   double _originalPrice = 0.0;
+  String _userEmail = 'guest@example.com';
+  String _userName = 'Guest User';
 
   @override
-  Widget build(BuildContext context) {
-    // Default data if no orderData provided
-    final orderData =
-        widget.orderData ??
-        {
-          'title': 'City Walk event',
-          'date': '14 December, 2025',
-          'location': 'Jeddah King Abdulaziz Road',
-          'image': 'assets/images/citywaikevents.svg',
-          'price': 'SR 120',
-          'tax': 'SR 18',
-          'total': 'SR 138',
-          'type': 'event', // 'event' or 'hotel'
-        };
+  void initState() {
+    super.initState();
+    _loadPriceData();
+    _loadUserData();
+  }
 
+  void _loadPriceData() {
     // تحويل السعر إلى رقم
-    if (_originalPrice == 0.0) {
+    final orderData = widget.orderData;
+    if (orderData != null) {
       final priceStr = orderData['total'] ?? 'SR 138';
       _originalPrice = double.tryParse(priceStr.replaceAll('SR ', '')) ?? 138.0;
       _currentTotalPrice = orderData['total'] ?? 'SR 138';
     }
+  }
+
+  Future<void> _loadUserData() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final userDataString = prefs.getString('user_data');
+
+      if (userDataString != null) {
+        final userData = json.decode(userDataString);
+        setState(() {
+          _userEmail = userData['email']?.toString() ?? 'guest@example.com';
+          _userName = userData['full_name']?.toString() ?? 'Guest User';
+        });
+        print('✅ User data loaded: $_userName ($_userEmail)');
+      } else {
+        print('⚠️ No user data found in SharedPreferences');
+      }
+    } catch (e) {
+      print('❌ Error loading user data: $e');
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // Get order data (use passed data directly - it already contains API data when needed)
+    final orderData = widget.orderData ?? _getDefaultOrderData();
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -82,7 +103,7 @@ class _OrderSummaryViewState extends State<OrderSummaryView> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Enhanced Order Header
+                  // Enhanced Order Header (shows API data)
                   SectionOrderHeader(orderData: orderData),
                   const SizedBox(height: 24),
 
@@ -135,7 +156,8 @@ class _OrderSummaryViewState extends State<OrderSummaryView> {
                           ? _currentTotalPrice
                           : (orderData['total'] ?? 'SR 138'),
                       'orderTitle': orderData['title'] ?? 'Order',
-                      'orderData': orderData, // Pass full order data
+                      'orderData':
+                          orderData, // Pass full order data with API info
                     },
                   );
                   break;
@@ -147,6 +169,7 @@ class _OrderSummaryViewState extends State<OrderSummaryView> {
                           ? _currentTotalPrice
                           : (orderData['total'] ?? 'SR 138'),
                       'orderTitle': orderData['title'] ?? 'Order',
+                      'orderData': orderData,
                     },
                   );
                   break;
@@ -158,6 +181,7 @@ class _OrderSummaryViewState extends State<OrderSummaryView> {
                           ? _currentTotalPrice
                           : (orderData['total'] ?? 'SR 138'),
                       'orderTitle': orderData['title'] ?? 'Order',
+                      'orderData': orderData,
                     },
                   );
                   break;
@@ -169,6 +193,7 @@ class _OrderSummaryViewState extends State<OrderSummaryView> {
                           ? _currentTotalPrice
                           : (orderData['total'] ?? 'SR 138'),
                       'orderTitle': orderData['title'] ?? 'Order',
+                      'orderData': orderData,
                     },
                   );
                   break;
@@ -180,6 +205,7 @@ class _OrderSummaryViewState extends State<OrderSummaryView> {
                           ? _currentTotalPrice
                           : (orderData['total'] ?? 'SR 138'),
                       'orderTitle': orderData['title'] ?? 'Order',
+                      'orderData': orderData,
                     },
                   );
                   break;
@@ -192,6 +218,7 @@ class _OrderSummaryViewState extends State<OrderSummaryView> {
                           ? _currentTotalPrice
                           : (orderData['total'] ?? 'SR 138'),
                       'orderTitle': orderData['title'] ?? 'Order',
+                      'orderData': orderData,
                     },
                   );
               }
@@ -202,7 +229,22 @@ class _OrderSummaryViewState extends State<OrderSummaryView> {
     );
   }
 
+  Map<String, dynamic> _getDefaultOrderData() {
+    return {
+      'title': 'City Walk event',
+      'date': '14 December, 2025',
+      'location': 'Jeddah King Abdulaziz Road',
+      'image': 'assets/images/citywaikevents.svg',
+      'price': 'SR 120',
+      'tax': 'SR 18',
+      'total': 'SR 138',
+      'type': 'event',
+    };
+  }
+
   Widget _buildRecipientsSection() {
+    // Use real user data loaded from SharedPreferences
+
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -243,29 +285,53 @@ class _OrderSummaryViewState extends State<OrderSummaryView> {
             ],
           ),
           const SizedBox(height: 8),
-          const Text(
-            'Add other recipients of this event ticket',
-            style: TextStyle(fontSize: 14, color: Colors.grey),
+          Text(
+            widget.orderData?['type'] == 'hotel'
+                ? 'Primary guest for this hotel booking'
+                : 'Add other recipients of this event ticket',
+            style: const TextStyle(fontSize: 14, color: Colors.grey),
           ),
           const SizedBox(height: 16),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              Row(
                 children: [
-                  const Text(
-                    'ahlam',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.black,
+                  // User Avatar
+                  Container(
+                    width: 50,
+                    height: 50,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF7F2F3A).withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Icon(
+                      Icons.person,
+                      color: const Color(0xFF7F2F3A),
+                      size: 24,
                     ),
                   ),
-                  const SizedBox(height: 4),
-                  const Text(
-                    'aham@gmail.com',
-                    style: TextStyle(fontSize: 14, color: Colors.grey),
+                  const SizedBox(width: 12),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        _userName,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.black,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        _userEmail,
+                        style: const TextStyle(
+                          fontSize: 14,
+                          color: Colors.grey,
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
@@ -313,7 +379,7 @@ class _OrderSummaryViewState extends State<OrderSummaryView> {
           ),
           const SizedBox(height: 16),
           _buildPriceRow(
-            'Secluded Ticket Type',
+            orderData['type'] == 'hotel' ? 'Hotel Booking' : 'Event Ticket',
             orderData['price'] ?? 'SR 120',
           ),
           const SizedBox(height: 8),

@@ -210,19 +210,25 @@ class SectionBuyTicketButton extends StatelessWidget {
     }
 
     final orderData = {
+      // Real API data
       'title': eventData?['title'] ?? 'City Walk event',
       'date': eventData?['date'] ?? '14 December, 2025',
-      'location':
-          '${eventData?['location'] ?? 'Jeddah King Abdulaziz Road'}, ${eventData?['country'] ?? 'KSA'}',
+      'location': eventData?['location'] ?? 'Jeddah King Abdulaziz Road, KSA',
+      'image': eventData?['image'] ?? 'assets/images/citywaikevents.svg',
+      // Pricing
       'price': price,
       'tax': 'SR 18',
       'total': 'SR ${totalPrice.toStringAsFixed(1)}',
       'type': 'event',
-      'image': eventData?['image'] ?? 'assets/images/citywaikevents.svg',
-      // Add API integration data
+      // API integration data
       'event_id': eventId,
       'total_price': totalPrice,
-      'api_integration': true, // Flag to indicate API integration
+      'api_integration': true,
+      // Additional API data for display
+      'organizer': eventData?['organizer'],
+      'about': eventData?['about'],
+      'attendees': eventData?['attendees'],
+      'city': eventData?['city'],
     };
     context.push('/orderSummary', extra: orderData);
   }

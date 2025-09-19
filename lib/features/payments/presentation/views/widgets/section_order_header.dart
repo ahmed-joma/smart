@@ -103,9 +103,40 @@ class _SectionOrderHeaderState extends State<SectionOrderHeader>
                       ),
                     ],
                   ),
-                  child: widget.orderData['type'] == 'hotel'
-                      ? const Icon(Icons.hotel, color: Colors.white, size: 45)
-                      : const Icon(Icons.event, color: Colors.white, size: 45),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(16),
+                    child:
+                        widget.orderData['image']?.toString().startsWith(
+                              'http',
+                            ) ==
+                            true
+                        ? Image.network(
+                            widget.orderData['image'],
+                            width: 90,
+                            height: 90,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) {
+                              return widget.orderData['type'] == 'hotel'
+                                  ? const Icon(
+                                      Icons.hotel,
+                                      color: Colors.white,
+                                      size: 45,
+                                    )
+                                  : const Icon(
+                                      Icons.event,
+                                      color: Colors.white,
+                                      size: 45,
+                                    );
+                            },
+                          )
+                        : widget.orderData['type'] == 'hotel'
+                        ? const Icon(Icons.hotel, color: Colors.white, size: 45)
+                        : const Icon(
+                            Icons.event,
+                            color: Colors.white,
+                            size: 45,
+                          ),
+                  ),
                 ),
               ),
               const SizedBox(width: 20),
