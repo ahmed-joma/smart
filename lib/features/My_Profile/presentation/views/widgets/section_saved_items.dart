@@ -965,6 +965,19 @@ class _SectionSavedItemsState extends State<SectionSavedItems>
               Colors.grey.shade400,
               BlendMode.srcIn,
             ),
+            placeholderBuilder: (context) => Container(
+              width: 80,
+              height: 80,
+              decoration: BoxDecoration(
+                color: Colors.grey.shade100,
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Icon(
+                imagePath.contains('hotel') ? Icons.hotel : Icons.event,
+                size: 40,
+                color: Colors.grey.shade400,
+              ),
+            ),
           ),
           const SizedBox(height: 16),
           Text(

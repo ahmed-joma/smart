@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter/services.dart';
 import '../../../../../shared/shared.dart';
-import 'package:smartshop_map/shared/widgets/custom_snackbar.dart';
 import '../../manager/password_reset_cubit.dart';
 import 'section_header.dart';
 import 'section_instructions.dart';
@@ -217,6 +216,273 @@ class _RessetPasswordBodyState extends State<RessetPasswordBody> {
     }
   }
 
+  // دالة ذكية لمعالجة أخطاء إعادة تعيين كلمة المرور
+  void _handleResetPasswordError(String apiMessage) {
+    String title = '';
+    String message = '';
+    IconData icon = Icons.error;
+    Color color = Colors.red;
+
+    if (apiMessage.toLowerCase().contains('invalid code') ||
+        apiMessage.toLowerCase().contains('wrong code') ||
+        apiMessage.toLowerCase().contains('incorrect code')) {
+      title = '❌ Invalid Reset Code';
+      message =
+          'The reset code you entered is incorrect.\nPlease check and try again.';
+      icon = Icons.pin_outlined;
+    } else if (apiMessage.toLowerCase().contains('expired') ||
+        apiMessage.toLowerCase().contains('timeout')) {
+      title = '⏰ Code Expired';
+      message = 'The reset code has expired.\nPlease request a new code.';
+      icon = Icons.timer_off;
+      color = Colors.orange;
+    } else if (apiMessage.toLowerCase().contains('password') &&
+        (apiMessage.toLowerCase().contains('requirement') ||
+            apiMessage.toLowerCase().contains('weak') ||
+            apiMessage.toLowerCase().contains('invalid'))) {
+      title = '🔐 Weak Password';
+      message =
+          'Password does not meet requirements.\nPlease check the requirements below.';
+      icon = Icons.security;
+      color = Colors.orange;
+    } else if (apiMessage.toLowerCase().contains('email not found') ||
+        apiMessage.toLowerCase().contains('user not found')) {
+      title = '👤 Email Not Found';
+      message =
+          'No account found with this email.\nPlease check your email address.';
+      icon = Icons.person_search;
+      color = Colors.orange;
+    } else if (apiMessage.toLowerCase().contains('connection') ||
+        apiMessage.toLowerCase().contains('network')) {
+      title = '🌐 Connection Error';
+      message = 'Please check your internet connection\nand try again.';
+      icon = Icons.wifi_off;
+      color = Colors.blue;
+    } else {
+      title = '❌ Reset Failed';
+      message = 'Something went wrong.\nPlease try again.';
+      icon = Icons.error_outline;
+    }
+
+    _showErrorDialog(title, message, icon, color);
+  }
+
+  // دالة لمعالجة أخطاء إرسال الكود
+  void _handleSendCodeError(String apiMessage) {
+    String title = '';
+    String message = '';
+    IconData icon = Icons.error;
+    Color color = Colors.red;
+
+    if (apiMessage.toLowerCase().contains('too many requests') ||
+        apiMessage.toLowerCase().contains('rate limit')) {
+      title = '⏰ Too Many Requests';
+      message =
+          'You have requested too many codes.\nPlease wait before requesting again.';
+      icon = Icons.timer;
+      color = Colors.orange;
+    } else if (apiMessage.toLowerCase().contains('email not found')) {
+      title = '👤 Email Not Found';
+      message =
+          'No account found with this email.\nPlease check your email address.';
+      icon = Icons.person_search;
+      color = Colors.orange;
+    } else if (apiMessage.toLowerCase().contains('connection') ||
+        apiMessage.toLowerCase().contains('network')) {
+      title = '🌐 Connection Error';
+      message = 'Failed to send reset code.\nPlease check your connection.';
+      icon = Icons.wifi_off;
+      color = Colors.blue;
+    } else {
+      title = '❌ Failed to Send Code';
+      message = 'Could not send reset code.\nPlease try again later.';
+      icon = Icons.error_outline;
+    }
+
+    _showErrorDialog(title, message, icon, color);
+  }
+
+  // حوار مخصص للأخطاء
+  void _showErrorDialog(
+    String title,
+    String message,
+    IconData icon,
+    Color color,
+  ) {
+    showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (BuildContext context) {
+        return Dialog(
+          backgroundColor: Colors.transparent,
+          child: Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  blurRadius: 20,
+                  spreadRadius: 0,
+                ),
+              ],
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 60,
+                  height: 60,
+                  decoration: BoxDecoration(
+                    color: color.withOpacity(0.1),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(icon, size: 30, color: color),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                    fontFamily: 'Inter',
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  message,
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.grey.shade600,
+                    fontFamily: 'Inter',
+                    height: 1.4,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 20),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: color,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: const Text(
+                      'Try Again',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 16,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  // حوار النجاح
+  void _showSuccessDialog(
+    String title,
+    String message,
+    VoidCallback? onContinue,
+  ) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return Dialog(
+          backgroundColor: Colors.transparent,
+          child: Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  blurRadius: 20,
+                  spreadRadius: 0,
+                ),
+              ],
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 60,
+                  height: 60,
+                  decoration: BoxDecoration(
+                    color: Colors.green.withOpacity(0.1),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.check_circle,
+                    size: 30,
+                    color: Colors.green,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                    fontFamily: 'Inter',
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  message,
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.grey.shade600,
+                    fontFamily: 'Inter',
+                    height: 1.4,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 20),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: onContinue ?? () => Navigator.of(context).pop(),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.green,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: Text(
+                      onContinue != null ? 'Continue to Sign In' : 'OK',
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 16,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
@@ -224,56 +490,21 @@ class _RessetPasswordBodyState extends State<RessetPasswordBody> {
       child: BlocListener<PasswordResetCubit, PasswordResetState>(
         listener: (context, state) {
           if (state is ResetPasswordSuccess) {
-            // Show success notification
-            CustomSnackBar.showSuccess(
-              context: context,
-              message: 'Password reset successfully!',
-              duration: const Duration(seconds: 2),
+            _showSuccessDialog(
+              '🎉 Password Reset!',
+              'Your password has been reset successfully.\nYou can now sign in with your new password.',
+              () => context.go('/signInView'),
             );
-            // Navigate to sign in after showing notification
-            Future.delayed(const Duration(seconds: 2), () {
-              if (mounted) {
-                context.go('/signInView');
-              }
-            });
           } else if (state is ResetPasswordError) {
-            // Show error notification with debug info
-            print('❌ Reset Password Error: ${state.message}');
-            print('📧 Email used: $_userEmail');
-            print('🔢 Code used: $_verificationCode');
-
-            // Customize error message for better user experience
-            String userMessage = state.message;
-            if (state.message.contains('invalid') ||
-                state.message.contains('expired')) {
-              userMessage =
-                  'The reset code is invalid or has expired. Please request a new code.';
-            } else if (state.message.contains('email')) {
-              userMessage = 'Email not found. Please check your email address.';
-            } else if (state.message.contains('password')) {
-              userMessage =
-                  'Password requirements not met. Please check your password.';
-            }
-
-            CustomSnackBar.showError(
-              context: context,
-              message: userMessage,
-              duration: const Duration(seconds: 4),
-            );
+            _handleResetPasswordError(state.message);
           } else if (state is SendCodeSuccess) {
-            // Show success notification for resend
-            CustomSnackBar.showSuccess(
-              context: context,
-              message: 'Reset code sent again',
-              duration: const Duration(seconds: 2),
+            _showSuccessDialog(
+              '📧 Code Sent!',
+              'A new reset code has been sent to your email.\nPlease check your inbox.',
+              null,
             );
           } else if (state is SendCodeError) {
-            // Show error notification for resend
-            CustomSnackBar.showError(
-              context: context,
-              message: state.message,
-              duration: const Duration(seconds: 3),
-            );
+            _handleSendCodeError(state.message);
           }
         },
         child: Scaffold(

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:smartshop_map/shared/widgets/custom_snackbar.dart';
 import '../../manager/sign_up_cubit.dart';
 import 'section_header.dart';
 import 'section_form_fields.dart';
@@ -172,6 +171,361 @@ class _SignUpBodyState extends State<SignUpBody> {
     );
   }
 
+  // دالة ذكية لمعالجة أخطاء التسجيل
+  void _handleSignUpError(String apiMessage) {
+    String title = '';
+    String message = '';
+    IconData icon = Icons.error;
+    Color color = Colors.red;
+
+    if (apiMessage.toLowerCase().contains('email has already been taken') ||
+        apiMessage.toLowerCase().contains('email already exists')) {
+      title = '📧 Email Already Registered';
+      message =
+          'This email is already registered.\nWould you like to sign in instead?';
+      icon = Icons.email;
+      color = Colors.orange;
+
+      _showEmailExistsDialog();
+      return;
+    } else if (apiMessage.toLowerCase().contains('password') &&
+        (apiMessage.toLowerCase().contains('weak') ||
+            apiMessage.toLowerCase().contains('requirement') ||
+            apiMessage.toLowerCase().contains('invalid'))) {
+      title = '🔐 Weak Password';
+      message =
+          'Password does not meet requirements.\nPlease check the requirements below.';
+      icon = Icons.security;
+      color = Colors.orange;
+    } else if (apiMessage.toLowerCase().contains('name') ||
+        apiMessage.toLowerCase().contains('full name')) {
+      title = '👤 Invalid Name';
+      message =
+          'Please enter a valid full name.\nName should be at least 2 characters.';
+      icon = Icons.person_outline;
+      color = Colors.orange;
+    } else if (apiMessage.toLowerCase().contains('email') &&
+        apiMessage.toLowerCase().contains('invalid')) {
+      title = '📧 Invalid Email';
+      message = 'Please enter a valid email address\n(e.g., user@gmail.com)';
+      icon = Icons.email_outlined;
+      color = Colors.orange;
+    } else if (apiMessage.toLowerCase().contains('connection') ||
+        apiMessage.toLowerCase().contains('timeout') ||
+        apiMessage.toLowerCase().contains('network')) {
+      title = '🌐 Connection Error';
+      message = 'Please check your internet connection\nand try again.';
+      icon = Icons.wifi_off;
+      color = Colors.blue;
+    } else if (apiMessage.toLowerCase().contains('server error') ||
+        apiMessage.toLowerCase().contains('internal error')) {
+      title = '🛠️ Server Error';
+      message = 'Something went wrong on our end.\nPlease try again later.';
+      icon = Icons.build_circle_outlined;
+      color = Colors.purple;
+    } else {
+      title = '❌ Registration Failed';
+      message =
+          'Something went wrong during registration.\nPlease check your information and try again.';
+      icon = Icons.error_outline;
+    }
+
+    _showErrorDialog(title, message, icon, color);
+  }
+
+  // حوار مخصص للأخطاء
+  void _showErrorDialog(
+    String title,
+    String message,
+    IconData icon,
+    Color color,
+  ) {
+    showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (BuildContext context) {
+        return Dialog(
+          backgroundColor: Colors.transparent,
+          child: Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  blurRadius: 20,
+                  spreadRadius: 0,
+                ),
+              ],
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 60,
+                  height: 60,
+                  decoration: BoxDecoration(
+                    color: color.withOpacity(0.1),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(icon, size: 30, color: color),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                    fontFamily: 'Inter',
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  message,
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.grey.shade600,
+                    fontFamily: 'Inter',
+                    height: 1.4,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 20),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: color,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: const Text(
+                      'Try Again',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 16,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  // حوار خاص للإيميل المسجل مسبقاً
+  void _showEmailExistsDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (BuildContext context) {
+        return Dialog(
+          backgroundColor: Colors.transparent,
+          child: Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  blurRadius: 20,
+                  spreadRadius: 0,
+                ),
+              ],
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 60,
+                  height: 60,
+                  decoration: BoxDecoration(
+                    color: Colors.orange.withOpacity(0.1),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.person_pin,
+                    size: 30,
+                    color: Colors.orange,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                const Text(
+                  '📧 Email Already Registered',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                    fontFamily: 'Inter',
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  'This email is already registered.\nWould you like to sign in instead?',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.grey.shade600,
+                    fontFamily: 'Inter',
+                    height: 1.4,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 20),
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: () => Navigator.of(context).pop(),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: Colors.grey.shade600,
+                          side: BorderSide(color: Colors.grey.shade300),
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        child: const Text(
+                          'Cancel',
+                          style: TextStyle(fontWeight: FontWeight.w600),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                          context.go('/signInView');
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.orange,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        child: const Text(
+                          'Sign In',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 16,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  // حوار النجاح
+  void _showSuccessDialog(
+    String title,
+    String message,
+    VoidCallback? onContinue,
+  ) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return Dialog(
+          backgroundColor: Colors.transparent,
+          child: Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  blurRadius: 20,
+                  spreadRadius: 0,
+                ),
+              ],
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 60,
+                  height: 60,
+                  decoration: BoxDecoration(
+                    color: Colors.green.withOpacity(0.1),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.check_circle,
+                    size: 30,
+                    color: Colors.green,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                    fontFamily: 'Inter',
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  message,
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.grey.shade600,
+                    fontFamily: 'Inter',
+                    height: 1.4,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 20),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: onContinue ?? () => Navigator.of(context).pop(),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.green,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: Text(
+                      onContinue != null ? 'Continue to Verification' : 'OK',
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 16,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
@@ -179,50 +533,13 @@ class _SignUpBodyState extends State<SignUpBody> {
       child: BlocListener<SignUpCubit, SignUpState>(
         listener: (context, state) {
           if (state is SignUpSuccess) {
-            // Show success notification
-            CustomSnackBar.showSuccess(
-              context: context,
-              message:
-                  'Account created successfully! Please check your email for verification.',
-              duration: const Duration(seconds: 2),
+            _showSuccessDialog(
+              '🎉 Account Created!',
+              'Your account has been created successfully.\nPlease check your email for verification.',
+              () => context.go('/verificationView'),
             );
-
-            // Navigate to verification page after showing notification
-            Future.delayed(const Duration(seconds: 2), () {
-              if (mounted) {
-                context.go('/verificationView');
-              }
-            });
           } else if (state is SignUpError) {
-            // Show error notification with specific messages
-            String errorMessage = state.message;
-
-            // Customize error messages based on API response
-            if (state.message.contains('email has already been taken')) {
-              errorMessage =
-                  'This email is already registered. Please use a different email or sign in.';
-            } else if (state.message.contains('full name field is required')) {
-              errorMessage = 'Please enter your full name';
-            } else if (state.message.contains('email')) {
-              errorMessage =
-                  'Please enter a valid email address (e.g., user@gmail.com)';
-            } else if (state.message.contains('password')) {
-              errorMessage = 'Password must be at least 6 characters long';
-            } else if (state.message.contains('name')) {
-              errorMessage = 'Please enter your full name';
-            } else if (state.message.contains('Connection timeout')) {
-              errorMessage =
-                  'Connection timeout. Please check your internet connection.';
-            } else if (state.message.contains('Cannot connect')) {
-              errorMessage =
-                  'Cannot connect to server. Please check your internet connection.';
-            }
-
-            CustomSnackBar.showError(
-              context: context,
-              message: errorMessage,
-              duration: const Duration(seconds: 3),
-            );
+            _handleSignUpError(state.message);
           }
         },
         child: Scaffold(

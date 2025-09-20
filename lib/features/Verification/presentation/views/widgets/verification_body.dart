@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import '../../../../../shared/widgets/custom_snackbar.dart';
 import '../../manager/verification_cubit.dart';
 import 'section_header.dart';
 import 'section_email_info.dart';
@@ -106,6 +105,269 @@ class _VerificationBodyState extends State<VerificationBody> {
     }
   }
 
+  // دالة ذكية لمعالجة أخطاء التحقق
+  void _handleVerificationError(String apiMessage) {
+    String title = '';
+    String message = '';
+    IconData icon = Icons.error;
+    Color color = Colors.red;
+
+    if (apiMessage.toLowerCase().contains('invalid code') ||
+        apiMessage.toLowerCase().contains('wrong code') ||
+        apiMessage.toLowerCase().contains('incorrect code')) {
+      title = '❌ Invalid Code';
+      message =
+          'The verification code you entered is incorrect.\nPlease check and try again.';
+      icon = Icons.pin_outlined;
+    } else if (apiMessage.toLowerCase().contains('expired') ||
+        apiMessage.toLowerCase().contains('timeout')) {
+      title = '⏰ Code Expired';
+      message =
+          'The verification code has expired.\nPlease request a new code.';
+      icon = Icons.timer_off;
+      color = Colors.orange;
+    } else if (apiMessage.toLowerCase().contains('already verified')) {
+      title = '✅ Already Verified';
+      message = 'Your email is already verified.\nYou can proceed to login.';
+      icon = Icons.check_circle;
+      color = Colors.green;
+    } else if (apiMessage.toLowerCase().contains('too many attempts')) {
+      title = '🚫 Too Many Attempts';
+      message =
+          'Too many verification attempts.\nPlease wait before trying again.';
+      icon = Icons.block;
+      color = Colors.orange;
+    } else if (apiMessage.toLowerCase().contains('connection') ||
+        apiMessage.toLowerCase().contains('network')) {
+      title = '🌐 Connection Error';
+      message = 'Please check your internet connection\nand try again.';
+      icon = Icons.wifi_off;
+      color = Colors.blue;
+    } else {
+      title = '❌ Verification Failed';
+      message = 'Something went wrong during verification.\nPlease try again.';
+      icon = Icons.error_outline;
+    }
+
+    _showErrorDialog(title, message, icon, color);
+  }
+
+  // دالة لمعالجة أخطاء إعادة الإرسال
+  void _handleResendError(String apiMessage) {
+    String title = '';
+    String message = '';
+    IconData icon = Icons.error;
+    Color color = Colors.red;
+
+    if (apiMessage.toLowerCase().contains('too many requests') ||
+        apiMessage.toLowerCase().contains('rate limit')) {
+      title = '⏰ Too Many Requests';
+      message =
+          'You have requested too many codes.\nPlease wait before requesting again.';
+      icon = Icons.timer;
+      color = Colors.orange;
+    } else if (apiMessage.toLowerCase().contains('already verified')) {
+      title = '✅ Already Verified';
+      message = 'Your email is already verified.\nNo need to resend code.';
+      icon = Icons.check_circle;
+      color = Colors.green;
+    } else if (apiMessage.toLowerCase().contains('connection') ||
+        apiMessage.toLowerCase().contains('network')) {
+      title = '🌐 Connection Error';
+      message =
+          'Failed to send verification code.\nPlease check your connection.';
+      icon = Icons.wifi_off;
+      color = Colors.blue;
+    } else {
+      title = '❌ Failed to Send Code';
+      message = 'Could not send verification code.\nPlease try again later.';
+      icon = Icons.error_outline;
+    }
+
+    _showErrorDialog(title, message, icon, color);
+  }
+
+  // حوار مخصص للأخطاء
+  void _showErrorDialog(
+    String title,
+    String message,
+    IconData icon,
+    Color color,
+  ) {
+    showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (BuildContext context) {
+        return Dialog(
+          backgroundColor: Colors.transparent,
+          child: Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  blurRadius: 20,
+                  spreadRadius: 0,
+                ),
+              ],
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 60,
+                  height: 60,
+                  decoration: BoxDecoration(
+                    color: color.withOpacity(0.1),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(icon, size: 30, color: color),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                    fontFamily: 'Inter',
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  message,
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.grey.shade600,
+                    fontFamily: 'Inter',
+                    height: 1.4,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 20),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: color,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: const Text(
+                      'Try Again',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 16,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  // حوار النجاح
+  void _showSuccessDialog(
+    String title,
+    String message,
+    VoidCallback? onContinue,
+  ) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return Dialog(
+          backgroundColor: Colors.transparent,
+          child: Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  blurRadius: 20,
+                  spreadRadius: 0,
+                ),
+              ],
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 60,
+                  height: 60,
+                  decoration: BoxDecoration(
+                    color: Colors.green.withOpacity(0.1),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.check_circle,
+                    size: 30,
+                    color: Colors.green,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                    fontFamily: 'Inter',
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  message,
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.grey.shade600,
+                    fontFamily: 'Inter',
+                    height: 1.4,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 20),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: onContinue ?? () => Navigator.of(context).pop(),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.green,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: Text(
+                      onContinue != null ? 'Continue' : 'OK',
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 16,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
@@ -113,39 +375,21 @@ class _VerificationBodyState extends State<VerificationBody> {
       child: BlocListener<VerificationCubit, VerificationState>(
         listener: (context, state) {
           if (state is VerificationSuccess) {
-            // Show success notification
-            CustomSnackBar.showSuccess(
-              context: context,
-              message: 'Email verified successfully!',
-              duration: const Duration(seconds: 2),
+            _showSuccessDialog(
+              '🎉 Email Verified!',
+              'Your email has been verified successfully.\nWelcome to our platform!',
+              () => context.go('/homeView'),
             );
-            // Navigate to home page after showing notification
-            Future.delayed(const Duration(seconds: 2), () {
-              if (mounted) {
-                context.go('/homeView');
-              }
-            });
           } else if (state is VerificationError) {
-            // Show error notification
-            CustomSnackBar.showError(
-              context: context,
-              message: state.message,
-              duration: const Duration(seconds: 3),
-            );
+            _handleVerificationError(state.message);
           } else if (state is ResendCodeSuccess) {
-            // Show success notification for resend
-            CustomSnackBar.showSuccess(
-              context: context,
-              message: 'Verification code sent again',
-              duration: const Duration(seconds: 2),
+            _showSuccessDialog(
+              '📧 Code Sent!',
+              'A new verification code has been sent to your email.\nPlease check your inbox.',
+              null,
             );
           } else if (state is ResendCodeError) {
-            // Show error notification for resend
-            CustomSnackBar.showError(
-              context: context,
-              message: state.message,
-              duration: const Duration(seconds: 3),
-            );
+            _handleResendError(state.message);
           }
         },
         child: Scaffold(

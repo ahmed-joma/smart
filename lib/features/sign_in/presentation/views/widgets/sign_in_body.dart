@@ -56,6 +56,295 @@ class _SignInBodyState extends State<SignInBody> {
     });
   }
 
+  // دالة ذكية لمعالجة أخطاء تسجيل الدخول
+  void _handleSignInError(String apiMessage) {
+    String email = _emailController.text.trim();
+
+    String title = '';
+    String message = '';
+    IconData icon = Icons.error;
+    Color color = Colors.red;
+
+    // تحليل نوع الخطأ وإعطاء رسائل ذكية
+    if (apiMessage.toLowerCase().contains('invalid credentials') ||
+        apiMessage.toLowerCase().contains('unauthorized') ||
+        apiMessage.toLowerCase().contains('wrong password') ||
+        apiMessage.toLowerCase().contains('incorrect')) {
+      // التحقق من صحة الإيميل أولاً
+      if (!_isValidEmail(email)) {
+        title = '📧 Invalid Email Format';
+        message = 'Please enter a valid email address\n(e.g., user@gmail.com)';
+        icon = Icons.email_outlined;
+      } else {
+        title = '🔐 Login Failed';
+        message =
+            'Email or password is incorrect.\nPlease double-check your credentials.';
+        icon = Icons.lock_outline;
+      }
+    } else if (apiMessage.toLowerCase().contains('user not found') ||
+        apiMessage.toLowerCase().contains('email not found') ||
+        apiMessage.toLowerCase().contains('account not found')) {
+      title = '👤 Account Not Found';
+      message =
+          'No account found with this email.\nWould you like to create a new account?';
+      icon = Icons.person_search;
+      color = Colors.orange;
+
+      // إضافة زر للانتقال للتسجيل
+      _showAccountNotFoundDialog();
+      return;
+    } else if (apiMessage.toLowerCase().contains('email not verified') ||
+        apiMessage.toLowerCase().contains('account not verified')) {
+      title = '✉️ Email Not Verified';
+      message = 'Please check your email and verify your account first.';
+      icon = Icons.mark_email_unread;
+      color = Colors.orange;
+    } else if (apiMessage.toLowerCase().contains('account disabled') ||
+        apiMessage.toLowerCase().contains('account suspended')) {
+      title = '🚫 Account Suspended';
+      message =
+          'Your account has been suspended.\nPlease contact support for assistance.';
+      icon = Icons.block;
+    } else if (apiMessage.toLowerCase().contains('too many attempts') ||
+        apiMessage.toLowerCase().contains('rate limit')) {
+      title = '⏰ Too Many Attempts';
+      message =
+          'Too many login attempts.\nPlease wait a few minutes and try again.';
+      icon = Icons.timer;
+      color = Colors.orange;
+    } else if (apiMessage.toLowerCase().contains('connection') ||
+        apiMessage.toLowerCase().contains('timeout') ||
+        apiMessage.toLowerCase().contains('network')) {
+      title = '🌐 Connection Error';
+      message = 'Please check your internet connection\nand try again.';
+      icon = Icons.wifi_off;
+      color = Colors.blue;
+    } else if (apiMessage.toLowerCase().contains('server error') ||
+        apiMessage.toLowerCase().contains('internal error')) {
+      title = '🛠️ Server Error';
+      message = 'Something went wrong on our end.\nPlease try again later.';
+      icon = Icons.build_circle_outlined;
+      color = Colors.purple;
+    } else {
+      // خطأ عام
+      title = '❌ Login Failed';
+      message =
+          'Something went wrong.\nPlease check your credentials and try again.';
+      icon = Icons.error_outline;
+    }
+
+    // عرض الإشعار
+    _showCustomErrorDialog(title, message, icon, color);
+  }
+
+  // التحقق من صحة الإيميل
+  bool _isValidEmail(String email) {
+    return RegExp(
+      r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$',
+    ).hasMatch(email);
+  }
+
+  // حوار مخصص للأخطاء
+  void _showCustomErrorDialog(
+    String title,
+    String message,
+    IconData icon,
+    Color color,
+  ) {
+    showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (BuildContext context) {
+        return Dialog(
+          backgroundColor: Colors.transparent,
+          child: Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  blurRadius: 20,
+                  spreadRadius: 0,
+                ),
+              ],
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 60,
+                  height: 60,
+                  decoration: BoxDecoration(
+                    color: color.withOpacity(0.1),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(icon, size: 30, color: color),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                    fontFamily: 'Inter',
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  message,
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.grey.shade600,
+                    fontFamily: 'Inter',
+                    height: 1.4,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 20),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: color,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: const Text(
+                      'Try Again',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 16,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  // حوار خاص للحسابات غير الموجودة
+  void _showAccountNotFoundDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (BuildContext context) {
+        return Dialog(
+          backgroundColor: Colors.transparent,
+          child: Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  blurRadius: 20,
+                  spreadRadius: 0,
+                ),
+              ],
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 60,
+                  height: 60,
+                  decoration: BoxDecoration(
+                    color: Colors.orange.withOpacity(0.1),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.person_add,
+                    size: 30,
+                    color: Colors.orange,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                const Text(
+                  '👤 Account Not Found',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                    fontFamily: 'Inter',
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  'No account found with this email.\nWould you like to create a new account?',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.grey.shade600,
+                    fontFamily: 'Inter',
+                    height: 1.4,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 20),
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: () => Navigator.of(context).pop(),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: Colors.grey.shade600,
+                          side: BorderSide(color: Colors.grey.shade300),
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        child: const Text(
+                          'Cancel',
+                          style: TextStyle(fontWeight: FontWeight.w600),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                          context.go('/signUpView');
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.orange,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        child: const Text(
+                          'Sign Up',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 16,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   @override
   void dispose() {
     _emailController.dispose();
@@ -127,38 +416,7 @@ class _SignInBodyState extends State<SignInBody> {
               }
             });
           } else if (state is SignInError) {
-            // Show error notification with specific messages
-            String errorMessage = state.message;
-
-            // Customize error messages based on API response
-            if (state.message.contains('Invalid credentials')) {
-              // Check if it's email or password issue
-              String email = _emailController.text.trim();
-              if (email.contains('@gmail.com') ||
-                  email.contains('@yahoo.com') ||
-                  email.contains('@hotmail.com')) {
-                errorMessage = 'Incorrect password. Please try again.';
-              } else {
-                errorMessage = 'No account found for this email address.';
-              }
-            } else if (state.message.contains('email')) {
-              errorMessage =
-                  'Please enter a valid email address (e.g., user@gmail.com)';
-            } else if (state.message.contains('password')) {
-              errorMessage = 'Incorrect password. Please try again.';
-            } else if (state.message.contains('Connection timeout')) {
-              errorMessage =
-                  'Connection timeout. Please check your internet connection.';
-            } else if (state.message.contains('Cannot connect')) {
-              errorMessage =
-                  'Cannot connect to server. Please check your internet connection.';
-            }
-
-            CustomSnackBar.showError(
-              context: context,
-              message: errorMessage,
-              duration: const Duration(seconds: 3),
-            );
+            _handleSignInError(state.message);
           }
         },
         child: Scaffold(
