@@ -206,7 +206,7 @@ class _FilterBodyState extends State<FilterBody> {
                   _searchQuery = '';
                 });
               },
-              onApply: () {
+              onApply: () async {
                 // Create filter request with selected options
                 final filterRequest = FilterRequest(
                   q: _searchQuery.isNotEmpty ? _searchQuery : null,
@@ -218,14 +218,19 @@ class _FilterBodyState extends State<FilterBody> {
                   priceMax: _priceRange.end != 120 ? _priceRange.end : null,
                 );
 
-                // Apply filters and navigate to Choose City page with results
-                context.read<FilterCubit>().applyFilters(filterRequest);
+                // Apply filters and wait for completion
+                await context.read<FilterCubit>().applyFilters(filterRequest);
 
-                // Close filter bottom sheet
-                Navigator.of(context).pop();
+                // Close filter bottom sheet only if the context is still mounted
+                if (context.mounted) {
+                  Navigator.of(context).pop();
 
-                // Navigate to Choose City page (which will show results)
-                context.push('/searchView', extra: {'hasFilterResults': true});
+                  // Navigate to Choose City page (which will show results)
+                  context.push(
+                    '/searchView',
+                    extra: {'hasFilterResults': true},
+                  );
+                }
               },
             ),
           ],

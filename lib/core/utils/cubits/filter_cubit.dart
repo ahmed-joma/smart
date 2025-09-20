@@ -41,6 +41,11 @@ class FilterCubit extends Cubit<FilterState> {
   // Apply filters and get results
   Future<void> applyFilters(FilterRequest request) async {
     try {
+      if (isClosed) {
+        print('⚠️ FilterCubit: Cubit is closed, skipping filter application');
+        return;
+      }
+
       emit(FilterResultsLoading());
 
       print('🔍 FilterCubit: Applying filters...');
@@ -48,12 +53,32 @@ class FilterCubit extends Cubit<FilterState> {
 
       final response = await _filterRepository.filter(request);
 
+      if (isClosed) {
+        print(
+          '⚠️ FilterCubit: Cubit was closed during API call, skipping emit',
+        );
+        return;
+      }
+
       if (response.status && response.data != null) {
         print('✅ FilterCubit: Filter results loaded successfully');
         print(
           '🎉 Events: ${response.data!.events.length}, Hotels: ${response.data!.hotels.length}',
         );
-        emit(FilterResultsSuccess(response.data!, request));
+
+        // Check if we have any results
+        final totalResults =
+            response.data!.events.length + response.data!.hotels.length;
+        if (totalResults == 0) {
+          print('📭 FilterCubit: No results found for the applied filters');
+          emit(
+            FilterResultsError(
+              'No results found for the selected filters. Try adjusting your criteria.',
+            ),
+          );
+        } else {
+          emit(FilterResultsSuccess(response.data!, request));
+        }
       } else {
         print('❌ FilterCubit: Failed to apply filters');
         emit(
@@ -64,7 +89,9 @@ class FilterCubit extends Cubit<FilterState> {
       }
     } catch (e) {
       print('❌ FilterCubit: Error applying filters: $e');
-      emit(FilterResultsError('Failed to apply filters: ${e.toString()}'));
+      if (!isClosed) {
+        emit(FilterResultsError('Failed to apply filters: ${e.toString()}'));
+      }
     }
   }
 

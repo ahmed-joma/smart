@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../../shared/shared.dart';
 import '../../../../Filters/presentation/views/Filter_page.dart';
+import '../../../../../core/utils/service_locator.dart';
+import '../../../../../core/utils/cubits/filter_cubit.dart';
+import '../../../../../core/utils/cubits/favorite_cubit.dart';
 
 class SectionSearchBar extends StatelessWidget {
   final TextEditingController searchController;
@@ -51,7 +55,13 @@ class SectionSearchBar extends StatelessWidget {
                 context: context,
                 isScrollControlled: true,
                 backgroundColor: Colors.transparent,
-                builder: (bottomSheetContext) => const FilterPage(),
+                builder: (bottomSheetContext) => MultiBlocProvider(
+                  providers: [
+                    BlocProvider.value(value: sl<FilterCubit>()),
+                    BlocProvider.value(value: sl<FavoriteCubit>()),
+                  ],
+                  child: const FilterPage(),
+                ),
               );
             },
             child: Container(

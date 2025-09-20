@@ -95,6 +95,14 @@ class _SearchBodyState extends State<SearchBody> {
                             ),
                             textAlign: TextAlign.center,
                           ),
+                          const SizedBox(height: 24),
+                          ElevatedButton(
+                            onPressed: () {
+                              // Clear filters and return to city list
+                              context.read<FilterCubit>().clearFilters();
+                            },
+                            child: const Text('Clear Filters'),
+                          ),
                         ],
                       ),
                     ),
