@@ -25,8 +25,9 @@ class FilterResultsLoading extends FilterState {}
 class FilterResultsSuccess extends FilterState {
   final FilterResult results;
   final FilterRequest appliedFilters;
+  final FilterDetails? filterDetails; // Store filter details for editing
 
-  FilterResultsSuccess(this.results, this.appliedFilters);
+  FilterResultsSuccess(this.results, this.appliedFilters, [this.filterDetails]);
 }
 
 class FilterResultsError extends FilterState {

@@ -32,7 +32,7 @@ class SectionHeader extends StatelessWidget {
 
           // Title
           Text(
-            'Choose the city',
+            'Events & Hotels',
             style: TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.w600,

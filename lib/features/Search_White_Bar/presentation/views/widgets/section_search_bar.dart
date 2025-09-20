@@ -19,76 +19,69 @@ class SectionSearchBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-      child: Row(
-        children: [
-          // Search Bar
-          Expanded(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+      child: Center(
+        child: GestureDetector(
+          onTap: () {
+            showModalBottomSheet(
+              context: context,
+              isScrollControlled: true,
+              backgroundColor: Colors.transparent,
+              builder: (bottomSheetContext) => MultiBlocProvider(
+                providers: [
+                  BlocProvider.value(value: sl<FilterCubit>()),
+                  BlocProvider.value(value: sl<FavoriteCubit>()),
+                ],
+                child: const FilterPage(),
+              ),
+            );
+          },
+          child: Container(
+            height: 56,
+            constraints: const BoxConstraints(maxWidth: 180),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [AppColors.primary, AppColors.primary.withOpacity(0.8)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(28),
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.primary.withOpacity(0.3),
+                  blurRadius: 12,
+                  offset: const Offset(0, 6),
+                ),
+              ],
+            ),
             child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.search, color: AppColors.primary, size: 24),
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.2),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(Icons.tune, color: AppColors.onPrimary, size: 20),
+                ),
                 const SizedBox(width: 12),
-                Expanded(
-                  child: TextField(
-                    controller: searchController,
-                    focusNode: searchFocusNode,
-                    decoration: const InputDecoration(
-                      hintText: 'Search..',
-                      hintStyle: TextStyle(color: Colors.grey, fontSize: 20),
-                      border: InputBorder.none,
-                      enabledBorder: InputBorder.none,
-                      focusedBorder: InputBorder.none,
-                      contentPadding: EdgeInsets.zero,
+                Flexible(
+                  child: Text(
+                    'Find & Filter',
+                    style: TextStyle(
+                      color: AppColors.onPrimary,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      letterSpacing: 0.5,
                     ),
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
               ],
             ),
           ),
-
-          const SizedBox(width: 12),
-
-          // Filters Button
-          GestureDetector(
-            onTap: () {
-              showModalBottomSheet(
-                context: context,
-                isScrollControlled: true,
-                backgroundColor: Colors.transparent,
-                builder: (bottomSheetContext) => MultiBlocProvider(
-                  providers: [
-                    BlocProvider.value(value: sl<FilterCubit>()),
-                    BlocProvider.value(value: sl<FavoriteCubit>()),
-                  ],
-                  child: const FilterPage(),
-                ),
-              );
-            },
-            child: Container(
-              height: 40,
-              padding: const EdgeInsets.symmetric(horizontal: 12),
-              decoration: BoxDecoration(
-                color: AppColors.primary,
-                borderRadius: BorderRadius.circular(24),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(Icons.filter_list, color: AppColors.onPrimary, size: 20),
-                  const SizedBox(width: 8),
-                  Text(
-                    'Filters',
-                    style: TextStyle(
-                      color: AppColors.onPrimary,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w400,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }

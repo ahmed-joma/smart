@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
 import 'section_filter_header.dart';
 import 'section_category_filters.dart';
 import 'section_time_date_filters.dart';
@@ -49,12 +48,19 @@ class _FilterBodyState extends State<FilterBody> {
       builder: (context, state) {
         print('🎛️ FilterBody: Current state: ${state.runtimeType}');
 
-        // Load filter details if we're in initial state
+        // Load filter details only if we're in initial state
         if (state is FilterInitial) {
           print('🎛️ FilterBody: Initial state - calling getFilterDetails...');
           WidgetsBinding.instance.addPostFrameCallback((_) {
             context.read<FilterCubit>().getFilterDetails();
           });
+        }
+
+        // If we're in results state and this FilterBody is in a bottom sheet,
+        // we need to get filter details for editing
+        if (state is FilterResultsSuccess || state is FilterResultsError) {
+          // Only call getFilterDetails when the bottom sheet opens for editing
+          // We'll handle this differently - store the filter details in the success state
         }
 
         if (state is FilterDetailsLoading || state is FilterInitial) {
@@ -98,6 +104,21 @@ class _FilterBodyState extends State<FilterBody> {
           );
           availableTags = state.data.tags;
           availableCities = state.data.cities;
+        } else if (state is FilterResultsSuccess &&
+            state.filterDetails != null) {
+          print(
+            '✅ FilterBody: Using cached filter details from FilterResultsSuccess',
+          );
+          availableTags = state.filterDetails!.tags;
+          availableCities = state.filterDetails!.cities;
+        }
+
+        // If no filter details available, show loading
+        if (availableTags.isEmpty && availableCities.isEmpty) {
+          print(
+            '⏳ FilterBody: No filter details available, showing loading...',
+          );
+          return const Center(child: CircularProgressIndicator());
         }
 
         return Column(
@@ -219,17 +240,17 @@ class _FilterBodyState extends State<FilterBody> {
                 );
 
                 // Apply filters and wait for completion
+                print(
+                  '🎯 FilterBody: Applying filters with request: ${filterRequest.toJson()}',
+                );
                 await context.read<FilterCubit>().applyFilters(filterRequest);
+                print('✅ FilterBody: Apply filters completed');
 
                 // Close filter bottom sheet only if the context is still mounted
                 if (context.mounted) {
                   Navigator.of(context).pop();
-
-                  // Navigate to Choose City page (which will show results)
-                  context.push(
-                    '/searchView',
-                    extra: {'hasFilterResults': true},
-                  );
+                  // No need to navigate - the SearchView will automatically show results
+                  // because we're using the same FilterCubit singleton
                 }
               },
             ),

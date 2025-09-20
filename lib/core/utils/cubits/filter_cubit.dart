@@ -5,6 +5,7 @@ import 'filter_state.dart';
 
 class FilterCubit extends Cubit<FilterState> {
   final FilterRepository _filterRepository;
+  FilterDetails? _cachedFilterDetails; // Cache filter details
 
   FilterCubit(this._filterRepository) : super(FilterInitial());
 
@@ -19,6 +20,7 @@ class FilterCubit extends Cubit<FilterState> {
 
       if (response.status && response.data != null) {
         print('✅ FilterCubit: Filter details loaded successfully');
+        _cachedFilterDetails = response.data!; // Cache the details
         emit(FilterDetailsSuccess(response.data!));
       } else {
         print('❌ FilterCubit: Failed to load filter details');
@@ -77,7 +79,9 @@ class FilterCubit extends Cubit<FilterState> {
             ),
           );
         } else {
-          emit(FilterResultsSuccess(response.data!, request));
+          emit(
+            FilterResultsSuccess(response.data!, request, _cachedFilterDetails),
+          );
         }
       } else {
         print('❌ FilterCubit: Failed to apply filters');

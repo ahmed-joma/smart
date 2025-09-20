@@ -43,6 +43,82 @@ class _SectionFilterResultsState extends State<SectionFilterResults>
     super.dispose();
   }
 
+  void _showClearingMessage(BuildContext context) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return Dialog(
+          backgroundColor: Colors.transparent,
+          child: Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  blurRadius: 10,
+                  spreadRadius: 2,
+                ),
+              ],
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Animated check icon
+                TweenAnimationBuilder(
+                  duration: const Duration(milliseconds: 800),
+                  tween: Tween<double>(begin: 0, end: 1),
+                  builder: (context, double value, child) {
+                    return Transform.scale(
+                      scale: value,
+                      child: Container(
+                        width: 60,
+                        height: 60,
+                        decoration: BoxDecoration(
+                          color: Colors.green.withOpacity(0.1),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          Icons.cleaning_services,
+                          color: Colors.green,
+                          size: 30,
+                        ),
+                      ),
+                    );
+                  },
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  'Filters Cleared Successfully',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.grey.shade800,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Returning to main page...',
+                  style: TextStyle(fontSize: 14, color: Colors.grey.shade600),
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+
+    // Auto dismiss after delay
+    Future.delayed(const Duration(milliseconds: 1500), () {
+      if (context.mounted) {
+        Navigator.of(context).pop();
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final totalResults =
@@ -71,8 +147,13 @@ class _SectionFilterResultsState extends State<SectionFilterResults>
                   const Spacer(),
                   TextButton(
                     onPressed: () {
-                      // Clear filters and go back to city list
-                      context.read<FilterCubit>().clearFilters();
+                      // Show clearing message with animation
+                      _showClearingMessage(context);
+
+                      // Clear filters after a short delay
+                      Future.delayed(const Duration(milliseconds: 1500), () {
+                        context.read<FilterCubit>().clearFilters();
+                      });
                     },
                     child: Text(
                       'Clear Filters',
