@@ -15,9 +15,15 @@ class SectionNearLocation extends StatefulWidget {
 }
 
 class _SectionNearLocationState extends State<SectionNearLocation> {
-  void _toggleFavorite(int hotelId) {
+  // Track saved state for each hotel
+  final Map<int, bool> _savedHotels = {};
+
+  void _toggleFavorite(int hotelId, bool currentState) {
     print('🏨 Toggle favorite for hotel ID: $hotelId');
     context.read<FavoriteCubit>().toggleHotelFavorite(hotelId);
+    setState(() {
+      _savedHotels[hotelId] = !currentState;
+    });
   }
 
   @override
@@ -175,8 +181,11 @@ class _SectionNearLocationState extends State<SectionNearLocation> {
                   top: 16,
                   right: 16, // تغيير إلى يمين البطاقة
                   child: InteractiveBookmark(
-                    isSaved: hotel.isFavorite,
-                    onPressed: () => _toggleFavorite(hotel.id),
+                    isSaved: _savedHotels[hotel.id] ?? hotel.isFavorite,
+                    onPressed: () => _toggleFavorite(
+                      hotel.id,
+                      _savedHotels[hotel.id] ?? hotel.isFavorite,
+                    ),
                     size: 40,
                   ),
                 ),

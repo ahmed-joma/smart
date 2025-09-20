@@ -24,6 +24,19 @@ class _HotelDetailsBodyState extends State<HotelDetailsBody>
   late ScrollController _scrollController;
   late AnimationController _bounceController;
 
+  // Track favorite state locally
+  bool? _localFavoriteState;
+
+  void _toggleFavorite(bool currentState) {
+    if (widget.hotelId != null) {
+      print('🏨 Toggle favorite for hotel ID: ${widget.hotelId}');
+      context.read<FavoriteCubit>().toggleHotelFavorite(widget.hotelId!);
+      setState(() {
+        _localFavoriteState = !currentState;
+      });
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -228,11 +241,11 @@ class _HotelDetailsBodyState extends State<HotelDetailsBody>
                     // Custom App Bar with Background Image
                     SectionHotelHeader(
                       imageUrl: imageUrl,
-                      isFavorite: isFavorite,
+                      isFavorite: _localFavoriteState ?? isFavorite,
                       onFavoriteToggle: widget.hotelId != null
-                          ? () => context
-                                .read<FavoriteCubit>()
-                                .toggleHotelFavorite(widget.hotelId!)
+                          ? () => _toggleFavorite(
+                              _localFavoriteState ?? isFavorite ?? false,
+                            )
                           : null,
                     ),
 

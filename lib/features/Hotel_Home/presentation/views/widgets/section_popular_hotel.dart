@@ -1,11 +1,30 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../../../data/models/hotel_models.dart';
+import '../../../../../shared/widgets/interactive_bookmark.dart';
+import '../../../../../core/utils/cubits/favorite_cubit.dart';
 
-class SectionPopularHotel extends StatelessWidget {
+class SectionPopularHotel extends StatefulWidget {
   final List<Hotel> hotels;
 
   const SectionPopularHotel({super.key, required this.hotels});
+
+  @override
+  State<SectionPopularHotel> createState() => _SectionPopularHotelState();
+}
+
+class _SectionPopularHotelState extends State<SectionPopularHotel> {
+  // Track saved state for each hotel
+  final Map<int, bool> _savedHotels = {};
+
+  void _toggleFavorite(int hotelId, bool currentState) {
+    print('🏨 Toggle favorite for hotel ID: $hotelId');
+    context.read<FavoriteCubit>().toggleHotelFavorite(hotelId);
+    setState(() {
+      _savedHotels[hotelId] = !currentState;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -40,7 +59,7 @@ class SectionPopularHotel extends StatelessWidget {
           const SizedBox(height: 20),
 
           // Vertical list of popular hotel cards
-          hotels.isEmpty
+          widget.hotels.isEmpty
               ? const Center(
                   child: Text(
                     'No popular hotels found',
@@ -48,13 +67,13 @@ class SectionPopularHotel extends StatelessWidget {
                   ),
                 )
               : Column(
-                  children: hotels.asMap().entries.map((entry) {
+                  children: widget.hotels.asMap().entries.map((entry) {
                     final index = entry.key;
                     final hotel = entry.value;
                     return Column(
                       children: [
                         _buildPopularHotelCard(context: context, hotel: hotel),
-                        if (index < hotels.length - 1)
+                        if (index < widget.hotels.length - 1)
                           const SizedBox(height: 20), // مسافة أكبر بين البطاقات
                       ],
                     );
@@ -231,11 +250,23 @@ class SectionPopularHotel extends StatelessWidget {
               ),
             ),
 
-            // Rating - positioned on the right side
+            // Rating and Favorite - positioned on the right side
             Column(
-              mainAxisAlignment: MainAxisAlignment.start, // محاذاة من الأعلى
+              mainAxisAlignment:
+                  MainAxisAlignment.spaceBetween, // توزيع العناصر
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
+                // Favorite Button at the top
+                InteractiveBookmark(
+                  isSaved: _savedHotels[hotel.id] ?? hotel.isFavorite,
+                  onPressed: () => _toggleFavorite(
+                    hotel.id,
+                    _savedHotels[hotel.id] ?? hotel.isFavorite,
+                  ),
+                  size: 32,
+                ),
+
+                // Rating at the bottom
                 Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [

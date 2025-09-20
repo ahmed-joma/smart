@@ -24,7 +24,19 @@ class _EventDetailsBodyState extends State<EventDetailsBody>
     with TickerProviderStateMixin {
   late ScrollController _scrollController;
   late AnimationController _bounceController;
-  late Animation<double> _bounceAnimation;
+
+  // Track favorite state locally
+  bool? _localFavoriteState;
+
+  void _toggleFavorite(bool currentState) {
+    if (widget.eventId != null) {
+      print('🎯 Toggle favorite for event ID: ${widget.eventId}');
+      context.read<FavoriteCubit>().toggleEventFavorite(widget.eventId!);
+      setState(() {
+        _localFavoriteState = !currentState;
+      });
+    }
+  }
 
   @override
   void initState() {
@@ -33,9 +45,6 @@ class _EventDetailsBodyState extends State<EventDetailsBody>
     _bounceController = AnimationController(
       duration: const Duration(milliseconds: 300),
       vsync: this,
-    );
-    _bounceAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _bounceController, curve: Curves.elasticOut),
     );
 
     // Load event details if eventId is provided
@@ -224,11 +233,11 @@ class _EventDetailsBodyState extends State<EventDetailsBody>
                     // Custom App Bar with Background Image
                     SectionEventHeader(
                       imageUrl: event['image'] as String?,
-                      isFavorite: isFavorite,
+                      isFavorite: _localFavoriteState ?? isFavorite,
                       onFavoriteToggle: widget.eventId != null
-                          ? () => context
-                                .read<FavoriteCubit>()
-                                .toggleEventFavorite(widget.eventId!)
+                          ? () => _toggleFavorite(
+                              _localFavoriteState ?? isFavorite ?? false,
+                            )
                           : null,
                     ),
 

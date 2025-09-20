@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../../shared/shared.dart';
 import 'section_custom_category.dart';
-import '../../../../Filters/presentation/views/Filter_page.dart';
 
 class SectionHeader extends StatelessWidget {
   const SectionHeader({super.key});
@@ -180,12 +179,8 @@ class SectionHeader extends StatelessWidget {
           // Filters Button
           GestureDetector(
             onTap: () {
-              showModalBottomSheet(
-                context: context,
-                isScrollControlled: true,
-                backgroundColor: Colors.transparent,
-                builder: (context) => const FilterPage(),
-              );
+              // Navigate to Events & Hotels page (same as search)
+              context.go('/searchView');
             },
             child: Container(
               height: 40,
