@@ -6,6 +6,7 @@ import '../../../../../shared/shared.dart';
 import '../../../../../shared/widgets/interactive_bookmark.dart';
 import '../../../data/models/home_models.dart';
 import '../../../../../core/utils/cubits/favorite_cubit.dart';
+import '../../../../../core/utils/cubits/favorite_state.dart';
 
 class SectionUpcomingEvents extends StatefulWidget {
   final List<HomeEvent> events;
@@ -21,63 +22,90 @@ class _SectionUpcomingEventsState extends State<SectionUpcomingEvents> {
   final Map<int, bool> _savedEvents = {};
 
   @override
+  void initState() {
+    super.initState();
+    // Initialize saved events map with current states
+    for (final event in widget.events) {
+      _savedEvents[event.id] = event.isFavorite;
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     if (widget.events.isEmpty) {
       return const SizedBox.shrink();
     }
 
-    return Column(
-      children: [
-        // Section Header
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 25),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text(
-                'Upcoming Events',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w400,
-                  color: AppColors.primary,
+    return BlocListener<FavoriteCubit, FavoriteState>(
+      listener: (context, state) {
+        if (state is FavoriteSuccess) {
+          // Update local state when favorite changes from other pages
+          setState(() {
+            // Find the event that was toggled and update its local state
+            for (final event in widget.events) {
+              if (state.message.contains('Event') &&
+                  state.message.contains('${event.id}')) {
+                _savedEvents[event.id] =
+                    !(_savedEvents[event.id] ?? event.isFavorite);
+                break;
+              }
+            }
+          });
+        }
+      },
+      child: Column(
+        children: [
+          // Section Header
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 25),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  'Upcoming Events',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w400,
+                    color: AppColors.primary,
+                  ),
                 ),
-              ),
-              Row(
-                children: [
-                  const Text(
-                    'See All',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w400,
+                Row(
+                  children: [
+                    const Text(
+                      'See All',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w400,
+                        color: Color(0xFF747688),
+                      ),
+                    ),
+                    const SizedBox(width: 4),
+                    const Icon(
+                      Icons.arrow_forward_ios,
+                      size: 16,
                       color: Color(0xFF747688),
                     ),
-                  ),
-                  const SizedBox(width: 4),
-                  const Icon(
-                    Icons.arrow_forward_ios,
-                    size: 16,
-                    color: Color(0xFF747688),
-                  ),
-                ],
-              ),
-            ],
+                  ],
+                ),
+              ],
+            ),
           ),
-        ),
 
-        // Events List
-        SizedBox(
-          height: 300,
-          child: ListView.builder(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            itemCount: widget.events.length,
-            itemBuilder: (context, index) {
-              final event = widget.events[index];
-              return _buildEventCard(event, index);
-            },
+          // Events List
+          SizedBox(
+            height: 300,
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              itemCount: widget.events.length,
+              itemBuilder: (context, index) {
+                final event = widget.events[index];
+                return _buildEventCard(event, index);
+              },
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 

@@ -30,6 +30,33 @@ class _SignUpBodyState extends State<SignUpBody> {
   bool _isPasswordValid = true;
   bool _isConfirmPasswordValid = true;
 
+  // رسائل الخطأ
+  String _passwordErrorMessage = '';
+  String _confirmPasswordErrorMessage = '';
+
+  // دالة للتحقق من قوة كلمة المرور
+  String _validatePassword(String password) {
+    if (password.isEmpty) {
+      return 'Password is required';
+    }
+    if (password.length < 8) {
+      return 'Password must be at least 8 characters long';
+    }
+    if (!password.contains(RegExp(r'[A-Z]'))) {
+      return 'Password must contain at least one uppercase letter';
+    }
+    if (!password.contains(RegExp(r'[a-z]'))) {
+      return 'Password must contain at least one lowercase letter';
+    }
+    if (!password.contains(RegExp(r'[0-9]'))) {
+      return 'Password must contain at least one number';
+    }
+    if (!password.contains(RegExp(r'[!@#$%^&*(),.?":{}|<>]'))) {
+      return 'Password must contain at least one special character';
+    }
+    return '';
+  }
+
   // دوال لإعادة تعيين حالة الحقول عند الكتابة
   void _onFullNameChanged(String value) {
     if (_isFullNameValid != true) {
@@ -48,19 +75,25 @@ class _SignUpBodyState extends State<SignUpBody> {
   }
 
   void _onPasswordChanged(String value) {
-    if (_isPasswordValid != true) {
-      setState(() {
-        _isPasswordValid = true;
-      });
-    }
+    setState(() {
+      _passwordErrorMessage = _validatePassword(value);
+      _isPasswordValid = _passwordErrorMessage.isEmpty;
+    });
   }
 
   void _onConfirmPasswordChanged(String value) {
-    if (_isConfirmPasswordValid != true) {
-      setState(() {
+    setState(() {
+      if (value.isEmpty) {
+        _confirmPasswordErrorMessage = 'Please confirm your password';
+        _isConfirmPasswordValid = false;
+      } else if (value != _passwordController.text) {
+        _confirmPasswordErrorMessage = 'Passwords do not match';
+        _isConfirmPasswordValid = false;
+      } else {
+        _confirmPasswordErrorMessage = '';
         _isConfirmPasswordValid = true;
-      });
-    }
+      }
+    });
   }
 
   void _onTogglePasswordVisibility() {
@@ -98,18 +131,25 @@ class _SignUpBodyState extends State<SignUpBody> {
       isValid = false;
     }
 
-    if (_passwordController.text.isEmpty) {
+    // Validate password with detailed requirements
+    _passwordErrorMessage = _validatePassword(_passwordController.text);
+    if (_passwordErrorMessage.isNotEmpty) {
       setState(() => _isPasswordValid = false);
       isValid = false;
     }
 
+    // Validate confirm password
     if (_confirmPasswordController.text.isEmpty) {
-      setState(() => _isConfirmPasswordValid = false);
+      setState(() {
+        _confirmPasswordErrorMessage = 'Please confirm your password';
+        _isConfirmPasswordValid = false;
+      });
       isValid = false;
-    }
-
-    if (_passwordController.text != _confirmPasswordController.text) {
-      setState(() => _isConfirmPasswordValid = false);
+    } else if (_passwordController.text != _confirmPasswordController.text) {
+      setState(() {
+        _confirmPasswordErrorMessage = 'Passwords do not match';
+        _isConfirmPasswordValid = false;
+      });
       isValid = false;
     }
 
@@ -213,6 +253,9 @@ class _SignUpBodyState extends State<SignUpBody> {
                         isConfirmPasswordValid: _isConfirmPasswordValid,
                         isPasswordVisible: _isPasswordVisible,
                         isConfirmPasswordVisible: _isConfirmPasswordVisible,
+                        passwordErrorMessage: _passwordErrorMessage,
+                        confirmPasswordErrorMessage:
+                            _confirmPasswordErrorMessage,
                         onFullNameChanged: _onFullNameChanged,
                         onEmailChanged: _onEmailChanged,
                         onPasswordChanged: _onPasswordChanged,

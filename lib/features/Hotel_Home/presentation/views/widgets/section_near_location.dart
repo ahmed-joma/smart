@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../../shared/widgets/interactive_bookmark.dart';
 import '../../../data/models/hotel_models.dart';
 import '../../../../../core/utils/cubits/favorite_cubit.dart';
+import '../../../../../core/utils/cubits/favorite_state.dart';
 
 class SectionNearLocation extends StatefulWidget {
   final List<Hotel> hotels;
@@ -18,6 +19,15 @@ class _SectionNearLocationState extends State<SectionNearLocation> {
   // Track saved state for each hotel
   final Map<int, bool> _savedHotels = {};
 
+  @override
+  void initState() {
+    super.initState();
+    // Initialize saved hotels map with current states
+    for (final hotel in widget.hotels) {
+      _savedHotels[hotel.id] = hotel.isFavorite;
+    }
+  }
+
   void _toggleFavorite(int hotelId, bool currentState) {
     print('🏨 Toggle favorite for hotel ID: $hotelId');
     context.read<FavoriteCubit>().toggleHotelFavorite(hotelId);
@@ -28,63 +38,84 @@ class _SectionNearLocationState extends State<SectionNearLocation> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      child: Column(
-        children: [
-          // Header with title and "See all" link
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text(
-                'Near Location',
-                style: TextStyle(fontSize: 20, color: Colors.black),
-              ),
-              GestureDetector(
-                onTap: () {
-                  // Navigate to see all hotels
-                },
-                child: const Text(
-                  'See all',
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: Color(0xFF7F2F3A),
-                    fontWeight: FontWeight.w400,
+    return BlocListener<FavoriteCubit, FavoriteState>(
+      listener: (context, state) {
+        if (state is FavoriteSuccess) {
+          // Update local state when favorite changes from other pages
+          setState(() {
+            // Find the hotel that was toggled and update its local state
+            for (final hotel in widget.hotels) {
+              if (state.message.contains('Hotel') &&
+                  state.message.contains('${hotel.id}')) {
+                _savedHotels[hotel.id] =
+                    !(_savedHotels[hotel.id] ?? hotel.isFavorite);
+                break;
+              }
+            }
+          });
+        }
+      },
+      child: Container(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          children: [
+            // Header with title and "See all" link
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  'Near Location',
+                  style: TextStyle(fontSize: 20, color: Colors.black),
+                ),
+                GestureDetector(
+                  onTap: () {
+                    // Navigate to see all hotels
+                  },
+                  child: const Text(
+                    'See all',
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Color(0xFF7F2F3A),
+                      fontWeight: FontWeight.w400,
+                    ),
                   ),
                 ),
-              ),
-            ],
-          ),
+              ],
+            ),
 
-          const SizedBox(height: 20),
+            const SizedBox(height: 20),
 
-          // Horizontal scrollable hotel cards
-          SizedBox(
-            height:
-                340, // تقليل الارتفاع من 370 إلى 340 ليتناسب مع البطاقات الجديدة
-            child: widget.hotels.isEmpty
-                ? const Center(
-                    child: Text(
-                      'No hotels found',
-                      style: TextStyle(fontSize: 16, color: Colors.grey),
+            // Horizontal scrollable hotel cards
+            SizedBox(
+              height:
+                  340, // تقليل الارتفاع من 370 إلى 340 ليتناسب مع البطاقات الجديدة
+              child: widget.hotels.isEmpty
+                  ? const Center(
+                      child: Text(
+                        'No hotels found',
+                        style: TextStyle(fontSize: 16, color: Colors.grey),
+                      ),
+                    )
+                  : ListView.builder(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: widget.hotels.length,
+                      itemBuilder: (context, index) {
+                        final hotel = widget.hotels[index];
+                        return Padding(
+                          padding: EdgeInsets.only(
+                            left: index == 0 ? 0 : 20,
+                            right: index == widget.hotels.length - 1 ? 20 : 0,
+                          ),
+                          child: _buildHotelCard(
+                            context: context,
+                            hotel: hotel,
+                          ),
+                        );
+                      },
                     ),
-                  )
-                : ListView.builder(
-                    scrollDirection: Axis.horizontal,
-                    itemCount: widget.hotels.length,
-                    itemBuilder: (context, index) {
-                      final hotel = widget.hotels[index];
-                      return Padding(
-                        padding: EdgeInsets.only(
-                          left: index == 0 ? 0 : 20,
-                          right: index == widget.hotels.length - 1 ? 20 : 0,
-                        ),
-                        child: _buildHotelCard(context: context, hotel: hotel),
-                      );
-                    },
-                  ),
-          ),
-        ],
+            ),
+          ],
+        ),
       ),
     );
   }

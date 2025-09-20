@@ -12,6 +12,8 @@ class SectionFormFields extends StatefulWidget {
   final bool isConfirmPasswordValid;
   final bool isPasswordVisible;
   final bool isConfirmPasswordVisible;
+  final String passwordErrorMessage;
+  final String confirmPasswordErrorMessage;
   final Function(String) onFullNameChanged;
   final Function(String) onEmailChanged;
   final Function(String) onPasswordChanged;
@@ -31,6 +33,8 @@ class SectionFormFields extends StatefulWidget {
     required this.isConfirmPasswordValid,
     required this.isPasswordVisible,
     required this.isConfirmPasswordVisible,
+    required this.passwordErrorMessage,
+    required this.confirmPasswordErrorMessage,
     required this.onFullNameChanged,
     required this.onEmailChanged,
     required this.onPasswordChanged,
@@ -113,6 +117,54 @@ class _SectionFormFieldsState extends State<SectionFormFields> {
           onChanged: widget.onPasswordChanged,
         ),
 
+        // Password Requirements
+        if (widget.passwordController.text.isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.only(top: 8, left: 4),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildPasswordRequirement(
+                  'At least 8 characters',
+                  widget.passwordController.text.length >= 8,
+                ),
+                _buildPasswordRequirement(
+                  'Contains uppercase letter (A-Z)',
+                  widget.passwordController.text.contains(RegExp(r'[A-Z]')),
+                ),
+                _buildPasswordRequirement(
+                  'Contains lowercase letter (a-z)',
+                  widget.passwordController.text.contains(RegExp(r'[a-z]')),
+                ),
+                _buildPasswordRequirement(
+                  'Contains number (0-9)',
+                  widget.passwordController.text.contains(RegExp(r'[0-9]')),
+                ),
+                _buildPasswordRequirement(
+                  'Contains special character (!@#\$%^&*)',
+                  widget.passwordController.text.contains(
+                    RegExp(r'[!@#$%^&*(),.?":{}|<>]'),
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+        // Password Error Message
+        if (widget.passwordErrorMessage.isNotEmpty &&
+            widget.passwordController.text.isEmpty)
+          Padding(
+            padding: const EdgeInsets.only(top: 8, left: 4),
+            child: Text(
+              widget.passwordErrorMessage,
+              style: const TextStyle(
+                color: Colors.red,
+                fontSize: 12,
+                fontFamily: 'Inter',
+              ),
+            ),
+          ),
+
         const SizedBox(height: 16),
 
         // Confirm Password Field
@@ -142,8 +194,46 @@ class _SectionFormFieldsState extends State<SectionFormFields> {
           onChanged: widget.onConfirmPasswordChanged,
         ),
 
+        // Confirm Password Error Message
+        if (widget.confirmPasswordErrorMessage.isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.only(top: 8, left: 4),
+            child: Text(
+              widget.confirmPasswordErrorMessage,
+              style: const TextStyle(
+                color: Colors.red,
+                fontSize: 12,
+                fontFamily: 'Inter',
+              ),
+            ),
+          ),
+
         const SizedBox(height: 32),
       ],
+    );
+  }
+
+  Widget _buildPasswordRequirement(String text, bool isValid) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 4),
+      child: Row(
+        children: [
+          Icon(
+            isValid ? Icons.check_circle : Icons.cancel,
+            size: 16,
+            color: isValid ? Colors.green : Colors.red,
+          ),
+          const SizedBox(width: 8),
+          Text(
+            text,
+            style: TextStyle(
+              color: isValid ? Colors.green : Colors.red,
+              fontSize: 11,
+              fontFamily: 'Inter',
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
