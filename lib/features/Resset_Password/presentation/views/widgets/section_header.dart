@@ -7,26 +7,36 @@ class SectionHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(right: 120),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          IconButton(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Back arrow button
+        Align(
+          alignment: Alignment.centerLeft,
+          child: IconButton(
             onPressed: () => context.go('/signInView'),
-            icon: Icon(Icons.arrow_back, color: AppColors.primary, size: 24),
+            icon: Icon(Icons.arrow_back, color: AppColors.primary, size: 28),
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(),
+            style: IconButton.styleFrom(
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            ),
           ),
-          const SizedBox(height: 16),
-          const Text(
-            '  FORGET PASSWORD',
+        ),
+        const SizedBox(height: 20),
+        // Title
+        Center(
+          child: Text(
+            'FORGET PASSWORD',
             style: TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.w700,
               color: AppColors.primary,
+              fontFamily: 'Inter',
             ),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
