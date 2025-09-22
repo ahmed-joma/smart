@@ -89,139 +89,255 @@ class _SectionProfileInfoState extends State<SectionProfileInfo> {
 
           if (state is ProfileSuccess) {
             final user = state.data.user;
-            return Container(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
-              child: Column(
-                children: [
-                  // Profile Picture
-                  Center(
-                    child: ProfileAvatar(
-                      imageUrl: user.imageUrl.isNotEmpty ? user.imageUrl : null,
-                      name: user.fullName,
-                      size: 120,
-                      showEditIcon: true,
-                      onTap: () => _changeProfileImage(context),
-                    ),
-                  ),
-
-                  const SizedBox(height: 20),
-
-                  // User Name
-                  Text(
-                    user.fullName,
-                    style: TextStyle(
-                      color: AppColors.primary,
-                      fontSize: 28,
-                      fontWeight: FontWeight.w400,
-                      fontFamily: 'Inter',
-                    ),
-                  ),
-
-                  const SizedBox(height: 20),
-
-                  // Following/Followers
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      // Following
-                      Column(
-                        children: [
-                          Text(
-                            '350',
-                            style: TextStyle(
-                              color: AppColors.primary,
-                              fontSize: 24,
-                              fontWeight: FontWeight.w400,
-                              fontFamily: 'Inter',
-                            ),
-                          ),
-                          Text(
-                            'Following',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              color: Colors.grey.shade600,
-                              fontSize: 14,
-                              fontWeight: FontWeight.w400,
-                              fontFamily: 'Inter',
-                            ),
-                          ),
-                        ],
-                      ),
-
-                      // Separator Line
-                      Container(
-                        width: 1,
-                        height: 40,
-                        margin: const EdgeInsets.symmetric(horizontal: 30),
-                        color: Colors.grey.shade300,
-                      ),
-
-                      // Followers
-                      Column(
-                        children: [
-                          Text(
-                            '346',
-                            style: TextStyle(
-                              color: AppColors.primary,
-                              fontSize: 24,
-                              fontWeight: FontWeight.w400,
-                              fontFamily: 'Inter',
-                            ),
-                          ),
-                          Text(
-                            'Followers',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              color: Colors.grey.shade600,
-                              fontSize: 14,
-                              fontWeight: FontWeight.w400,
-                              fontFamily: 'Inter',
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-
-                  const SizedBox(height: 20),
-
-                  // Edit Profile Button
-                  GestureDetector(
-                    onTap: () {
-                      context.go('/editProfileView');
-                    },
+            return TweenAnimationBuilder<double>(
+              duration: const Duration(milliseconds: 1200),
+              tween: Tween(begin: 0.0, end: 1.0),
+              builder: (context, opacity, child) {
+                return Opacity(
+                  opacity: opacity,
+                  child: Transform.translate(
+                    offset: Offset(0, 20 * (1 - opacity)),
                     child: Container(
-                      width: 200,
-                      height: 60,
-                      decoration: BoxDecoration(
-                        border: Border.all(
-                          color: const Color(0xFF5669FF),
-                          width: 2,
-                        ),
-                        borderRadius: BorderRadius.circular(20),
+                      margin: const EdgeInsets.symmetric(
+                        horizontal: 24,
+                        vertical: 20,
                       ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(Icons.edit, color: AppColors.primary, size: 20),
-                          const SizedBox(width: 8),
-                          Text(
-                            'Edit Profile',
-                            style: TextStyle(
-                              color: AppColors.primary,
-                              fontSize: 16,
-                              fontWeight: FontWeight.w400,
-                              fontFamily: 'Inter',
-                            ),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(24),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.05),
+                            blurRadius: 20,
+                            offset: const Offset(0, 10),
+                          ),
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.02),
+                            blurRadius: 40,
+                            offset: const Offset(0, 20),
                           ),
                         ],
                       ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(32),
+                        child: Column(
+                          children: [
+                            // Profile Picture with modern design
+                            Stack(
+                              children: [
+                                Container(
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    gradient: LinearGradient(
+                                      begin: Alignment.topLeft,
+                                      end: Alignment.bottomRight,
+                                      colors: [
+                                        AppColors.primary.withOpacity(0.1),
+                                        const Color(
+                                          0xFF6B7AED,
+                                        ).withOpacity(0.1),
+                                      ],
+                                    ),
+                                  ),
+                                  padding: const EdgeInsets.all(8),
+                                  child: ProfileAvatar(
+                                    imageUrl: user.imageUrl.isNotEmpty
+                                        ? user.imageUrl
+                                        : null,
+                                    name: user.fullName,
+                                    size: 100,
+                                    showEditIcon: false,
+                                    onTap: () => _changeProfileImage(context),
+                                  ),
+                                ),
+                                // Edit Icon
+                                Positioned(
+                                  bottom: 0,
+                                  right: 0,
+                                  child: GestureDetector(
+                                    onTap: () => _changeProfileImage(context),
+                                    child: Container(
+                                      decoration: BoxDecoration(
+                                        color: AppColors.primary,
+                                        shape: BoxShape.circle,
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: AppColors.primary
+                                                .withOpacity(0.3),
+                                            blurRadius: 8,
+                                            offset: const Offset(0, 4),
+                                          ),
+                                        ],
+                                      ),
+                                      padding: const EdgeInsets.all(8),
+                                      child: const Icon(
+                                        Icons.camera_alt,
+                                        color: Colors.white,
+                                        size: 16,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+
+                            const SizedBox(height: 24),
+
+                            // User Name with modern typography
+                            Text(
+                              user.fullName,
+                              style: const TextStyle(
+                                color: Color(0xFF1D1E25),
+                                fontSize: 32,
+                                fontWeight: FontWeight.w700,
+                                fontFamily: 'Inter',
+                                letterSpacing: -0.5,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+
+                            const SizedBox(height: 8),
+
+                            // User Status Badge
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 6,
+                              ),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF29D697).withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(20),
+                                border: Border.all(
+                                  color: const Color(
+                                    0xFF29D697,
+                                  ).withOpacity(0.3),
+                                  width: 1,
+                                ),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Container(
+                                    width: 8,
+                                    height: 8,
+                                    decoration: const BoxDecoration(
+                                      color: Color(0xFF29D697),
+                                      shape: BoxShape.circle,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 6),
+                                  Text(
+                                    'Active Member',
+                                    style: TextStyle(
+                                      color: const Color(0xFF29D697),
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w600,
+                                      fontFamily: 'Inter',
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+
+                            const SizedBox(height: 32),
+
+                            // Stats Cards
+                            Container(
+                              decoration: BoxDecoration(
+                                color: Colors.grey.shade50,
+                                borderRadius: BorderRadius.circular(20),
+                                border: Border.all(
+                                  color: Colors.grey.shade200,
+                                  width: 1,
+                                ),
+                              ),
+                              padding: const EdgeInsets.all(24),
+                              child: Row(
+                                children: [
+                                  // Following Card
+                                  Expanded(
+                                    child: _buildStatCard(
+                                      '350',
+                                      'Following',
+                                      Icons.people_outline,
+                                      const Color(0xFF6B7AED),
+                                    ),
+                                  ),
+                                  Container(
+                                    width: 1,
+                                    height: 50,
+                                    color: Colors.grey.shade300,
+                                  ),
+                                  // Followers Card
+                                  Expanded(
+                                    child: _buildStatCard(
+                                      '346',
+                                      'Followers',
+                                      Icons.favorite_outline,
+                                      const Color(0xFFEE544A),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+
+                            const SizedBox(height: 32),
+
+                            // Edit Profile Button with modern design
+                            GestureDetector(
+                              onTap: () {
+                                context.go('/editProfileView');
+                              },
+                              child: Container(
+                                width: double.infinity,
+                                height: 56,
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    begin: Alignment.topLeft,
+                                    end: Alignment.bottomRight,
+                                    colors: [
+                                      AppColors.primary,
+                                      const Color(0xFF6B7AED),
+                                    ],
+                                  ),
+                                  borderRadius: BorderRadius.circular(16),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: AppColors.primary.withOpacity(0.3),
+                                      blurRadius: 12,
+                                      offset: const Offset(0, 6),
+                                    ),
+                                  ],
+                                ),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    const Icon(
+                                      Icons.edit_outlined,
+                                      color: Colors.white,
+                                      size: 20,
+                                    ),
+                                    const SizedBox(width: 12),
+                                    const Text(
+                                      'Edit Profile',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w600,
+                                        fontFamily: 'Inter',
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
                   ),
-
-                  const SizedBox(height: 10),
-                ],
-              ),
+                );
+              },
             );
           }
 
@@ -232,6 +348,70 @@ class _SectionProfileInfoState extends State<SectionProfileInfo> {
           );
         },
       ),
+    );
+  }
+
+  Widget _buildStatCard(
+    String number,
+    String label,
+    IconData icon,
+    Color color,
+  ) {
+    return TweenAnimationBuilder<double>(
+      duration: const Duration(milliseconds: 1500),
+      tween: Tween(begin: 0, end: double.parse(number)),
+      builder: (context, animatedValue, child) {
+        return Column(
+          children: [
+            // Animated Icon Container
+            TweenAnimationBuilder<double>(
+              duration: const Duration(milliseconds: 800),
+              tween: Tween(begin: 0.0, end: 1.0),
+              builder: (context, scale, child) {
+                return Transform.scale(
+                  scale: scale,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: color.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow: [
+                        BoxShadow(
+                          color: color.withOpacity(0.2),
+                          blurRadius: 8,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    padding: const EdgeInsets.all(12),
+                    child: Icon(icon, color: color, size: 24),
+                  ),
+                );
+              },
+            ),
+            const SizedBox(height: 12),
+            // Animated Counter
+            Text(
+              animatedValue.toInt().toString(),
+              style: const TextStyle(
+                color: Color(0xFF1D1E25),
+                fontSize: 24,
+                fontWeight: FontWeight.w700,
+                fontFamily: 'Inter',
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              label,
+              style: TextStyle(
+                color: Colors.grey.shade600,
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+                fontFamily: 'Inter',
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 }
