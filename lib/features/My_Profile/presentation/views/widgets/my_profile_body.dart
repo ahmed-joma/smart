@@ -216,7 +216,7 @@ class _MyProfileBodyState extends State<MyProfileBody> {
 
   Widget _buildAchievementsSection() {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+      margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),
@@ -229,7 +229,7 @@ class _MyProfileBodyState extends State<MyProfileBody> {
         ],
       ),
       child: Padding(
-        padding: const EdgeInsets.all(24),
+        padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -262,7 +262,7 @@ class _MyProfileBodyState extends State<MyProfileBody> {
               ],
             ),
 
-            const SizedBox(height: 24),
+            const SizedBox(height: 16),
 
             // Achievements Grid
             Row(
@@ -286,7 +286,7 @@ class _MyProfileBodyState extends State<MyProfileBody> {
                 ),
               ],
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 8),
             Row(
               children: [
                 Expanded(

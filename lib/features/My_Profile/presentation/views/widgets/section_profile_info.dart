@@ -99,8 +99,8 @@ class _SectionProfileInfoState extends State<SectionProfileInfo> {
                     offset: Offset(0, 20 * (1 - opacity)),
                     child: Container(
                       margin: const EdgeInsets.symmetric(
-                        horizontal: 24,
-                        vertical: 20,
+                        horizontal: 20,
+                        vertical: 12,
                       ),
                       decoration: BoxDecoration(
                         color: Colors.white,
@@ -119,7 +119,7 @@ class _SectionProfileInfoState extends State<SectionProfileInfo> {
                         ],
                       ),
                       child: Padding(
-                        padding: const EdgeInsets.all(32),
+                        padding: const EdgeInsets.all(20),
                         child: Column(
                           children: [
                             // Profile Picture with modern design
@@ -145,7 +145,7 @@ class _SectionProfileInfoState extends State<SectionProfileInfo> {
                                         ? user.imageUrl
                                         : null,
                                     name: user.fullName,
-                                    size: 100,
+                                    size: 70,
                                     showEditIcon: false,
                                     onTap: () => _changeProfileImage(context),
                                   ),
@@ -181,14 +181,14 @@ class _SectionProfileInfoState extends State<SectionProfileInfo> {
                               ],
                             ),
 
-                            const SizedBox(height: 24),
+                            const SizedBox(height: 16),
 
                             // User Name with modern typography
                             Text(
                               user.fullName,
                               style: const TextStyle(
                                 color: Color(0xFF1D1E25),
-                                fontSize: 32,
+                                fontSize: 24,
                                 fontWeight: FontWeight.w700,
                                 fontFamily: 'Inter',
                                 letterSpacing: -0.5,
@@ -239,7 +239,7 @@ class _SectionProfileInfoState extends State<SectionProfileInfo> {
                               ),
                             ),
 
-                            const SizedBox(height: 32),
+                            const SizedBox(height: 20),
 
                             // Stats Cards
                             Container(
@@ -251,7 +251,7 @@ class _SectionProfileInfoState extends State<SectionProfileInfo> {
                                   width: 1,
                                 ),
                               ),
-                              padding: const EdgeInsets.all(24),
+                              padding: const EdgeInsets.all(16),
                               child: Row(
                                 children: [
                                   // Following Card
@@ -281,7 +281,7 @@ class _SectionProfileInfoState extends State<SectionProfileInfo> {
                               ),
                             ),
 
-                            const SizedBox(height: 32),
+                            const SizedBox(height: 20),
 
                             // Edit Profile Button with modern design
                             GestureDetector(
@@ -290,7 +290,7 @@ class _SectionProfileInfoState extends State<SectionProfileInfo> {
                               },
                               child: Container(
                                 width: double.infinity,
-                                height: 56,
+                                height: 48,
                                 decoration: BoxDecoration(
                                   gradient: LinearGradient(
                                     begin: Alignment.topLeft,

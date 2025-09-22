@@ -99,7 +99,7 @@ class _SectionSavedItemsState extends State<SectionSavedItems>
         ),
       ],
       child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+        margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(20),
@@ -112,7 +112,7 @@ class _SectionSavedItemsState extends State<SectionSavedItems>
           ],
         ),
         child: Padding(
-          padding: const EdgeInsets.all(24),
+          padding: const EdgeInsets.all(16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -225,11 +225,11 @@ class _SectionSavedItemsState extends State<SectionSavedItems>
                 ),
               ),
 
-              const SizedBox(height: 24),
+              const SizedBox(height: 16),
 
               // Tab Bar View
               SizedBox(
-                height: _selectedTabIndex == 0 ? 400 : 350,
+                height: _selectedTabIndex == 0 ? 300 : 280,
                 child: TabBarView(
                   controller: _tabController,
                   children: [
