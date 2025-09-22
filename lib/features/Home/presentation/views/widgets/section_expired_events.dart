@@ -302,7 +302,7 @@ class _SectionExpiredEventsState extends State<SectionExpiredEvents> {
                           fontWeight: FontWeight.w600,
                           color: const Color(0xFF1D1E25).withOpacity(0.7),
                         ),
-                        maxLines: 2,
+                        maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
                       const SizedBox(height: 4),

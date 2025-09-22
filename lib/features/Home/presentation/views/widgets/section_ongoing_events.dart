@@ -293,7 +293,7 @@ class _SectionOngoingEventsState extends State<SectionOngoingEvents> {
                           fontWeight: FontWeight.w600,
                           color: Color(0xFF1D1E25),
                         ),
-                        maxLines: 2,
+                        maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
                       const SizedBox(height: 4),
