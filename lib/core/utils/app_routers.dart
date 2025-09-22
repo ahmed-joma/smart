@@ -75,7 +75,10 @@ class AppRouters {
       ),
       GoRoute(
         path: kVerificationView,
-        builder: (context, state) => const VerificationView(),
+        builder: (context, state) {
+          final email = state.extra as String?;
+          return VerificationView(userEmail: email);
+        },
       ),
       GoRoute(
         path: kEnterEmailView,

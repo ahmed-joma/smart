@@ -536,7 +536,8 @@ class _SignUpBodyState extends State<SignUpBody> {
             _showSuccessDialog(
               '🎉 Account Created!',
               'Your account has been created successfully.\nPlease check your email for verification.',
-              () => context.go('/verificationView'),
+              () =>
+                  context.go('/verificationView', extra: _emailController.text),
             );
           } else if (state is SignUpError) {
             _handleSignUpError(state.message);

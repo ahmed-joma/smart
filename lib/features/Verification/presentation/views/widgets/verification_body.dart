@@ -9,7 +9,9 @@ import 'section_continue_button.dart';
 import 'section_resend_timer.dart';
 
 class VerificationBody extends StatefulWidget {
-  const VerificationBody({super.key});
+  final String? userEmail;
+
+  const VerificationBody({super.key, this.userEmail});
 
   @override
   State<VerificationBody> createState() => _VerificationBodyState();
@@ -22,8 +24,8 @@ class _VerificationBodyState extends State<VerificationBody> {
   );
   final List<FocusNode> _focusNodes = List.generate(4, (index) => FocusNode());
 
-  // Email variable - can be changed based on user
-  String _userEmail = 'ahmedjomma18@gmail.com';
+  // Email variable - dynamic from sign up
+  String get _userEmail => widget.userEmail ?? 'ahmedjomma18@gmail.com';
 
   int _resendTimer = 300; // 5 minutes (300 seconds)
   bool _canResend = false;

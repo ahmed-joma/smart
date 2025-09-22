@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'widgets/verification_body.dart';
 
 class VerificationView extends StatelessWidget {
-  const VerificationView({super.key});
+  final String? userEmail;
+
+  const VerificationView({super.key, this.userEmail});
 
   @override
   Widget build(BuildContext context) {
-    return const VerificationBody();
+    return VerificationBody(userEmail: userEmail);
   }
 }
