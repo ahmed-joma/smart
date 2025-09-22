@@ -69,7 +69,7 @@ class _SectionNearLocationState extends State<SectionNearLocation> {
                 ),
                 GestureDetector(
                   onTap: () {
-                    // Navigate to see all hotels
+                    context.go('/nearLocationHotelsView');
                   },
                   child: const Text(
                     'See all',

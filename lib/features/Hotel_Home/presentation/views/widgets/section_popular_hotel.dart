@@ -69,7 +69,7 @@ class _SectionPopularHotelState extends State<SectionPopularHotel> {
                 ),
                 GestureDetector(
                   onTap: () {
-                    // Navigate to see all popular hotels
+                    context.go('/featuredHotelsView');
                   },
                   child: const Text(
                     'See all',

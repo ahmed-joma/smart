@@ -9,6 +9,8 @@ import '../../features/Home/presentation/views/Home_view.dart';
 import '../../features/Home/presentation/views/upcoming_events_view.dart';
 import '../../features/Home/presentation/views/ongoing_events_view.dart';
 import '../../features/Home/presentation/views/expired_events_view.dart';
+import '../../features/Hotel_Home/presentation/views/featured_hotels_view.dart';
+import '../../features/Hotel_Home/presentation/views/near_location_hotels_view.dart';
 import '../../features/My_Profile/presentation/views/my_profile_view.dart';
 import '../../features/My_Profile/presentation/views/edit_profile_view.dart';
 import '../../features/Search_White_Bar/presentation/views/search_view.dart';
@@ -40,6 +42,8 @@ class AppRouters {
   static const String kUpcomingEventsView = '/upcomingEventsView';
   static const String kOngoingEventsView = '/ongoingEventsView';
   static const String kExpiredEventsView = '/expiredEventsView';
+  static const String kFeaturedHotelsView = '/featuredHotelsView';
+  static const String kNearLocationHotelsView = '/nearLocationHotelsView';
   static const String kMyProfileView = '/myProfileView';
   static const String kEditProfileView = '/editProfileView';
   static const String kCalendarView = '/calendarView';
@@ -106,6 +110,14 @@ class AppRouters {
       GoRoute(
         path: kExpiredEventsView,
         builder: (context, state) => const ExpiredEventsView(),
+      ),
+      GoRoute(
+        path: kFeaturedHotelsView,
+        builder: (context, state) => const FeaturedHotelsView(),
+      ),
+      GoRoute(
+        path: kNearLocationHotelsView,
+        builder: (context, state) => const NearLocationHotelsView(),
       ),
       GoRoute(
         path: kMyProfileView,
