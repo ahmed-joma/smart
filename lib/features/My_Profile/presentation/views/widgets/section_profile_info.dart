@@ -201,12 +201,12 @@ class _SectionProfileInfoState extends State<SectionProfileInfo> {
                             // User Status Badge
                             Container(
                               padding: const EdgeInsets.symmetric(
-                                horizontal: 12,
-                                vertical: 6,
+                                horizontal: 10,
+                                vertical: 4,
                               ),
                               decoration: BoxDecoration(
                                 color: const Color(0xFF29D697).withOpacity(0.1),
-                                borderRadius: BorderRadius.circular(20),
+                                borderRadius: BorderRadius.circular(16),
                                 border: Border.all(
                                   color: const Color(
                                     0xFF29D697,
@@ -218,19 +218,19 @@ class _SectionProfileInfoState extends State<SectionProfileInfo> {
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
                                   Container(
-                                    width: 8,
-                                    height: 8,
+                                    width: 6,
+                                    height: 6,
                                     decoration: const BoxDecoration(
                                       color: Color(0xFF29D697),
                                       shape: BoxShape.circle,
                                     ),
                                   ),
-                                  const SizedBox(width: 6),
+                                  const SizedBox(width: 4),
                                   Text(
                                     'Active Member',
                                     style: TextStyle(
                                       color: const Color(0xFF29D697),
-                                      fontSize: 12,
+                                      fontSize: 11,
                                       fontWeight: FontWeight.w600,
                                       fontFamily: 'Inter',
                                     ),
