@@ -6,6 +6,9 @@ import '../../features/Verification/presentation/views/Verification_view.dart';
 import '../../features/Resset_Password/presentation/views/Resset_Password_view.dart';
 import '../../features/Resset_Password/presentation/views/enter_email_view.dart';
 import '../../features/Home/presentation/views/Home_view.dart';
+import '../../features/Home/presentation/views/upcoming_events_view.dart';
+import '../../features/Home/presentation/views/ongoing_events_view.dart';
+import '../../features/Home/presentation/views/expired_events_view.dart';
 import '../../features/My_Profile/presentation/views/my_profile_view.dart';
 import '../../features/My_Profile/presentation/views/edit_profile_view.dart';
 import '../../features/Search_White_Bar/presentation/views/search_view.dart';
@@ -34,6 +37,9 @@ class AppRouters {
   static const String kEnterEmailView = '/enterEmailView';
   static const String kRessetPasswordView = '/ressetPasswordView';
   static const String kHomeView = '/homeView';
+  static const String kUpcomingEventsView = '/upcomingEventsView';
+  static const String kOngoingEventsView = '/ongoingEventsView';
+  static const String kExpiredEventsView = '/expiredEventsView';
   static const String kMyProfileView = '/myProfileView';
   static const String kEditProfileView = '/editProfileView';
   static const String kCalendarView = '/calendarView';
@@ -89,6 +95,18 @@ class AppRouters {
         builder: (context, state) => const RessetPasswordView(),
       ),
       GoRoute(path: kHomeView, builder: (context, state) => const HomeView()),
+      GoRoute(
+        path: kUpcomingEventsView,
+        builder: (context, state) => const UpcomingEventsView(),
+      ),
+      GoRoute(
+        path: kOngoingEventsView,
+        builder: (context, state) => const OngoingEventsView(),
+      ),
+      GoRoute(
+        path: kExpiredEventsView,
+        builder: (context, state) => const ExpiredEventsView(),
+      ),
       GoRoute(
         path: kMyProfileView,
         builder: (context, state) => const MyProfileView(),

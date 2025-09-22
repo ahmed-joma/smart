@@ -40,23 +40,28 @@ class _SectionExpiredEventsState extends State<SectionExpiredEvents> {
                   color: AppColors.primary,
                 ),
               ),
-              Row(
-                children: [
-                  const Text(
-                    'See All',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w400,
+              GestureDetector(
+                onTap: () {
+                  context.go('/expiredEventsView');
+                },
+                child: Row(
+                  children: [
+                    const Text(
+                      'See All',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w400,
+                        color: Color(0xFF747688),
+                      ),
+                    ),
+                    const SizedBox(width: 4),
+                    const Icon(
+                      Icons.arrow_forward_ios,
+                      size: 16,
                       color: Color(0xFF747688),
                     ),
-                  ),
-                  const SizedBox(width: 4),
-                  const Icon(
-                    Icons.arrow_forward_ios,
-                    size: 16,
-                    color: Color(0xFF747688),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ],
           ),
