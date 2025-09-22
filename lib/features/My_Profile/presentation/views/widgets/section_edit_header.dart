@@ -7,29 +7,35 @@ class SectionEditHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-      child: Row(
-        children: [
-          // Back Arrow
-          IconButton(
-            onPressed: () {
-              context.go('/myProfileView');
-            },
-            icon: Icon(Icons.arrow_back, color: AppColors.primary, size: 24),
-          ),
-          const SizedBox(width: 16),
-          // Edit Profile Title
-          Text(
-            'Edit Profile',
-            style: TextStyle(
-              color: AppColors.primary,
-              fontSize: 20,
-              fontWeight: FontWeight.w600,
-              fontFamily: 'Inter',
+    return SafeArea(
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+        child: Row(
+          children: [
+            // Simple Back Arrow
+            GestureDetector(
+              onTap: () {
+                context.go('/myProfileView');
+              },
+              child: Icon(
+                Icons.arrow_back_ios_new,
+                color: AppColors.primary,
+                size: 20,
+              ),
             ),
-          ),
-        ],
+            const SizedBox(width: 16),
+            // Simple Title
+            Text(
+              'Edit Profile',
+              style: TextStyle(
+                color: AppColors.primary,
+                fontSize: 20,
+                fontWeight: FontWeight.w600,
+                fontFamily: 'Inter',
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
