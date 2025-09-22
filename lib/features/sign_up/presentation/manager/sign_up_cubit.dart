@@ -64,7 +64,53 @@ class SignUpCubit extends Cubit<SignUpState> {
       if (response.isSuccess && response.data != null) {
         emit(SignUpSuccess(user: response.data!.user));
       } else {
-        emit(SignUpError(message: response.msg));
+        // تحقق من نوع الخطأ أولاً
+        print('🔍 SignUp API Response: ${response.msg}');
+        print('🔍 SignUp API Data: ${response.data}');
+
+        String message = response.msg.toLowerCase();
+
+        // تحقق من رسائل النجاح أولاً
+        if (message.contains('verification') ||
+            message.contains('confirm') ||
+            message.contains('check your email') ||
+            message.contains('sent to your email') ||
+            message.contains('code sent') ||
+            message.contains('verify') ||
+            message.contains('email sent') ||
+            message.contains('تم إرسال') ||
+            message.contains('تأكيد') ||
+            message.contains('رمز') ||
+            message.contains('كود') ||
+            message.contains('created') ||
+            message.contains('registered')) {
+          // تم إنشاء الحساب وإرسال رمز التأكيد بنجاح
+          emit(
+            SignUpSuccess(
+              user: User(
+                id: 0,
+                name: name,
+                email: email,
+                isEmailVerified: false,
+              ),
+            ),
+          );
+        } else {
+          // تحقق من الأخطاء المحددة في data أو msg
+          String errorMessage = response.msg;
+
+          // تحقق من الـ data إذا كان فيه errors
+          if (response.data != null) {
+            String errorData = response.data.toString().toLowerCase();
+            if (errorData.contains('email has already been taken') ||
+                errorData.contains('email already exists') ||
+                errorData.contains('already taken')) {
+              errorMessage = 'Email has already been taken';
+            }
+          }
+
+          emit(SignUpError(message: errorMessage));
+        }
       }
     } on ApiError catch (e) {
       emit(SignUpError(message: e.message));
