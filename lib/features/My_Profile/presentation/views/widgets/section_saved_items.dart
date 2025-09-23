@@ -449,12 +449,16 @@ class _SectionSavedItemsState extends State<SectionSavedItems>
                             ),
                           ),
                           const Spacer(),
-                          Text(
-                            'SR ${event.price}',
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                              color: AppColors.primary,
+                          Flexible(
+                            child: Text(
+                              'SR ${event.price}',
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.primary,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                             ),
                           ),
                         ],
@@ -605,12 +609,16 @@ class _SectionSavedItemsState extends State<SectionSavedItems>
                             }),
                           ),
                           const Spacer(),
-                          Text(
-                            'SR ${hotel.pricePerNight}/night',
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                              color: AppColors.primary,
+                          Flexible(
+                            child: Text(
+                              'SR ${hotel.pricePerNight}/night',
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.primary,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                             ),
                           ),
                         ],

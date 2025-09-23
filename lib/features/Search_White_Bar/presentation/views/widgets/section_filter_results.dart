@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../../core/utils/models/filter_models.dart';
 import '../../../../../core/utils/cubits/favorite_cubit.dart';
+import '../../../../../core/utils/cubits/favorite_state.dart';
 import '../../../../../core/utils/cubits/filter_cubit.dart';
 import '../../../../../shared/shared.dart';
 import '../../../../../shared/widgets/interactive_bookmark.dart';
@@ -26,6 +27,10 @@ class _SectionFilterResultsState extends State<SectionFilterResults>
   late TabController _tabController;
   int _selectedTabIndex = 0;
 
+  // Local state for favorites
+  final Map<int, bool> _savedEvents = {};
+  final Map<int, bool> _savedHotels = {};
+
   @override
   void initState() {
     super.initState();
@@ -35,6 +40,14 @@ class _SectionFilterResultsState extends State<SectionFilterResults>
         _selectedTabIndex = _tabController.index;
       });
     });
+
+    // Initialize saved state from results
+    for (var event in widget.results.events) {
+      _savedEvents[event.id] = event.isFavorite;
+    }
+    for (var hotel in widget.results.hotels) {
+      _savedHotels[hotel.id] = hotel.isFavorite;
+    }
   }
 
   @override
@@ -124,127 +137,140 @@ class _SectionFilterResultsState extends State<SectionFilterResults>
     final totalResults =
         widget.results.events.length + widget.results.hotels.length;
 
-    return Column(
-      children: [
-        // Results Header
-        Container(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            children: [
-              // Results Summary
-              Row(
-                children: [
-                  Icon(Icons.search, color: AppColors.primary, size: 20),
-                  const SizedBox(width: 8),
-                  Text(
-                    'Found $totalResults results',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.primary,
-                    ),
-                  ),
-                  const Spacer(),
-                  TextButton(
-                    onPressed: () {
-                      // Show clearing message with animation
-                      _showClearingMessage(context);
-
-                      // Clear filters after a short delay
-                      Future.delayed(const Duration(milliseconds: 1500), () {
-                        context.read<FilterCubit>().clearFilters();
-                      });
-                    },
-                    child: Text(
-                      'Clear Filters',
+    return BlocListener<FavoriteCubit, FavoriteState>(
+      listener: (context, state) {
+        if (state is FavoriteSuccess) {
+          setState(() {
+            if (state.favoriteType == 'event') {
+              _savedEvents[state.favoriteId] = state.isFavorite;
+            } else if (state.favoriteType == 'hotel') {
+              _savedHotels[state.favoriteId] = state.isFavorite;
+            }
+          });
+        }
+      },
+      child: Column(
+        children: [
+          // Results Header
+          Container(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              children: [
+                // Results Summary
+                Row(
+                  children: [
+                    Icon(Icons.search, color: AppColors.primary, size: 20),
+                    const SizedBox(width: 8),
+                    Text(
+                      'Found $totalResults results',
                       style: TextStyle(
-                        color: Colors.grey.shade600,
-                        fontSize: 12,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.primary,
                       ),
                     ),
-                  ),
-                ],
-              ),
+                    const Spacer(),
+                    TextButton(
+                      onPressed: () {
+                        // Show clearing message with animation
+                        _showClearingMessage(context);
 
-              const SizedBox(height: 16),
-
-              // Tab Bar
-              Container(
-                height: 50,
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade50,
-                  borderRadius: BorderRadius.circular(25),
-                  border: Border.all(color: Colors.grey.shade200),
-                ),
-                child: TabBar(
-                  controller: _tabController,
-                  indicator: BoxDecoration(
-                    color: AppColors.primary,
-                    borderRadius: BorderRadius.circular(25),
-                  ),
-                  labelColor: Colors.white,
-                  unselectedLabelColor: Colors.grey.shade600,
-                  labelStyle: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                  ),
-                  unselectedLabelStyle: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                  ),
-                  tabs: [
-                    Tab(
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.event,
-                            size: 16,
-                            color: _selectedTabIndex == 0
-                                ? Colors.white
-                                : Colors.grey.shade600,
-                          ),
-                          const SizedBox(width: 6),
-                          Text('Events (${widget.results.events.length})'),
-                        ],
-                      ),
-                    ),
-                    Tab(
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.hotel,
-                            size: 16,
-                            color: _selectedTabIndex == 1
-                                ? Colors.white
-                                : Colors.grey.shade600,
-                          ),
-                          const SizedBox(width: 6),
-                          Text('Hotels (${widget.results.hotels.length})'),
-                        ],
+                        // Clear filters after a short delay
+                        Future.delayed(const Duration(milliseconds: 1500), () {
+                          context.read<FilterCubit>().clearFilters();
+                        });
+                      },
+                      child: Text(
+                        'Clear Filters',
+                        style: TextStyle(
+                          color: Colors.grey.shade600,
+                          fontSize: 12,
+                        ),
                       ),
                     ),
                   ],
                 ),
-              ),
-            ],
-          ),
-        ),
 
-        // Tab Bar View
-        Expanded(
-          child: TabBarView(
-            controller: _tabController,
-            children: [
-              // Events Tab
-              _buildEventsList(),
-              // Hotels Tab
-              _buildHotelsList(),
-            ],
+                const SizedBox(height: 16),
+
+                // Tab Bar
+                Container(
+                  height: 50,
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade50,
+                    borderRadius: BorderRadius.circular(25),
+                    border: Border.all(color: Colors.grey.shade200),
+                  ),
+                  child: TabBar(
+                    controller: _tabController,
+                    indicator: BoxDecoration(
+                      color: AppColors.primary,
+                      borderRadius: BorderRadius.circular(25),
+                    ),
+                    labelColor: Colors.white,
+                    unselectedLabelColor: Colors.grey.shade600,
+                    labelStyle: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                    ),
+                    unselectedLabelStyle: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                    ),
+                    tabs: [
+                      Tab(
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.event,
+                              size: 16,
+                              color: _selectedTabIndex == 0
+                                  ? Colors.white
+                                  : Colors.grey.shade600,
+                            ),
+                            const SizedBox(width: 6),
+                            Text('Events (${widget.results.events.length})'),
+                          ],
+                        ),
+                      ),
+                      Tab(
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.hotel,
+                              size: 16,
+                              color: _selectedTabIndex == 1
+                                  ? Colors.white
+                                  : Colors.grey.shade600,
+                            ),
+                            const SizedBox(width: 6),
+                            Text('Hotels (${widget.results.hotels.length})'),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
-        ),
-      ],
+
+          // Tab Bar View
+          Expanded(
+            child: TabBarView(
+              controller: _tabController,
+              children: [
+                // Events Tab
+                _buildEventsList(),
+                // Hotels Tab
+                _buildHotelsList(),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -412,9 +438,13 @@ class _SectionFilterResultsState extends State<SectionFilterResults>
 
                 // Favorite Button
                 InteractiveBookmark(
-                  isSaved: event.isFavorite,
+                  isSaved: _savedEvents[event.id] ?? event.isFavorite,
                   size: 32,
                   onPressed: () {
+                    setState(() {
+                      _savedEvents[event.id] =
+                          !(_savedEvents[event.id] ?? event.isFavorite);
+                    });
                     context.read<FavoriteCubit>().toggleEventFavorite(event.id);
                   },
                 ),
@@ -557,9 +587,13 @@ class _SectionFilterResultsState extends State<SectionFilterResults>
 
                 // Favorite Button
                 InteractiveBookmark(
-                  isSaved: hotel.isFavorite,
+                  isSaved: _savedHotels[hotel.id] ?? hotel.isFavorite,
                   size: 32,
                   onPressed: () {
+                    setState(() {
+                      _savedHotels[hotel.id] =
+                          !(_savedHotels[hotel.id] ?? hotel.isFavorite);
+                    });
                     context.read<FavoriteCubit>().toggleHotelFavorite(hotel.id);
                   },
                 ),
