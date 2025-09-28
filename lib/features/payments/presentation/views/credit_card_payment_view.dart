@@ -36,6 +36,15 @@ class _CreditCardPaymentViewState extends State<CreditCardPaymentView>
   bool _isProcessing = false;
   String _cardType = '';
 
+  // Validation states
+  bool _isCardNumberValid = false;
+  bool _isCardHolderValid = false;
+  bool _isExpiryValid = false;
+  bool _isCvvValid = false;
+
+  // Show validation errors only after user tries to submit
+  bool _showValidationErrors = false;
+
   @override
   void initState() {
     super.initState();
@@ -72,18 +81,142 @@ class _CreditCardPaymentViewState extends State<CreditCardPaymentView>
   }
 
   void _detectCardType(String number) {
-    if (number.startsWith('4')) {
+    // Remove spaces for card type detection
+    final cleanNumber = number.replaceAll(' ', '');
+
+    if (cleanNumber.startsWith('4')) {
       setState(() => _cardType = 'visa');
-    } else if (number.startsWith('5')) {
+    } else if (cleanNumber.startsWith('5')) {
       setState(() => _cardType = 'mastercard');
-    } else if (number.startsWith('3')) {
+    } else if (cleanNumber.startsWith('3')) {
       setState(() => _cardType = 'amex');
     } else {
       setState(() => _cardType = '');
     }
+
+    // Format the card number
+    _formatCardNumber(number);
+  }
+
+  void _validateCardNumber(String number) {
+    // Remove spaces and check if it's a valid card number
+    final cleanNumber = number.replaceAll(' ', '');
+    setState(() {
+      _isCardNumberValid = cleanNumber.length == 16; // Exactly 16 digits
+    });
+  }
+
+  void _formatCardNumber(String value) {
+    // Remove all non-digits
+    final digitsOnly = value.replaceAll(RegExp(r'[^\d]'), '');
+
+    // Limit to 16 digits
+    final limitedDigits = digitsOnly.length > 16
+        ? digitsOnly.substring(0, 16)
+        : digitsOnly;
+
+    // Format with spaces every 4 digits
+    String formatted = '';
+    for (int i = 0; i < limitedDigits.length; i++) {
+      if (i > 0 && i % 4 == 0) {
+        formatted += ' ';
+      }
+      formatted += limitedDigits[i];
+    }
+
+    // Update controller if different
+    if (_cardNumberController.text != formatted) {
+      _cardNumberController.value = TextEditingValue(
+        text: formatted,
+        selection: TextSelection.collapsed(offset: formatted.length),
+      );
+    }
+
+    // Validate the formatted value
+    _validateCardNumber(formatted);
+  }
+
+  void _validateCardHolder(String name) {
+    setState(() {
+      _isCardHolderValid = name.trim().length >= 2 && name.trim().contains(' ');
+    });
+  }
+
+  void _validateExpiryDate(String expiry) {
+    if (expiry.length == 4) {
+      final month = int.tryParse(expiry.substring(0, 2));
+      final year = int.tryParse(expiry.substring(2, 4));
+
+      setState(() {
+        _isExpiryValid =
+            month != null &&
+            year != null &&
+            month >= 1 &&
+            month <= 12 &&
+            year >= 24; // Assuming current year is 2024+
+      });
+    } else {
+      setState(() => _isExpiryValid = false);
+    }
+  }
+
+  void _validateCvv(String cvv) {
+    setState(() {
+      _isCvvValid = cvv.length == 3 && RegExp(r'^\d{3}$').hasMatch(cvv);
+    });
+  }
+
+  void _formatExpiryDate(String value) {
+    // Remove all non-digits
+    final digitsOnly = value.replaceAll(RegExp(r'[^\d]'), '');
+
+    // Limit to 4 digits
+    final limitedDigits = digitsOnly.length > 4
+        ? digitsOnly.substring(0, 4)
+        : digitsOnly;
+
+    // Format with "/" after 2 digits
+    String formatted = limitedDigits;
+    if (limitedDigits.length >= 2) {
+      formatted =
+          '${limitedDigits.substring(0, 2)}/${limitedDigits.substring(2)}';
+    }
+
+    // Update controller if different
+    if (_expiryController.text != formatted) {
+      _expiryController.value = TextEditingValue(
+        text: formatted,
+        selection: TextSelection.collapsed(offset: formatted.length),
+      );
+    }
+
+    // Validate the formatted value
+    _validateExpiryDate(limitedDigits);
+  }
+
+  bool get _isFormValid {
+    return _isCardNumberValid &&
+        _isCardHolderValid &&
+        _isExpiryValid &&
+        _isCvvValid;
   }
 
   void _processPayment() {
+    // Show validation errors when user tries to submit
+    setState(() => _showValidationErrors = true);
+
+    // Check if form is valid before processing
+    if (!_isFormValid) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please fill in all card details correctly'),
+          backgroundColor: Colors.red,
+          duration: Duration(seconds: 3),
+        ),
+      );
+      return;
+    }
+
     setState(() => _isProcessing = true);
 
     // Check if API integration is enabled
@@ -628,9 +761,15 @@ class _CreditCardPaymentViewState extends State<CreditCardPaymentView>
             icon: Icons.credit_card,
             inputFormatters: [
               FilteringTextInputFormatter.digitsOnly,
-              LengthLimitingTextInputFormatter(16),
+              LengthLimitingTextInputFormatter(
+                19,
+              ), // Allow for spaces (16 digits + 3 spaces)
             ],
             onChanged: _detectCardType,
+            isValid: _isCardNumberValid,
+            errorText: _showValidationErrors && !_isCardNumberValid
+                ? 'Enter exactly 16 digits'
+                : null,
           ),
           const SizedBox(height: 16),
 
@@ -641,6 +780,11 @@ class _CreditCardPaymentViewState extends State<CreditCardPaymentView>
             hint: 'John Doe',
             icon: Icons.person,
             textCapitalization: TextCapitalization.words,
+            onChanged: _validateCardHolder,
+            isValid: _isCardHolderValid,
+            errorText: _showValidationErrors && !_isCardHolderValid
+                ? 'Enter first and last name'
+                : null,
           ),
           const SizedBox(height: 16),
 
@@ -655,8 +799,15 @@ class _CreditCardPaymentViewState extends State<CreditCardPaymentView>
                   icon: Icons.calendar_today,
                   inputFormatters: [
                     FilteringTextInputFormatter.digitsOnly,
-                    LengthLimitingTextInputFormatter(4),
+                    LengthLimitingTextInputFormatter(
+                      5,
+                    ), // Allow for "/" character
                   ],
+                  onChanged: _formatExpiryDate,
+                  isValid: _isExpiryValid,
+                  errorText: _showValidationErrors && !_isExpiryValid
+                      ? 'Enter MM/YY format'
+                      : null,
                 ),
               ),
               const SizedBox(width: 16),
@@ -670,6 +821,11 @@ class _CreditCardPaymentViewState extends State<CreditCardPaymentView>
                     FilteringTextInputFormatter.digitsOnly,
                     LengthLimitingTextInputFormatter(3),
                   ],
+                  onChanged: _validateCvv,
+                  isValid: _isCvvValid,
+                  errorText: _showValidationErrors && !_isCvvValid
+                      ? 'Enter 3-digit CVV'
+                      : null,
                   onTap: () {
                     setState(() => _isCardFlipped = true);
                   },
@@ -695,6 +851,8 @@ class _CreditCardPaymentViewState extends State<CreditCardPaymentView>
     VoidCallback? onTap,
     VoidCallback? onEditingComplete,
     Function(String)? onChanged,
+    bool? isValid,
+    String? errorText,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -713,21 +871,49 @@ class _CreditCardPaymentViewState extends State<CreditCardPaymentView>
           decoration: InputDecoration(
             hintText: hint,
             hintStyle: TextStyle(color: Colors.grey.shade500),
-            prefixIcon: Icon(icon, color: Colors.grey.shade600),
+            prefixIcon: Icon(
+              icon,
+              color: isValid == true
+                  ? Colors.green
+                  : (_showValidationErrors && isValid == false)
+                  ? Colors.red
+                  : Colors.grey.shade600,
+            ),
             filled: true,
-            fillColor: Colors.grey.shade50,
+            fillColor: isValid == true
+                ? Colors.green.shade50
+                : (_showValidationErrors && isValid == false)
+                ? Colors.red.shade50
+                : Colors.grey.shade50,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: BorderSide.none,
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: Color(0xFF7F2F3A), width: 2),
+              borderSide: BorderSide(
+                color: isValid == true
+                    ? Colors.green
+                    : (_showValidationErrors && isValid == false)
+                    ? Colors.red
+                    : const Color(0xFF7F2F3A),
+                width: 2,
+              ),
+            ),
+            errorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(color: Colors.red, width: 2),
+            ),
+            focusedErrorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(color: Colors.red, width: 2),
             ),
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 16,
               vertical: 12,
             ),
+            errorText: errorText,
+            errorStyle: const TextStyle(fontSize: 12, color: Colors.red),
           ),
           inputFormatters: inputFormatters,
           textCapitalization: textCapitalization ?? TextCapitalization.none,
@@ -744,9 +930,11 @@ class _CreditCardPaymentViewState extends State<CreditCardPaymentView>
       width: double.infinity,
       height: 56,
       child: ElevatedButton(
-        onPressed: _isProcessing ? null : _processPayment,
+        onPressed: (_isProcessing || !_isFormValid) ? null : _processPayment,
         style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xFF7F2F3A),
+          backgroundColor: _isFormValid
+              ? const Color(0xFF7F2F3A)
+              : Colors.grey.shade400,
           foregroundColor: Colors.white,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
@@ -765,10 +953,12 @@ class _CreditCardPaymentViewState extends State<CreditCardPaymentView>
             : Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(Icons.payment, size: 20),
+                  Icon(_isFormValid ? Icons.payment : Icons.lock, size: 20),
                   const SizedBox(width: 12),
                   Text(
-                    'Pay ${widget.totalAmount}',
+                    _isFormValid
+                        ? 'Pay ${widget.totalAmount}'
+                        : 'Fill card details to pay',
                     style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
