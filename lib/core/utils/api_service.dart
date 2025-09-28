@@ -122,7 +122,8 @@ class ApiService {
       case DioExceptionType.receiveTimeout:
         return ApiError(
           code: 408,
-          message: 'Connection timeout. Please check your internet connection.',
+          message:
+              'The request took longer than expected to receive data. It was aborted. To get rid of this exception, try raising the RequestOptions.receiveTimeout above the duration or improve the response time of the server.',
         );
       case DioExceptionType.badResponse:
         if (error.response?.data != null) {

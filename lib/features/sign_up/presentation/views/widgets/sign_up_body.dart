@@ -212,11 +212,14 @@ class _SignUpBodyState extends State<SignUpBody> {
       color = Colors.orange;
     } else if (apiMessage.toLowerCase().contains('connection') ||
         apiMessage.toLowerCase().contains('timeout') ||
-        apiMessage.toLowerCase().contains('network')) {
-      title = '🌐 Connection Error';
-      message = 'Please check your internet connection\nand try again.';
-      icon = Icons.wifi_off;
-      color = Colors.blue;
+        apiMessage.toLowerCase().contains('network') ||
+        apiMessage.toLowerCase().contains('took longer') ||
+        apiMessage.toLowerCase().contains('aborted')) {
+      title = '⏱️ Request Timeout';
+      message =
+          'The request is taking longer than expected.\nThis might be due to server load.\nPlease try again in a moment.';
+      icon = Icons.timer;
+      color = Colors.orange;
     } else if (apiMessage.toLowerCase().contains('server error') ||
         apiMessage.toLowerCase().contains('internal error')) {
       title = '🛠️ Server Error';
