@@ -1,4 +1,5 @@
 import 'package:go_router/go_router.dart';
+import 'package:smartshop_map/features/Settings/presentation/views/settings_view.dart';
 import '../../features/Splash_Screen/presentation/views/widgets/splash_screen_view.dart';
 import '../../features/sign_in/presentation/views/sign_in_view.dart';
 import '../../features/sign_up/presentation/views/sign_up_view.dart';
@@ -11,6 +12,8 @@ import '../../features/Home/presentation/views/ongoing_events_view.dart';
 import '../../features/Home/presentation/views/expired_events_view.dart';
 import '../../features/Hotel_Home/presentation/views/featured_hotels_view.dart';
 import '../../features/Hotel_Home/presentation/views/near_location_hotels_view.dart';
+import '../../features/Calendar/presentation/views/calendar_view.dart';
+import '../../features/Help_Faqs/presentation/views/help_faqs_view.dart';
 import '../../features/My_Profile/presentation/views/my_profile_view.dart';
 import '../../features/My_Profile/presentation/views/edit_profile_view.dart';
 import '../../features/Search_White_Bar/presentation/views/search_view.dart';
@@ -129,8 +132,7 @@ class AppRouters {
       ),
       GoRoute(
         path: kCalendarView,
-        builder: (context, state) =>
-            const Scaffold(body: Center(child: Text('Calendar'))),
+        builder: (context, state) => const CalendarView(),
       ),
       GoRoute(
         path: kAiChatbotView,
@@ -139,13 +141,11 @@ class AppRouters {
       ),
       GoRoute(
         path: kSettingsView,
-        builder: (context, state) =>
-            const Scaffold(body: Center(child: Text('Settings'))),
+        builder: (context, state) => const SettingsView(),
       ),
       GoRoute(
         path: kHelpFaqsView,
-        builder: (context, state) =>
-            const Scaffold(body: Center(child: Text('Help & FAQs'))),
+        builder: (context, state) => const HelpFaqsView(),
       ),
       GoRoute(
         path: kSearchView,

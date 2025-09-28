@@ -9,15 +9,9 @@ class BookingSuccessView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    print('🎫 BookingSuccessView - Success Data: $successData');
-
     final type = successData?['type'] ?? 'unknown';
     final bookingData = successData?['booking'] as Map<String, dynamic>?;
     final ticketData = successData?['ticket'] as Map<String, dynamic>?;
-
-    print('🎫 Type: $type');
-    print('🎫 Booking Data: $bookingData');
-    print('🎫 Ticket Data: $ticketData');
 
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FA),
@@ -393,11 +387,7 @@ class BookingSuccessView extends StatelessWidget {
   }
 
   Widget _buildEventTicketDetails(Map<String, dynamic>? ticket) {
-    print('🎫 Building Event Ticket Details:');
-    print('🎫 Ticket data: $ticket');
-
     if (ticket == null) {
-      print('❌ No ticket data available');
       return const Center(
         child: Text(
           'No ticket details available',
@@ -405,8 +395,6 @@ class BookingSuccessView extends StatelessWidget {
         ),
       );
     }
-
-    print('🎫 Building Column widget with ${ticket.length} ticket fields');
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -428,98 +416,47 @@ class BookingSuccessView extends StatelessWidget {
           ),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(20),
-            child: Builder(
-              builder: (context) {
-                final imageUrl = ticket['event_image_url']?.toString();
-                print('🎫 Event Image URL: "$imageUrl"');
-                print(
-                  '🎫 Image URL is not empty: ${imageUrl?.isNotEmpty == true}',
-                );
-
-                return imageUrl?.isNotEmpty == true
-                    ? Builder(
-                        builder: (context) {
-                          print(
-                            '🎫 Building Image.network widget with URL: "$imageUrl"',
-                          );
-                          return Image.network(
-                            imageUrl!,
-                            fit: BoxFit.cover,
-                            loadingBuilder: (context, child, loadingProgress) {
-                              if (loadingProgress == null) {
-                                print('✅ Image loaded successfully');
-                                return child;
-                              }
-                              print(
-                                '🔄 Image loading... ${loadingProgress.cumulativeBytesLoaded}/${loadingProgress.expectedTotalBytes}',
-                              );
-                              return Container(
-                                decoration: BoxDecoration(
-                                  gradient: LinearGradient(
-                                    colors: [
-                                      AppColors.primary.withOpacity(0.1),
-                                      AppColors.primary.withOpacity(0.2),
-                                    ],
-                                    begin: Alignment.topLeft,
-                                    end: Alignment.bottomRight,
-                                  ),
-                                ),
-                                child: const Center(
-                                  child: CircularProgressIndicator(
-                                    color: AppColors.primary,
-                                  ),
-                                ),
-                              );
-                            },
-                            errorBuilder: (context, error, stackTrace) {
-                              print('❌ Image loading error: $error');
-                              return Container(
-                                decoration: BoxDecoration(
-                                  gradient: LinearGradient(
-                                    colors: [
-                                      AppColors.primary.withOpacity(0.1),
-                                      AppColors.primary.withOpacity(0.2),
-                                    ],
-                                    begin: Alignment.topLeft,
-                                    end: Alignment.bottomRight,
-                                  ),
-                                ),
-                                child: Icon(
-                                  Icons.event,
-                                  size: 60,
-                                  color: AppColors.primary,
-                                ),
-                              );
-                            },
-                          );
-                        },
-                      )
-                    : Builder(
-                        builder: (context) {
-                          print(
-                            '🎫 Building fallback Container (no image URL)',
-                          );
-                          return Container(
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                colors: [
-                                  AppColors.primary.withOpacity(0.1),
-                                  AppColors.primary.withOpacity(0.2),
-                                ],
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                              ),
-                            ),
-                            child: Icon(
-                              Icons.event,
-                              size: 60,
-                              color: AppColors.primary,
-                            ),
-                          );
-                        },
+            child: ticket['event_image_url']?.toString().isNotEmpty == true
+                ? Image.network(
+                    ticket['event_image_url'],
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) {
+                      return Container(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [
+                              AppColors.primary.withOpacity(0.1),
+                              AppColors.primary.withOpacity(0.2),
+                            ],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                        ),
+                        child: Icon(
+                          Icons.event,
+                          size: 60,
+                          color: AppColors.primary,
+                        ),
                       );
-              },
-            ),
+                    },
+                  )
+                : Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [
+                          AppColors.primary.withOpacity(0.1),
+                          AppColors.primary.withOpacity(0.2),
+                        ],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                    ),
+                    child: Icon(
+                      Icons.event,
+                      size: 60,
+                      color: AppColors.primary,
+                    ),
+                  ),
           ),
         ),
 
@@ -531,33 +468,18 @@ class BookingSuccessView extends StatelessWidget {
             Icon(Icons.event, color: AppColors.primary, size: 24),
             const SizedBox(width: 8),
             Expanded(
-              child: Builder(
-                builder: (context) {
-                  final title = ticket['event_title'] ?? 'Unknown Event';
-                  print('🎫 Building Text Widget with title: "$title"');
-                  return Text(
-                    title,
-                    style: const TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.w800,
-                      color: Colors.black87,
-                    ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  );
-                },
+              child: Text(
+                ticket['event_title'] ?? 'Unknown Event',
+                style: const TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.w800,
+                  color: Colors.black87,
+                ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
               ),
             ),
           ],
-        ),
-
-        // Debug: Print the actual title being displayed
-        Builder(
-          builder: (context) {
-            final title = ticket['event_title'] ?? 'Unknown Event';
-            print('🎫 Displaying Event Title: "$title"');
-            return const SizedBox.shrink();
-          },
         ),
 
         const SizedBox(height: 20),
@@ -764,38 +686,6 @@ class BookingSuccessView extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                 ),
               ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildDetailRow(String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(
-            width: 120,
-            child: Text(
-              '$label:',
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.grey.shade700,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ),
-          Expanded(
-            child: Text(
-              value,
-              style: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                color: Colors.black87,
-              ),
             ),
           ),
         ],
