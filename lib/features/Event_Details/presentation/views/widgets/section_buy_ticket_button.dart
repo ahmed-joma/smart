@@ -62,8 +62,16 @@ class SectionBuyTicketButton extends StatelessWidget {
 
   void _showTicketConfirmation(BuildContext context) {
     // تحويل السعر من "SR 120" إلى رقم
-    final priceValue = double.tryParse(price.replaceAll('SR ', '')) ?? 120.0;
-    final totalPrice = priceValue + 18.0; // إضافة الضريبة
+    final cleanPrice = price.replaceAll('SR', '').replaceAll(' ', '').trim();
+    final priceValue = double.tryParse(cleanPrice) ?? 120.0;
+    final taxAmount = priceValue * 0.15; // 15% ضريبة
+    final totalPrice = priceValue + taxAmount; // السعر + الضريبة
+
+    print('🎫 Original price: $price');
+    print('🎫 Clean price: $cleanPrice');
+    print('🎫 Price value: $priceValue');
+    print('🎫 Tax amount (15%): $taxAmount');
+    print('🎫 Total price: $totalPrice');
 
     showDialog(
       context: context,
@@ -133,7 +141,7 @@ class SectionBuyTicketButton extends StatelessWidget {
                 children: [
                   const Text('Ticket Price:'),
                   Text(
-                    price,
+                    'SR ${priceValue.toStringAsFixed(1)}',
                     style: const TextStyle(fontWeight: FontWeight.w600),
                   ),
                 ],
@@ -142,8 +150,11 @@ class SectionBuyTicketButton extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text('Tax & Fees:'),
-                  Text('SR 18', style: TextStyle(color: Colors.grey.shade600)),
+                  const Text('Tax & Fees (15%):'),
+                  Text(
+                    'SR ${taxAmount.toStringAsFixed(1)}',
+                    style: TextStyle(color: Colors.grey.shade600),
+                  ),
                 ],
               ),
               const SizedBox(height: 8),
@@ -195,6 +206,10 @@ class SectionBuyTicketButton extends StatelessWidget {
   }
 
   void _proceedToPayment(BuildContext context, double totalPrice) {
+    // حساب الضريبة مرة أخرى
+    final cleanPrice = price.replaceAll('SR', '').replaceAll(' ', '').trim();
+    final priceValue = double.tryParse(cleanPrice) ?? 120.0;
+    final taxAmount = priceValue * 0.15; // 15% ضريبة
     // Get event ID from eventData
     int? eventId;
     if (eventData != null) {
@@ -209,6 +224,12 @@ class SectionBuyTicketButton extends StatelessWidget {
       }
     }
 
+    // Fallback event ID if not found
+    if (eventId == null) {
+      eventId = 1; // Default event ID for testing
+      print('⚠️ Event ID not found, using fallback ID: $eventId');
+    }
+
     final orderData = {
       // Real API data
       'title': eventData?['title'] ?? 'City Walk event',
@@ -217,7 +238,7 @@ class SectionBuyTicketButton extends StatelessWidget {
       'image': eventData?['image'] ?? 'assets/images/citywaikevents.svg',
       // Pricing
       'price': price,
-      'tax': 'SR 18',
+      'tax': 'SR ${taxAmount.toStringAsFixed(1)}',
       'total': 'SR ${totalPrice.toStringAsFixed(1)}',
       'type': 'event',
       // API integration data

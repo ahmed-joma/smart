@@ -5,7 +5,6 @@ import '../../../../../../shared/shared.dart';
 import '../../../../../../core/utils/cubits/order_cubit.dart';
 import '../../../../../../core/utils/models/order_models.dart';
 
-
 class SectionBookHotelButton extends StatelessWidget {
   final double totalPrice;
   final Map<String, dynamic>? hotelData;
@@ -53,7 +52,13 @@ class SectionBookHotelButton extends StatelessWidget {
   }
 
   void _showHotelBookingConfirmation(BuildContext context) {
-    final totalWithTax = totalPrice + 18.0;
+    // حساب الضريبة 15% من السعر الإجمالي
+    final taxAmount = totalPrice * 0.15; // 15% ضريبة
+    final totalWithTax = totalPrice + taxAmount; // السعر + الضريبة
+
+    print('🏨 Original price: SR ${totalPrice.toStringAsFixed(1)}');
+    print('🏨 Tax amount (15%): SR ${taxAmount.toStringAsFixed(1)}');
+    print('🏨 Total with tax: SR ${totalWithTax.toStringAsFixed(1)}');
 
     showDialog(
       context: context,
@@ -138,9 +143,9 @@ class SectionBookHotelButton extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text('Tax & Fees:'),
+                  const Text('Tax & Fees (15%):'),
                   Text(
-                    'SR 18.0',
+                    'SR ${taxAmount.toStringAsFixed(1)}',
                     style: TextStyle(color: Colors.grey.shade600),
                   ),
                 ],
@@ -409,6 +414,9 @@ class SectionBookHotelButton extends StatelessWidget {
       return;
     }
 
+    // حساب الضريبة مرة أخرى للتأكد من القيم الصحيحة
+    final taxAmount = totalPrice * 0.15; // 15% ضريبة
+
     // Navigate to payment page with hotel booking data (using real API data)
     final orderData = {
       // Real API data
@@ -418,7 +426,7 @@ class SectionBookHotelButton extends StatelessWidget {
       'image': hotelData?['image'] ?? 'assets/images/hotel.svg',
       // Pricing
       'price': 'SR ${totalPrice.toStringAsFixed(1)}',
-      'tax': 'SR 18',
+      'tax': 'SR ${taxAmount.toStringAsFixed(1)}',
       'total': 'SR ${totalWithTax.toStringAsFixed(1)}',
       'type': 'hotel',
       // Booking details

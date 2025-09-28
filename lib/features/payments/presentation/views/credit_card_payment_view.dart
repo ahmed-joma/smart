@@ -209,12 +209,26 @@ class _CreditCardPaymentViewState extends State<CreditCardPaymentView>
       final eventId = orderData['event_id'] as int?;
       final totalPrice = orderData['total_price'] as double?;
 
+      print('🎫 Event ID: $eventId');
+      print('💰 Total Price: $totalPrice');
+
       if (eventId != null && totalPrice != null) {
+        print(
+          '✅ Calling buyEventTicket with ID: $eventId and price: $totalPrice',
+        );
         orderCubit.buyEventTicket(eventId: eventId, totalPrice: totalPrice);
       } else {
         setState(() => _isProcessing = false);
+        print(
+          '❌ Missing event data - Event ID: $eventId, Total Price: $totalPrice',
+        );
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Missing event ticket data')),
+          SnackBar(
+            content: Text(
+              'Missing event ticket data - Event ID: $eventId, Price: $totalPrice',
+            ),
+            backgroundColor: Colors.red,
+          ),
         );
       }
     }
@@ -776,6 +790,15 @@ class _CreditCardPaymentViewState extends State<CreditCardPaymentView>
 
   void _showEventTicketSuccess(EventTicket ticket) {
     // Navigate to a success page showing the event ticket details
+    print('🎫 EventTicket Success Data:');
+    print('🎫 Ticket ID: ${ticket.ticketId}');
+    print('🎫 Event Title: ${ticket.eventTitle}');
+    print('🎫 Event Image URL: ${ticket.eventImageUrl}');
+    print('🎫 Event City: ${ticket.eventCity}');
+    print('🎫 Event Venue: ${ticket.eventVenue}');
+    print('🎫 Order Number: ${ticket.orderNumber}');
+    print('🎫 User Name: ${ticket.userName}');
+
     context.go(
       '/ticketSuccess',
       extra: {'type': 'event', 'ticket': ticket.toJson()},
