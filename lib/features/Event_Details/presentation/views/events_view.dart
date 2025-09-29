@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../../shared/shared.dart';
+import '../../../../../core/utils/cubits/order_cubit.dart';
+import '../../../../../core/utils/models/order_models.dart';
 
 class EventsView extends StatefulWidget {
   const EventsView({super.key});
@@ -10,24 +13,27 @@ class EventsView extends StatefulWidget {
 }
 
 class _EventsViewState extends State<EventsView> {
-  String _selectedTab = 'UPCOMING'; // Default selected tab
+  String _selectedTab = 'CURRENT'; // Default selected tab
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      body: SafeArea(
-        child: Column(
-          children: [
-            // Header
-            _buildHeader(context),
+    return BlocProvider(
+      create: (context) => OrderCubit()..getUserOrders(),
+      child: Scaffold(
+        backgroundColor: Colors.white,
+        body: SafeArea(
+          child: Column(
+            children: [
+              // Header
+              _buildHeader(context),
 
-            // Segmented Control
-            _buildSegmentedControl(),
+              // Segmented Control
+              _buildSegmentedControl(),
 
-            // Main Content
-            Expanded(child: _buildMainContent()),
-          ],
+              // Main Content
+              Expanded(child: _buildMainContent()),
+            ],
+          ),
         ),
       ),
     );
@@ -53,7 +59,7 @@ class _EventsViewState extends State<EventsView> {
           // Title
           const Expanded(
             child: Text(
-              'Events',
+              'My Orders',
               style: TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.w600,
@@ -85,19 +91,19 @@ class _EventsViewState extends State<EventsView> {
       ),
       child: Row(
         children: [
-          // UPCOMING Tab
+          // CURRENT Tab
           Expanded(
             child: GestureDetector(
-              onTap: () => _onTabChanged('UPCOMING'),
+              onTap: () => _onTabChanged('CURRENT'),
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 300),
                 padding: const EdgeInsets.symmetric(vertical: 12),
                 decoration: BoxDecoration(
-                  color: _selectedTab == 'UPCOMING'
+                  color: _selectedTab == 'CURRENT'
                       ? Colors.white
                       : Colors.transparent,
                   borderRadius: BorderRadius.circular(30),
-                  boxShadow: _selectedTab == 'UPCOMING'
+                  boxShadow: _selectedTab == 'CURRENT'
                       ? [
                           BoxShadow(
                             color: Colors.black.withOpacity(0.1),
@@ -109,13 +115,13 @@ class _EventsViewState extends State<EventsView> {
                 ),
                 child: Center(
                   child: Text(
-                    'UPCOMING',
+                    'CURRENT',
                     style: TextStyle(
                       fontSize: 14,
-                      fontWeight: _selectedTab == 'UPCOMING'
+                      fontWeight: _selectedTab == 'CURRENT'
                           ? FontWeight.w600
                           : FontWeight.w500,
-                      color: _selectedTab == 'UPCOMING'
+                      color: _selectedTab == 'CURRENT'
                           ? AppColors.primary
                           : Colors.grey,
                     ),
@@ -127,19 +133,19 @@ class _EventsViewState extends State<EventsView> {
 
           const SizedBox(width: 4),
 
-          // PAST EVENTS Tab
+          // PAST Tab
           Expanded(
             child: GestureDetector(
-              onTap: () => _onTabChanged('PAST EVENTS'),
+              onTap: () => _onTabChanged('PAST'),
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 300),
                 padding: const EdgeInsets.symmetric(vertical: 12),
                 decoration: BoxDecoration(
-                  color: _selectedTab == 'PAST EVENTS'
+                  color: _selectedTab == 'PAST'
                       ? Colors.white
                       : Colors.transparent,
                   borderRadius: BorderRadius.circular(30),
-                  boxShadow: _selectedTab == 'PAST EVENTS'
+                  boxShadow: _selectedTab == 'PAST'
                       ? [
                           BoxShadow(
                             color: Colors.black.withOpacity(0.1),
@@ -151,13 +157,13 @@ class _EventsViewState extends State<EventsView> {
                 ),
                 child: Center(
                   child: Text(
-                    'PAST EVENTS',
+                    'PAST',
                     style: TextStyle(
                       fontSize: 14,
-                      fontWeight: _selectedTab == 'PAST EVENTS'
+                      fontWeight: _selectedTab == 'PAST'
                           ? FontWeight.w600
                           : FontWeight.w500,
-                      color: _selectedTab == 'PAST EVENTS'
+                      color: _selectedTab == 'PAST'
                           ? AppColors.primary
                           : Colors.grey,
                     ),
@@ -172,13 +178,170 @@ class _EventsViewState extends State<EventsView> {
   }
 
   Widget _buildMainContent() {
+    return BlocBuilder<OrderCubit, OrderState>(
+      builder: (context, state) {
+        if (state is UserOrdersLoading) {
+          return const Center(
+            child: CircularProgressIndicator(color: AppColors.primary),
+          );
+        }
+
+        if (state is UserOrdersError) {
+          return _buildErrorState(state.message);
+        }
+
+        if (state is UserOrdersSuccess) {
+          return _buildOrdersList(state.userOrders);
+        }
+
+        return _buildEmptyState();
+      },
+    );
+  }
+
+  Widget _buildOrdersList(UserOrdersData userOrders) {
+    List<dynamic> currentOrders = [];
+    List<dynamic> pastOrders = [];
+
+    if (_selectedTab == 'CURRENT') {
+      currentOrders.addAll(userOrders.events.upcoming);
+      currentOrders.addAll(userOrders.hotels.current);
+    } else {
+      pastOrders.addAll(userOrders.events.past);
+      pastOrders.addAll(userOrders.hotels.past);
+    }
+
+    final ordersToShow = _selectedTab == 'CURRENT' ? currentOrders : pastOrders;
+
+    if (ordersToShow.isEmpty) {
+      return _buildEmptyState();
+    }
+
+    return ListView.builder(
+      padding: const EdgeInsets.all(20),
+      itemCount: ordersToShow.length,
+      itemBuilder: (context, index) {
+        final order = ordersToShow[index];
+        return _buildOrderCard(order);
+      },
+    );
+  }
+
+  Widget _buildOrderCard(dynamic order) {
+    bool isHotel = order is OrderedHotel;
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          // Image
+          Container(
+            width: 80,
+            height: 80,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(12),
+              image: DecorationImage(
+                image: NetworkImage(isHotel ? order.coverUrl : order.imageUrl),
+                fit: BoxFit.cover,
+                onError: (exception, stackTrace) {
+                  // Handle error
+                },
+              ),
+            ),
+          ),
+
+          const SizedBox(width: 16),
+
+          // Details
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  isHotel ? order.name : 'Event #${order.id}',
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.black87,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  isHotel ? order.city : order.cityName,
+                  style: TextStyle(fontSize: 14, color: Colors.grey.shade600),
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: AppColors.primary.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        isHotel ? 'Hotel' : 'Event',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                          color: AppColors.primary,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      isHotel ? 'SR ${order.pricePerNight}' : 'View Details',
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.black87,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+
+          // Action Button
+          IconButton(
+            onPressed: () => _showOrderDetails(order),
+            icon: const Icon(
+              Icons.arrow_forward_ios,
+              color: Colors.grey,
+              size: 16,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEmptyState() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 40),
       child: Column(
         children: [
-          const SizedBox(height: 150),
+          const SizedBox(height: 100),
 
-          // Calendar Illustration
+          // Orders Illustration
           Container(
             width: 160,
             height: 160,
@@ -189,7 +352,7 @@ class _EventsViewState extends State<EventsView> {
             child: Stack(
               alignment: Alignment.center,
               children: [
-                // Calendar Icon
+                // Shopping Bag Icon
                 Container(
                   width: 110,
                   height: 110,
@@ -204,78 +367,14 @@ class _EventsViewState extends State<EventsView> {
                       ),
                     ],
                   ),
-                  child: Stack(
-                    children: [
-                      // Calendar Header (Red)
-                      Positioned(
-                        top: 0,
-                        left: 0,
-                        right: 0,
-                        child: Container(
-                          height: 20,
-                          decoration: BoxDecoration(
-                            color: AppColors.primary,
-                            borderRadius: const BorderRadius.only(
-                              topLeft: Radius.circular(8),
-                              topRight: Radius.circular(8),
-                            ),
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: [
-                              Container(
-                                width: 4,
-                                height: 4,
-                                decoration: BoxDecoration(
-                                  color: Colors.white.withOpacity(0.7),
-                                  shape: BoxShape.circle,
-                                ),
-                              ),
-                              Container(
-                                width: 4,
-                                height: 4,
-                                decoration: BoxDecoration(
-                                  color: Colors.white.withOpacity(0.7),
-                                  shape: BoxShape.circle,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-
-                      // Calendar Grid
-                      Positioned(
-                        top: 25,
-                        left: 8,
-                        right: 8,
-                        child: Column(
-                          children: [
-                            // Grid rows
-                            for (int i = 0; i < 4; i++)
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceEvenly,
-                                children: [
-                                  for (int j = 0; j < 7; j++)
-                                    Container(
-                                      width: 6,
-                                      height: 6,
-                                      decoration: BoxDecoration(
-                                        color: Colors.blue.shade800,
-                                        borderRadius: BorderRadius.circular(1),
-                                      ),
-                                    ),
-                                ],
-                              ),
-                          ],
-                        ),
-                      ),
-                    ],
+                  child: const Icon(
+                    Icons.shopping_bag_outlined,
+                    color: AppColors.primary,
+                    size: 60,
                   ),
                 ),
 
-                // Clock Icon (overlapping)
+                // Check Icon (overlapping)
                 Positioned(
                   bottom: 15,
                   right: 15,
@@ -283,11 +382,11 @@ class _EventsViewState extends State<EventsView> {
                     width: 50,
                     height: 50,
                     decoration: BoxDecoration(
-                      color: Colors.blue.shade600,
+                      color: Colors.green.shade600,
                       shape: BoxShape.circle,
                     ),
                     child: const Icon(
-                      Icons.access_time,
+                      Icons.check,
                       color: Colors.white,
                       size: 30,
                     ),
@@ -300,9 +399,9 @@ class _EventsViewState extends State<EventsView> {
           const SizedBox(height: 32),
 
           // Primary Message
-          const Text(
-            'No Upcoming Event',
-            style: TextStyle(
+          Text(
+            _selectedTab == 'CURRENT' ? 'No Current Orders' : 'No Past Orders',
+            style: const TextStyle(
               fontSize: 26,
               fontWeight: FontWeight.w400,
               color: AppColors.primary,
@@ -314,14 +413,16 @@ class _EventsViewState extends State<EventsView> {
 
           // Secondary Message
           Text(
-            'Lorem ipsum dolor sit amet,\nconsectetur',
+            _selectedTab == 'CURRENT'
+                ? 'You don\'t have any active bookings or upcoming events'
+                : 'You haven\'t completed any bookings or events yet',
             style: TextStyle(fontSize: 16, color: Colors.grey.shade600),
             textAlign: TextAlign.center,
           ),
 
           const SizedBox(height: 200),
 
-          // Explore Events Button
+          // Explore Button
           Container(
             width: double.infinity,
             height: 62,
@@ -329,33 +430,114 @@ class _EventsViewState extends State<EventsView> {
               color: AppColors.primary,
               borderRadius: BorderRadius.circular(16),
             ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Text(
-                  'EXPLORE EVENTS',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w400,
-                  ),
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                borderRadius: BorderRadius.circular(16),
+                onTap: () => context.go('/homeView'),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Text(
+                      'EXPLORE HOTELS & EVENTS',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w400,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Container(
+                      width: 26,
+                      height: 26,
+                      decoration: BoxDecoration(
+                        color: Colors.blue.shade600,
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.arrow_forward,
+                        color: Colors.white,
+                        size: 20,
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(width: 12),
-                Container(
-                  width: 26,
-                  height: 26,
-                  decoration: BoxDecoration(
-                    color: Colors.blue.shade600,
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(
-                    Icons.arrow_forward,
-                    color: Colors.white,
-                    size: 20,
-                  ),
-                ),
-              ],
+              ),
             ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildErrorState(String message) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.error_outline, size: 80, color: Colors.red.shade300),
+            const SizedBox(height: 20),
+            Text(
+              'Error Loading Orders',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.w600,
+                color: Colors.red.shade700,
+              ),
+            ),
+            const SizedBox(height: 10),
+            Text(
+              message,
+              style: TextStyle(fontSize: 14, color: Colors.grey.shade600),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 30),
+            ElevatedButton(
+              onPressed: () {
+                context.read<OrderCubit>().getUserOrders();
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                foregroundColor: Colors.white,
+              ),
+              child: const Text('Retry'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showOrderDetails(dynamic order) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(order is OrderedHotel ? order.name : 'Event #${order.id}'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Type: ${order is OrderedHotel ? 'Hotel' : 'Event'}'),
+            Text(
+              'City: ${order is OrderedHotel ? order.city : order.cityName}',
+            ),
+            if (order is OrderedHotel) ...[
+              Text('Price per night: SR ${order.pricePerNight}'),
+              Text('Rating: ${order.rate} stars'),
+              Text('Venue: ${order.venue}'),
+            ] else ...[
+              Text('Venue: ${order.venue}'),
+              Text('Date: ${order.formattedStartAt}'),
+              Text('Attendees: ${order.attendeesImages.length}'),
+            ],
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Close'),
           ),
         ],
       ),
