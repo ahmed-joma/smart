@@ -105,26 +105,6 @@ class _EventsViewState extends State<EventsView> with WidgetsBindingObserver {
             ),
           ),
 
-          // Refresh Icon
-          GestureDetector(
-            onTap: () {
-              print('🔄 Manual refresh triggered');
-              context.read<OrderCubit>().refreshUserOrders();
-              // Show loading indicator
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Refreshing orders...'),
-                  duration: Duration(seconds: 1),
-                ),
-              );
-            },
-            child: const Icon(
-              Icons.refresh,
-              color: AppColors.primary,
-              size: 24,
-            ),
-          ),
-
           const SizedBox(width: 8),
 
           // Menu Icon
@@ -503,51 +483,7 @@ class _EventsViewState extends State<EventsView> with WidgetsBindingObserver {
             textAlign: TextAlign.center,
           ),
 
-          const SizedBox(height: 200),
-
-          // Explore Button
-          Container(
-            width: double.infinity,
-            height: 62,
-            decoration: BoxDecoration(
-              color: AppColors.primary,
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: Material(
-              color: Colors.transparent,
-              child: InkWell(
-                borderRadius: BorderRadius.circular(16),
-                onTap: () => context.go('/homeView'),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Text(
-                      'EXPLORE HOTELS & EVENTS',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w400,
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Container(
-                      width: 26,
-                      height: 26,
-                      decoration: BoxDecoration(
-                        color: Colors.blue.shade600,
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Icon(
-                        Icons.arrow_forward,
-                        color: Colors.white,
-                        size: 20,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
+          const SizedBox(height: 50),
         ],
       ),
     );

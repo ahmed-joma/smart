@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
-import '../../../../shared/shared.dart';
 import 'widgets/chat_header.dart';
 import 'widgets/chat_search_bar.dart';
 import 'widgets/chat_messages_list.dart';
