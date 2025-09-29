@@ -4,6 +4,7 @@ import '../../../../core/utils/service_locator.dart';
 import '../../../../core/utils/repositories/auth_repository.dart';
 import '../../../../core/utils/models/auth_models.dart';
 import '../../../../core/utils/models/api_error.dart';
+import '../../../../core/utils/api_service.dart';
 
 // States
 abstract class SignUpState extends Equatable {
@@ -62,6 +63,8 @@ class SignUpCubit extends Cubit<SignUpState> {
       final response = await _authRepository.register(request);
 
       if (response.isSuccess && response.data != null) {
+        // حفظ بيانات المستخدم في SharedPreferences بعد التسجيل الناجح
+        await _saveUserDataAfterSignUp(response.data!.user);
         emit(SignUpSuccess(user: response.data!.user));
       } else {
         // تحقق من نوع الخطأ أولاً
@@ -85,16 +88,17 @@ class SignUpCubit extends Cubit<SignUpState> {
             message.contains('created') ||
             message.contains('registered')) {
           // تم إنشاء الحساب وإرسال رمز التأكيد بنجاح
-          emit(
-            SignUpSuccess(
-              user: User(
-                id: 0,
-                name: name,
-                email: email,
-                isEmailVerified: false,
-              ),
-            ),
+          final user = User(
+            id: 0,
+            name: name,
+            email: email,
+            isEmailVerified: false,
           );
+
+          // حفظ بيانات المستخدم في SharedPreferences بعد التسجيل الناجح
+          await _saveUserDataAfterSignUp(user);
+
+          emit(SignUpSuccess(user: user));
         } else {
           // تحقق من الأخطاء المحددة في data أو msg
           String errorMessage = response.msg;
@@ -121,5 +125,29 @@ class SignUpCubit extends Cubit<SignUpState> {
 
   void resetState() {
     emit(SignUpInitial());
+  }
+
+  // دالة لحفظ بيانات المستخدم في SharedPreferences بعد التسجيل الناجح
+  Future<void> _saveUserDataAfterSignUp(User user) async {
+    try {
+      final apiService = sl<ApiService>();
+
+      // إنشاء بيانات المستخدم بنفس تنسيق تسجيل الدخول
+      final userData = {
+        'id': user.id,
+        'full_name': user.name,
+        'email': user.email,
+        'is_email_verified': user.isEmailVerified,
+        'phone': user.phone,
+        'created_at': DateTime.now().toIso8601String(),
+      };
+
+      // حفظ البيانات في SharedPreferences
+      await apiService.setUserData(userData);
+
+      print('✅ User data saved after sign up: ${user.name} (${user.email})');
+    } catch (e) {
+      print('❌ Error saving user data after sign up: $e');
+    }
   }
 }
