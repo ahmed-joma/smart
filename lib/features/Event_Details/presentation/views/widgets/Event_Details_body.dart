@@ -268,7 +268,8 @@ class _EventDetailsBodyState extends State<EventDetailsBody>
                 // Fixed Buy Ticket Button at Bottom
                 SectionBuyTicketButton(
                   price: event['price']?.toString() ?? 'SR0',
-                  eventData: event,
+                  eventData: event, // ✅ استخدام البيانات المعروضة (الصحيحة)
+                  eventId: widget.eventId, // ✅ تمرير الـ ID مباشرة
                 ),
               ],
             );

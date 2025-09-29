@@ -103,6 +103,14 @@ class OrderCubit extends Cubit<OrderState> {
         print('📊 Upcoming events: ${response.data!.events.upcoming.length}');
         print('📊 Current hotels: ${response.data!.hotels.current.length}');
 
+        // Debug: Print detailed event data
+        for (int i = 0; i < response.data!.events.upcoming.length; i++) {
+          final event = response.data!.events.upcoming[i];
+          print(
+            '🎫 Event $i: ID=${event.id}, City=${event.cityName}, Venue=${event.venue}, Image=${event.imageUrl}',
+          );
+        }
+
         emit(UserOrdersSuccess(response.data!));
       } else {
         print('❌ OrderCubit: User orders fetch failed: ${response.msg}');

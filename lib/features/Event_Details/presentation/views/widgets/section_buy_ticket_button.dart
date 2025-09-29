@@ -5,11 +5,13 @@ import '../../../../../../shared/shared.dart';
 class SectionBuyTicketButton extends StatelessWidget {
   final String price;
   final Map<String, dynamic>? eventData;
+  final int? eventId;
 
   const SectionBuyTicketButton({
     super.key,
     required this.price,
     this.eventData,
+    this.eventId,
   });
 
   @override
@@ -72,6 +74,16 @@ class SectionBuyTicketButton extends StatelessWidget {
     print('🎫 Price value: $priceValue');
     print('🎫 Tax amount (15%): $taxAmount');
     print('🎫 Total price: $totalPrice');
+
+    // ✅ تسجيل البيانات المستلمة
+    print('📊 Event Data received:');
+    print('📊 Title: ${eventData?['title']}');
+    print('📊 Date: ${eventData?['date']}');
+    print('📊 Location: ${eventData?['location']}');
+    print('📊 City: ${eventData?['city']}');
+    print('📊 Organizer: ${eventData?['organizer']}');
+    print('📊 EventId passed: $eventId');
+    print('📊 Full eventData: $eventData');
 
     showDialog(
       context: context,
@@ -210,24 +222,69 @@ class SectionBuyTicketButton extends StatelessWidget {
     final cleanPrice = price.replaceAll('SR', '').replaceAll(' ', '').trim();
     final priceValue = double.tryParse(cleanPrice) ?? 120.0;
     final taxAmount = priceValue * 0.15; // 15% ضريبة
-    // Get event ID from eventData
-    int? eventId;
-    if (eventData != null) {
+
+    // ✅ استخدام الـ eventId الممرر أولاً
+    int? currentEventId = eventId;
+
+    if (currentEventId == null && eventData != null) {
+      // ✅ البحث في eventData كبديل
       if (eventData!['id'] is int) {
-        eventId = eventData!['id'] as int;
+        currentEventId = eventData!['id'] as int;
+        print('🎯 Found eventId in eventData[\'id\']: $currentEventId');
       } else if (eventData!['id'] is String) {
-        eventId = int.tryParse(eventData!['id']);
+        currentEventId = int.tryParse(eventData!['id']);
+        print(
+          '🎯 Found eventId in eventData[\'id\'] as String: $currentEventId',
+        );
       } else if (eventData!['eventId'] is int) {
-        eventId = eventData!['eventId'] as int;
+        currentEventId = eventData!['eventId'] as int;
+        print('🎯 Found eventId in eventData[\'eventId\']: $currentEventId');
       } else if (eventData!['eventId'] is String) {
-        eventId = int.tryParse(eventData!['eventId']);
+        currentEventId = int.tryParse(eventData!['eventId']);
+        print(
+          '🎯 Found eventId in eventData[\'eventId\'] as String: $currentEventId',
+        );
       }
     }
 
     // Fallback event ID if not found
-    if (eventId == null) {
-      eventId = 1; // Default event ID for testing
-      print('⚠️ Event ID not found, using fallback ID: $eventId');
+    if (currentEventId == null) {
+      currentEventId = 1; // Default event ID for testing
+      print('⚠️ Event ID not found, using fallback ID: $currentEventId');
+    } else {
+      print('✅ Using eventId: $currentEventId');
+    }
+
+    // Extract city name from location if city is not available
+    String extractedCity = eventData?['city'] ?? '';
+    if (extractedCity.isEmpty) {
+      final location = eventData?['location'] ?? '';
+      print('🏙️ Extracting city from location: $location');
+
+      // Smart city extraction from location
+      if (location.toLowerCase().contains('mecca') ||
+          location.toLowerCase().contains('مكة')) {
+        extractedCity = 'Mecca';
+      } else if (location.toLowerCase().contains('riyadh') ||
+          location.toLowerCase().contains('الرياض')) {
+        extractedCity = 'Riyadh';
+      } else if (location.toLowerCase().contains('jeddah') ||
+          location.toLowerCase().contains('جدة')) {
+        extractedCity = 'Jeddah';
+      } else if (location.toLowerCase().contains('dammam') ||
+          location.toLowerCase().contains('الدمام')) {
+        extractedCity = 'Dammam';
+      } else if (location.toLowerCase().contains('khobar') ||
+          location.toLowerCase().contains('الخبر')) {
+        extractedCity = 'Khobar';
+      } else {
+        // If no match, try to extract first word or use fallback
+        final locationParts = location.split(' ');
+        extractedCity = locationParts.isNotEmpty
+            ? locationParts[0]
+            : 'Unknown City';
+      }
+      print('🏙️ Extracted city: $extractedCity');
     }
 
     final orderData = {
@@ -242,14 +299,14 @@ class SectionBuyTicketButton extends StatelessWidget {
       'total': 'SR ${totalPrice.toStringAsFixed(1)}',
       'type': 'event',
       // API integration data
-      'event_id': eventId,
+      'event_id': currentEventId,
       'total_price': totalPrice,
       'api_integration': true,
       // Additional API data for display
       'organizer': eventData?['organizer'],
       'about': eventData?['about'],
       'attendees': eventData?['attendees'],
-      'city': eventData?['city'],
+      'city': extractedCity, // Use extracted city
     };
     context.push('/orderSummary', extra: orderData);
   }

@@ -424,6 +424,9 @@ class _CreditCardPaymentViewState extends State<CreditCardPaymentView>
   }
 
   Widget _buildOrderSummaryCard() {
+    final orderData = widget.orderData;
+    final orderType = orderData?['type'] ?? 'event';
+
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -440,16 +443,17 @@ class _CreditCardPaymentViewState extends State<CreditCardPaymentView>
       ),
       child: Row(
         children: [
+          // Dynamic Image/Icon based on order type
           Container(
-            padding: const EdgeInsets.all(12),
+            width: 60,
+            height: 60,
             decoration: BoxDecoration(
-              color: const Color(0xFF7F2F3A).withOpacity(0.1),
               borderRadius: BorderRadius.circular(12),
+              color: const Color(0xFF7F2F3A).withOpacity(0.1),
             ),
-            child: const Icon(
-              Icons.shopping_cart,
-              color: Color(0xFF7F2F3A),
-              size: 24,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: _buildOrderImage(orderData, orderType),
             ),
           ),
           const SizedBox(width: 16),
@@ -467,7 +471,7 @@ class _CreditCardPaymentViewState extends State<CreditCardPaymentView>
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'Total Amount',
+                  orderType == 'hotel' ? 'Hotel Booking' : 'Event Ticket',
                   style: TextStyle(fontSize: 14, color: Colors.grey.shade600),
                 ),
               ],
@@ -484,6 +488,44 @@ class _CreditCardPaymentViewState extends State<CreditCardPaymentView>
         ],
       ),
     );
+  }
+
+  Widget _buildOrderImage(Map<String, dynamic>? orderData, String orderType) {
+    if (orderData == null) {
+      return const Icon(
+        Icons.shopping_cart,
+        color: Color(0xFF7F2F3A),
+        size: 24,
+      );
+    }
+
+    if (orderType == 'hotel') {
+      // For hotels, try to get hotel image
+      final hotelImage = orderData['hotel_image'] ?? orderData['image'];
+      if (hotelImage != null && hotelImage.toString().isNotEmpty) {
+        return Image.network(
+          hotelImage.toString(),
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) {
+            return const Icon(Icons.hotel, color: Color(0xFF7F2F3A), size: 24);
+          },
+        );
+      }
+      return const Icon(Icons.hotel, color: Color(0xFF7F2F3A), size: 24);
+    } else {
+      // For events, try to get event image
+      final eventImage = orderData['event_image'] ?? orderData['image'];
+      if (eventImage != null && eventImage.toString().isNotEmpty) {
+        return Image.network(
+          eventImage.toString(),
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) {
+            return const Icon(Icons.event, color: Color(0xFF7F2F3A), size: 24);
+          },
+        );
+      }
+      return const Icon(Icons.event, color: Color(0xFF7F2F3A), size: 24);
+    }
   }
 
   Widget _buildCreditCardDisplay() {
@@ -989,9 +1031,62 @@ class _CreditCardPaymentViewState extends State<CreditCardPaymentView>
     print('🎫 Order Number: ${ticket.orderNumber}');
     print('🎫 User Name: ${ticket.userName}');
 
+    // Debug: Check if we have original event data
+    final orderData = widget.orderData;
+    print('🎫 Original Event Data:');
+    print('🎫 Original Title: ${orderData?['title']}');
+    print('🎫 Original Image: ${orderData?['image']}');
+    print('🎫 Original City: ${orderData?['city']}');
+    print('🎫 Original Location: ${orderData?['location']}');
+
+    // Create enhanced ticket data with original event info
+    final enhancedTicketData = ticket.toJson();
+
+    // Always use original event data for display (API returns static data)
+    // The API returns default/static data instead of real event data
+    // So we use the original event data passed from Event Details page
+    enhancedTicketData['event_title'] =
+        orderData?['title'] ?? ticket.eventTitle;
+    enhancedTicketData['event_image_url'] =
+        orderData?['image'] ?? ticket.eventImageUrl;
+
+    // Smart city extraction
+    String eventCity = orderData?['city'] ?? '';
+    if (eventCity.isEmpty) {
+      final location = orderData?['location'] ?? '';
+      // Smart city extraction from location
+      if (location.toLowerCase().contains('mecca') ||
+          location.toLowerCase().contains('مكة')) {
+        eventCity = 'Mecca';
+      } else if (location.toLowerCase().contains('riyadh') ||
+          location.toLowerCase().contains('الرياض')) {
+        eventCity = 'Riyadh';
+      } else if (location.toLowerCase().contains('jeddah') ||
+          location.toLowerCase().contains('جدة')) {
+        eventCity = 'Jeddah';
+      } else if (location.toLowerCase().contains('dammam') ||
+          location.toLowerCase().contains('الدمام')) {
+        eventCity = 'Dammam';
+      } else if (location.toLowerCase().contains('khobar') ||
+          location.toLowerCase().contains('الخبر')) {
+        eventCity = 'Khobar';
+      } else {
+        eventCity = ticket.eventCity; // Fallback to API data
+      }
+    }
+
+    enhancedTicketData['event_city'] = eventCity;
+    enhancedTicketData['event_venue'] =
+        orderData?['location'] ?? ticket.eventVenue;
+
+    print('🎫 Enhanced Ticket Data:');
+    print('🎫 Enhanced Title: ${enhancedTicketData['event_title']}');
+    print('🎫 Enhanced Image: ${enhancedTicketData['event_image_url']}');
+    print('🎫 Enhanced City: ${enhancedTicketData['event_city']}');
+
     context.go(
       '/ticketSuccess',
-      extra: {'type': 'event', 'ticket': ticket.toJson()},
+      extra: {'type': 'event', 'ticket': enhancedTicketData},
     );
   }
 

@@ -12,8 +12,45 @@ class EventsView extends StatefulWidget {
   State<EventsView> createState() => _EventsViewState();
 }
 
-class _EventsViewState extends State<EventsView> {
+class _EventsViewState extends State<EventsView> with WidgetsBindingObserver {
   String _selectedTab = 'CURRENT'; // Default selected tab
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      print('🔄 App resumed, refreshing orders...');
+      // Refresh orders when app comes back to foreground
+      Future.delayed(const Duration(milliseconds: 500), () {
+        if (mounted) {
+          context.read<OrderCubit>().refreshUserOrders();
+        }
+      });
+    }
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Force refresh when page is opened
+    print('🔄 Page opened, refreshing orders...');
+    Future.delayed(const Duration(milliseconds: 100), () {
+      if (mounted) {
+        context.read<OrderCubit>().refreshUserOrders();
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -67,6 +104,28 @@ class _EventsViewState extends State<EventsView> {
               ),
             ),
           ),
+
+          // Refresh Icon
+          GestureDetector(
+            onTap: () {
+              print('🔄 Manual refresh triggered');
+              context.read<OrderCubit>().refreshUserOrders();
+              // Show loading indicator
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Refreshing orders...'),
+                  duration: Duration(seconds: 1),
+                ),
+              );
+            },
+            child: const Icon(
+              Icons.refresh,
+              color: AppColors.primary,
+              size: 24,
+            ),
+          ),
+
+          const SizedBox(width: 8),
 
           // Menu Icon
           const Icon(Icons.more_vert, color: AppColors.primary, size: 24),
@@ -217,18 +276,42 @@ class _EventsViewState extends State<EventsView> {
       return _buildEmptyState();
     }
 
-    return ListView.builder(
-      padding: const EdgeInsets.all(20),
-      itemCount: ordersToShow.length,
-      itemBuilder: (context, index) {
-        final order = ordersToShow[index];
-        return _buildOrderCard(order);
+    return RefreshIndicator(
+      onRefresh: () async {
+        print('🔄 Pull-to-refresh triggered');
+        context.read<OrderCubit>().refreshUserOrders();
+        // Wait for the refresh to complete
+        await Future.delayed(const Duration(seconds: 1));
       },
+      child: ListView.builder(
+        padding: const EdgeInsets.all(20),
+        itemCount: ordersToShow.length,
+        itemBuilder: (context, index) {
+          final order = ordersToShow[index];
+          return _buildOrderCard(order);
+        },
+      ),
     );
   }
 
   Widget _buildOrderCard(dynamic order) {
     bool isHotel = order is OrderedHotel;
+
+    // Debug: Print order data to understand what we're getting
+    print('🏷️ Order Card Debug:');
+    print('🏷️ Order Type: ${isHotel ? 'Hotel' : 'Event'}');
+    if (isHotel) {
+      print('🏷️ Hotel Name: ${order.name}');
+      print('🏷️ Hotel City: ${order.city}');
+      print('🏷️ Hotel Image: ${order.coverUrl}');
+    } else {
+      print('🏷️ Event ID: ${order.id}');
+      print('🏷️ Event City: ${order.cityName}');
+      print('🏷️ Event Image: ${order.imageUrl}');
+      print('🏷️ Event Venue: ${order.venue}');
+      print('🏷️ Event Formatted Start: ${order.formattedStartAt}');
+      print('🏷️ Event Is Favorite: ${order.isFavorite}');
+    }
 
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
@@ -256,7 +339,7 @@ class _EventsViewState extends State<EventsView> {
                 image: NetworkImage(isHotel ? order.coverUrl : order.imageUrl),
                 fit: BoxFit.cover,
                 onError: (exception, stackTrace) {
-                  // Handle error
+                  print('❌ Image load error: $exception');
                 },
               ),
             ),
@@ -270,7 +353,7 @@ class _EventsViewState extends State<EventsView> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  isHotel ? order.name : 'Event #${order.id}',
+                  isHotel ? order.name : order.venue,
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
@@ -514,7 +597,7 @@ class _EventsViewState extends State<EventsView> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(order is OrderedHotel ? order.name : 'Event #${order.id}'),
+        title: Text(order is OrderedHotel ? order.name : order.venue),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
