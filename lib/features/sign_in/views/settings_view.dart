@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import '../../../../../shared/shared.dart';
+import '../../../../shared/shared.dart';
 
 class SettingsView extends StatefulWidget {
   const SettingsView({super.key});
