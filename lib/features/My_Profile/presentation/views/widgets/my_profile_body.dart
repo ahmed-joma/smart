@@ -4,7 +4,6 @@ import 'package:smartshop_map/shared/themes/app_colors.dart';
 import 'section_header.dart';
 import 'section_profile_info.dart';
 import 'section_about_me.dart';
-import 'section_interests.dart';
 import 'section_saved_items.dart';
 
 class MyProfileBody extends StatefulWidget {
@@ -43,12 +42,6 @@ class _MyProfileBodyState extends State<MyProfileBody> {
 
               // About Me Section
               const SectionAboutMe(),
-
-              // Interests Section
-              const SectionInterests(),
-
-              // Achievements Section
-              _buildAchievementsSection(),
 
               // Saved Items Section
               const SectionSavedItems(),
@@ -211,183 +204,6 @@ class _MyProfileBodyState extends State<MyProfileBody> {
           ],
         ),
       ),
-    );
-  }
-
-  Widget _buildAchievementsSection() {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.03),
-            blurRadius: 15,
-            offset: const Offset(0, 5),
-          ),
-        ],
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Section Header
-            Row(
-              children: [
-                Container(
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFFF9800).withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  padding: const EdgeInsets.all(12),
-                  child: const Icon(
-                    Icons.emoji_events_outlined,
-                    color: Color(0xFFFF9800),
-                    size: 20,
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Text(
-                  'Achievements',
-                  style: const TextStyle(
-                    color: Color(0xFF1D1E25),
-                    fontSize: 22,
-                    fontWeight: FontWeight.w700,
-                    fontFamily: 'Inter',
-                    letterSpacing: -0.3,
-                  ),
-                ),
-              ],
-            ),
-
-            const SizedBox(height: 16),
-
-            // Achievements Grid
-            Row(
-              children: [
-                Expanded(
-                  child: _buildAchievementCard(
-                    'First Event',
-                    Icons.event,
-                    const Color(0xFF6B7AED),
-                    true,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: _buildAchievementCard(
-                    'Explorer',
-                    Icons.explore,
-                    const Color(0xFF29D697),
-                    true,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                Expanded(
-                  child: _buildAchievementCard(
-                    'Social Butterfly',
-                    Icons.people,
-                    const Color(0xFFEE544A),
-                    false,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: _buildAchievementCard(
-                    'Hotel Expert',
-                    Icons.hotel,
-                    const Color(0xFFFF9800),
-                    false,
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildAchievementCard(
-    String title,
-    IconData icon,
-    Color color,
-    bool isUnlocked,
-  ) {
-    return TweenAnimationBuilder<double>(
-      duration: const Duration(milliseconds: 800),
-      tween: Tween(begin: 0.0, end: 1.0),
-      builder: (context, scale, child) {
-        return Transform.scale(
-          scale: scale,
-          child: Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: isUnlocked ? color.withOpacity(0.1) : Colors.grey.shade100,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                color: isUnlocked
-                    ? color.withOpacity(0.3)
-                    : Colors.grey.shade300,
-                width: 1,
-              ),
-            ),
-            child: Column(
-              children: [
-                Container(
-                  decoration: BoxDecoration(
-                    color: isUnlocked ? color : Colors.grey.shade400,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  padding: const EdgeInsets.all(12),
-                  child: Icon(icon, color: Colors.white, size: 20),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  title,
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                    fontFamily: 'Inter',
-                    color: isUnlocked
-                        ? const Color(0xFF1D1E25)
-                        : Colors.grey.shade500,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                if (isUnlocked) ...[
-                  const SizedBox(height: 4),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 6,
-                      vertical: 2,
-                    ),
-                    decoration: BoxDecoration(
-                      color: color,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: const Text(
-                      'Unlocked',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 8,
-                        fontWeight: FontWeight.w600,
-                        fontFamily: 'Inter',
-                      ),
-                    ),
-                  ),
-                ],
-              ],
-            ),
-          ),
-        );
-      },
     );
   }
 }

@@ -59,7 +59,7 @@ class _SectionBottomNavigationState extends State<SectionBottomNavigation> {
             label: 'Explore',
           ),
           const BottomNavigationBarItem(
-            icon: Icon(Icons.event),
+            icon: Icon(Icons.shopping_bag_outlined),
             label: 'Orders',
           ),
           BottomNavigationBarItem(
