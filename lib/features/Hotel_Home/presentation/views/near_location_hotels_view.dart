@@ -7,7 +7,6 @@ import '../manager/hotel_home_cubit.dart';
 import '../../data/repos/Hotel_Home_repo_imple.dart';
 import '../../../../core/utils/service_locator.dart';
 import '../../../../core/utils/cubits/favorite_cubit.dart';
-import '../../../../core/utils/repositories/favorite_repository.dart';
 
 class NearLocationHotelsView extends StatelessWidget {
   const NearLocationHotelsView({super.key});
@@ -20,9 +19,7 @@ class NearLocationHotelsView extends StatelessWidget {
           create: (context) =>
               HotelHomeCubit(HotelHomeRepoImpl(sl()))..getHotelData(),
         ),
-        BlocProvider(
-          create: (context) => FavoriteCubit(sl<FavoriteRepository>()),
-        ),
+        BlocProvider.value(value: sl<FavoriteCubit>()),
       ],
       child: Scaffold(
         backgroundColor: Colors.white,

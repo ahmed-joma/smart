@@ -43,15 +43,7 @@ class _SectionNearLocationState extends State<SectionNearLocation> {
         if (state is FavoriteSuccess) {
           // Update local state when favorite changes from other pages
           setState(() {
-            // Find the hotel that was toggled and update its local state
-            for (final hotel in widget.hotels) {
-              if (state.message.contains('Hotel') &&
-                  state.message.contains('${hotel.id}')) {
-                _savedHotels[hotel.id] =
-                    !(_savedHotels[hotel.id] ?? hotel.isFavorite);
-                break;
-              }
-            }
+            _savedHotels[state.favoriteId] = state.isFavorite;
           });
         }
       },

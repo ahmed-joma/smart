@@ -38,9 +38,7 @@ class HotelDetailsView extends StatelessWidget {
             sl<FavoriteRepository>(),
           ),
         ),
-        BlocProvider(
-          create: (context) => FavoriteCubit(sl<FavoriteRepository>()),
-        ),
+        BlocProvider.value(value: sl<FavoriteCubit>()),
       ],
       child: Scaffold(
         body: HotelDetailsBody(hotelData: hotelData, hotelId: hotelId),
