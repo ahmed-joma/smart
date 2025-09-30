@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:go_router/go_router.dart';
 import '../../../../../shared/themes/app_colors.dart';
 import '../../../../../shared/widgets/interactive_bookmark.dart';
 import '../../../data/models/hotel_models.dart';
@@ -159,123 +160,149 @@ class _NearLocationHotelsBodyState extends State<NearLocationHotelsBody> {
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Hotel Image
-            Container(
-              height: 180,
-              width: double.infinity,
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    AppColors.primary.withOpacity(0.1),
-                    const Color(0xFF6B7AED).withOpacity(0.1),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(16),
+          onTap: () {
+            print(
+              '🚀 Navigation: Tapped near location hotel with ID: ${hotel.id}',
+            );
+            final hotelData = {
+              'id': hotel.id,
+              'title': hotel.name,
+              'date': '14 December, 2025',
+              'day': 'Tuesday',
+              'time': 'Check-in: 3:00PM',
+              'location': hotel.fullVenue,
+              'country': 'KSA',
+              'organizer': 'Hotel Management',
+              'organizerCountry': 'KSA',
+              'about':
+                  'Luxury hotel with world-class amenities and exceptional service in ${hotel.city}. Located at ${hotel.fullVenue}.',
+              'guests': '+50 Guests',
+              'price': hotel.formattedPrice,
+              'image': hotel.coverUrl,
+            };
+            print('📦 Navigation data: $hotelData');
+            context.push('/hotelDetailsView', extra: hotelData);
+          },
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Hotel Image
+              Container(
+                height: 180,
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      AppColors.primary.withOpacity(0.1),
+                      const Color(0xFF6B7AED).withOpacity(0.1),
+                    ],
+                  ),
+                ),
+                child: hotel.coverUrl.isNotEmpty
+                    ? Image.network(
+                        hotel.coverUrl,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) {
+                          return _buildPlaceholderImage();
+                        },
+                      )
+                    : _buildPlaceholderImage(),
+              ),
+              // Hotel Details
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Hotel Name
+                    Text(
+                      hotel.name,
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w700,
+                        color: Color(0xFF1D1E25),
+                        fontFamily: 'Inter',
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 8),
+                    // Hotel Location
+                    Text(
+                      hotel.venue,
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.grey.shade600,
+                        fontFamily: 'Inter',
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 12),
+                    // Hotel Rating and Price
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.star,
+                                size: 16,
+                                color: Colors.amber.shade600,
+                              ),
+                              const SizedBox(width: 6),
+                              Text(
+                                hotel.rate.toString(),
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w500,
+                                  color: Colors.amber.shade700,
+                                  fontFamily: 'Inter',
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                '(0 reviews)',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.grey.shade500,
+                                  fontFamily: 'Inter',
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        // Price
+                        Text(
+                          'SR${hotel.pricePerNight}/night',
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700,
+                            color: Color(0xFF1D1E25),
+                            fontFamily: 'Inter',
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    // Favorite Button
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: InteractiveBookmark(
+                        isSaved: isSaved,
+                        onPressed: () => _toggleFavorite(hotel.id),
+                      ),
+                    ),
                   ],
                 ),
               ),
-              child: hotel.coverUrl.isNotEmpty
-                  ? Image.network(
-                      hotel.coverUrl,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) {
-                        return _buildPlaceholderImage();
-                      },
-                    )
-                  : _buildPlaceholderImage(),
-            ),
-            // Hotel Details
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Hotel Name
-                  Text(
-                    hotel.name,
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w700,
-                      color: Color(0xFF1D1E25),
-                      fontFamily: 'Inter',
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 8),
-                  // Hotel Location
-                  Text(
-                    hotel.venue,
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                      color: Colors.grey.shade600,
-                      fontFamily: 'Inter',
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 12),
-                  // Hotel Rating and Price
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Row(
-                          children: [
-                            Icon(
-                              Icons.star,
-                              size: 16,
-                              color: Colors.amber.shade600,
-                            ),
-                            const SizedBox(width: 6),
-                            Text(
-                              hotel.rate.toString(),
-                              style: TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w500,
-                                color: Colors.amber.shade700,
-                                fontFamily: 'Inter',
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            Text(
-                              '(0 reviews)',
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: Colors.grey.shade500,
-                                fontFamily: 'Inter',
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      // Price
-                      Text(
-                        'SR${hotel.pricePerNight}/night',
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700,
-                          color: Color(0xFF1D1E25),
-                          fontFamily: 'Inter',
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  // Favorite Button
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: InteractiveBookmark(
-                      isSaved: isSaved,
-                      onPressed: () => _toggleFavorite(hotel.id),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
