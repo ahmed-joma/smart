@@ -7,7 +7,6 @@ import '../manager/Home/home_cubit.dart';
 import '../../data/repos/Home_repo_imple.dart';
 import '../../../../core/utils/service_locator.dart';
 import '../../../../core/utils/cubits/favorite_cubit.dart';
-import '../../../../core/utils/repositories/favorite_repository.dart';
 
 class UpcomingEventsView extends StatelessWidget {
   const UpcomingEventsView({super.key});
@@ -16,8 +15,10 @@ class UpcomingEventsView extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
-        BlocProvider(create: (context) => HomeCubit(HomeRepoImpl(sl()))..getHomeData()),
-        BlocProvider(create: (context) => FavoriteCubit(sl<FavoriteRepository>())),
+        BlocProvider(
+          create: (context) => HomeCubit(HomeRepoImpl(sl()))..getHomeData(),
+        ),
+        BlocProvider.value(value: sl<FavoriteCubit>()),
       ],
       child: Scaffold(
         backgroundColor: Colors.white,

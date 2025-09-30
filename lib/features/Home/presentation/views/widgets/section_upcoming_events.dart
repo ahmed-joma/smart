@@ -41,15 +41,7 @@ class _SectionUpcomingEventsState extends State<SectionUpcomingEvents> {
         if (state is FavoriteSuccess) {
           // Update local state when favorite changes from other pages
           setState(() {
-            // Find the event that was toggled and update its local state
-            for (final event in widget.events) {
-              if (state.message.contains('Event') &&
-                  state.message.contains('${event.id}')) {
-                _savedEvents[event.id] =
-                    !(_savedEvents[event.id] ?? event.isFavorite);
-                break;
-              }
-            }
+            _savedEvents[state.favoriteId] = state.isFavorite;
           });
         }
       },

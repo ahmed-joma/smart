@@ -6,7 +6,6 @@ import '../manager/Home/home_cubit.dart';
 import '../../data/repos/Home_repo_imple.dart';
 import '../../../../core/utils/service_locator.dart';
 import '../../../../core/utils/cubits/favorite_cubit.dart';
-import '../../../../core/utils/repositories/favorite_repository.dart';
 
 class HomeView extends StatelessWidget {
   const HomeView({super.key});
@@ -17,7 +16,7 @@ class HomeView extends StatelessWidget {
       providers: [
         BlocProvider(create: (context) => ProfileCubit()..getProfile()),
         BlocProvider(create: (context) => HomeCubit(HomeRepoImpl(sl()))),
-        BlocProvider(create: (context) => FavoriteCubit(sl<FavoriteRepository>())),
+        BlocProvider.value(value: sl<FavoriteCubit>()),
       ],
       child: const HomeBody(),
     );

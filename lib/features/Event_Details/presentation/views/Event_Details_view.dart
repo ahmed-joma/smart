@@ -33,9 +33,7 @@ class EventDetailsView extends StatelessWidget {
             sl<FavoriteRepository>(),
           ),
         ),
-        BlocProvider(
-          create: (context) => FavoriteCubit(sl<FavoriteRepository>()),
-        ),
+        BlocProvider.value(value: sl<FavoriteCubit>()),
       ],
       child: Scaffold(
         body: EventDetailsBody(eventData: eventData, eventId: eventId),

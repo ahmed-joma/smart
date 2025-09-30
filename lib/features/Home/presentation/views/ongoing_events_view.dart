@@ -7,7 +7,6 @@ import '../manager/Home/home_cubit.dart';
 import '../../data/repos/Home_repo_imple.dart';
 import '../../../../core/utils/service_locator.dart';
 import '../../../../core/utils/cubits/favorite_cubit.dart';
-import '../../../../core/utils/repositories/favorite_repository.dart';
 
 class OngoingEventsView extends StatelessWidget {
   const OngoingEventsView({super.key});
@@ -19,9 +18,7 @@ class OngoingEventsView extends StatelessWidget {
         BlocProvider(
           create: (context) => HomeCubit(HomeRepoImpl(sl()))..getHomeData(),
         ),
-        BlocProvider(
-          create: (context) => FavoriteCubit(sl<FavoriteRepository>()),
-        ),
+        BlocProvider.value(value: sl<FavoriteCubit>()),
       ],
       child: Scaffold(
         backgroundColor: Colors.white,
