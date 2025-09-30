@@ -35,6 +35,10 @@ class _FilterBodyState extends State<FilterBody> {
   // Search query
   String _searchQuery = '';
 
+  // Date range
+  DateTime? _startDate;
+  DateTime? _endDate;
+
   @override
   void initState() {
     super.initState();
@@ -165,6 +169,17 @@ class _FilterBodyState extends State<FilterBody> {
                       onTimeFilterChanged: (filter) {
                         setState(() {
                           _selectedTimeFilter = filter;
+                          // Clear date range when using quick filters
+                          _startDate = null;
+                          _endDate = null;
+                        });
+                      },
+                      onDateRangeSelected: (startDate, endDate) {
+                        setState(() {
+                          _startDate = startDate;
+                          _endDate = endDate;
+                          // Clear quick filter when using date range
+                          _selectedTimeFilter = 'Custom';
                         });
                       },
                     ),
@@ -225,6 +240,8 @@ class _FilterBodyState extends State<FilterBody> {
                   _selectedCityId = null;
                   _priceRange = const RangeValues(20, 120);
                   _searchQuery = '';
+                  _startDate = null;
+                  _endDate = null;
                 });
               },
               onApply: () async {
@@ -237,6 +254,12 @@ class _FilterBodyState extends State<FilterBody> {
                   cityId: _selectedCityId,
                   priceMin: _priceRange.start != 20 ? _priceRange.start : null,
                   priceMax: _priceRange.end != 120 ? _priceRange.end : null,
+                  startAtFrom: _startDate != null
+                      ? _startDate!.toIso8601String().split('T')[0]
+                      : null,
+                  endAtTo: _endDate != null
+                      ? _endDate!.toIso8601String().split('T')[0]
+                      : null,
                 );
 
                 // Apply filters and wait for completion
