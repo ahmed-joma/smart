@@ -101,13 +101,23 @@ class OrderCubit extends Cubit<OrderState> {
       if (response.status && response.data != null) {
         print('✅ OrderCubit: User orders fetched successfully');
         print('📊 Upcoming events: ${response.data!.events.upcoming.length}');
+        print('📊 Past events: ${response.data!.events.past.length}');
         print('📊 Current hotels: ${response.data!.hotels.current.length}');
+        print('📊 Past hotels: ${response.data!.hotels.past.length}');
 
-        // Debug: Print detailed event data
+        // Debug: Print detailed upcoming event data
         for (int i = 0; i < response.data!.events.upcoming.length; i++) {
           final event = response.data!.events.upcoming[i];
           print(
-            '🎫 Event $i: ID=${event.id}, City=${event.cityName}, Venue=${event.venue}, Image=${event.imageUrl}',
+            '🎫 Upcoming Event $i: ID=${event.id}, City=${event.cityName}, Venue=${event.venue}, StartAt=${event.formattedStartAt}',
+          );
+        }
+
+        // Debug: Print detailed past event data
+        for (int i = 0; i < response.data!.events.past.length; i++) {
+          final event = response.data!.events.past[i];
+          print(
+            '🎫 Past Event $i: ID=${event.id}, City=${event.cityName}, Venue=${event.venue}, StartAt=${event.formattedStartAt}',
           );
         }
 

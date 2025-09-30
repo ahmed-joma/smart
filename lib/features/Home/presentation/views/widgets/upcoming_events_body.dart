@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:smartshop_map/shared/themes/app_colors.dart';
 import '../../manager/Home/home_cubit.dart';
 // home_state is part of home_cubit.dart
@@ -136,100 +137,118 @@ class _UpcomingEventsBodyState extends State<UpcomingEventsBody> {
                   ),
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Event Image
-                        Container(
-                          height: 180,
-                          width: double.infinity,
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                              colors: [
-                                AppColors.primary.withOpacity(0.1),
-                                const Color(0xFF6B7AED).withOpacity(0.1),
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(16),
+                      onTap: () {
+                        print(
+                          '🚀 Navigation: Tapped upcoming event with ID: ${event.id}',
+                        );
+                        final navigationData = {
+                          'eventId': event.id,
+                          'eventData': event.toJson(),
+                        };
+                        print('📦 Navigation data: $navigationData');
+                        context.push(
+                          '/eventDetailsView',
+                          extra: navigationData,
+                        );
+                      },
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Event Image
+                          Container(
+                            height: 180,
+                            width: double.infinity,
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                                colors: [
+                                  AppColors.primary.withOpacity(0.1),
+                                  const Color(0xFF6B7AED).withOpacity(0.1),
+                                ],
+                              ),
+                            ),
+                            child: event.imageUrl.isNotEmpty
+                                ? Image.network(
+                                    event.imageUrl,
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (context, error, stackTrace) {
+                                      return _buildPlaceholderImage();
+                                    },
+                                  )
+                                : _buildPlaceholderImage(),
+                          ),
+                          // Event Details
+                          Padding(
+                            padding: const EdgeInsets.all(16),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                // Event Title
+                                Text(
+                                  event.venue,
+                                  style: const TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w700,
+                                    color: Color(0xFF1D1E25),
+                                    fontFamily: 'Inter',
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                const SizedBox(height: 8),
+                                // Event Venue
+                                Text(
+                                  event.venue,
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w500,
+                                    color: Colors.grey.shade600,
+                                    fontFamily: 'Inter',
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                const SizedBox(height: 12),
+                                // Event Date and Favorite
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: Row(
+                                        children: [
+                                          Icon(
+                                            Icons.calendar_today,
+                                            size: 16,
+                                            color: AppColors.primary,
+                                          ),
+                                          const SizedBox(width: 6),
+                                          Text(
+                                            event.formattedStartAt,
+                                            style: TextStyle(
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.w500,
+                                              color: AppColors.primary,
+                                              fontFamily: 'Inter',
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    // Favorite Button
+                                    InteractiveBookmark(
+                                      isSaved: isSaved,
+                                      onPressed: () =>
+                                          _toggleFavorite(event.id),
+                                    ),
+                                  ],
+                                ),
                               ],
                             ),
                           ),
-                          child: event.imageUrl.isNotEmpty
-                              ? Image.network(
-                                  event.imageUrl,
-                                  fit: BoxFit.cover,
-                                  errorBuilder: (context, error, stackTrace) {
-                                    return _buildPlaceholderImage();
-                                  },
-                                )
-                              : _buildPlaceholderImage(),
-                        ),
-                        // Event Details
-                        Padding(
-                          padding: const EdgeInsets.all(16),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              // Event Title
-                              Text(
-                                event.venue,
-                                style: const TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.w700,
-                                  color: Color(0xFF1D1E25),
-                                  fontFamily: 'Inter',
-                                ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                              const SizedBox(height: 8),
-                              // Event Venue
-                              Text(
-                                event.venue,
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w500,
-                                  color: Colors.grey.shade600,
-                                  fontFamily: 'Inter',
-                                ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                              const SizedBox(height: 12),
-                              // Event Date and Favorite
-                              Row(
-                                children: [
-                                  Expanded(
-                                    child: Row(
-                                      children: [
-                                        Icon(
-                                          Icons.calendar_today,
-                                          size: 16,
-                                          color: AppColors.primary,
-                                        ),
-                                        const SizedBox(width: 6),
-                                        Text(
-                                          event.formattedStartAt,
-                                          style: TextStyle(
-                                            fontSize: 12,
-                                            fontWeight: FontWeight.w500,
-                                            color: AppColors.primary,
-                                            fontFamily: 'Inter',
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  // Favorite Button
-                                  InteractiveBookmark(
-                                    isSaved: isSaved,
-                                    onPressed: () => _toggleFavorite(event.id),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
                 );

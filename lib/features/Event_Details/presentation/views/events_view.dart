@@ -242,12 +242,30 @@ class _EventsViewState extends State<EventsView> with WidgetsBindingObserver {
     List<dynamic> currentOrders = [];
     List<dynamic> pastOrders = [];
 
+    // Debug: Print order counts
+    print('📊 EventsView Debug:');
+    print('📊 Upcoming events: ${userOrders.events.upcoming.length}');
+    print('📊 Past events: ${userOrders.events.past.length}');
+    print('📊 Current hotels: ${userOrders.hotels.current.length}');
+    print('📊 Past hotels: ${userOrders.hotels.past.length}');
+    print('📊 Selected tab: $_selectedTab');
+
     if (_selectedTab == 'CURRENT') {
       currentOrders.addAll(userOrders.events.upcoming);
       currentOrders.addAll(userOrders.hotels.current);
+      print('📊 Current orders total: ${currentOrders.length}');
     } else {
       pastOrders.addAll(userOrders.events.past);
       pastOrders.addAll(userOrders.hotels.past);
+      print('📊 Past orders total: ${pastOrders.length}');
+
+      // Debug: Print past events details
+      for (int i = 0; i < userOrders.events.past.length; i++) {
+        final event = userOrders.events.past[i];
+        print(
+          '🎫 Past Event $i: ID=${event.id}, City=${event.cityName}, Venue=${event.venue}, StartAt=${event.formattedStartAt}',
+        );
+      }
     }
 
     final ordersToShow = _selectedTab == 'CURRENT' ? currentOrders : pastOrders;
