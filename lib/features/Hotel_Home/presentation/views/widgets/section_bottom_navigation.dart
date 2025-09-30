@@ -34,8 +34,11 @@ class _SectionBottomNavigationState extends State<SectionBottomNavigation> {
             // Navigate to Home page
             context.go('/homeView');
           } else if (index == 1) {
-            // Navigate to Events page
+            // Navigate to Orders page
             context.go('/eventsView');
+          } else if (index == 2) {
+            // Navigate to Home page
+            context.go('/homeView');
           } else if (index == 4) {
             // Navigate to Profile page
             context.go('/myProfileView');
@@ -57,7 +60,7 @@ class _SectionBottomNavigationState extends State<SectionBottomNavigation> {
           ),
           const BottomNavigationBarItem(
             icon: Icon(Icons.event),
-            label: 'Events',
+            label: 'Orders',
           ),
           BottomNavigationBarItem(
             icon: Transform.translate(
@@ -77,7 +80,7 @@ class _SectionBottomNavigationState extends State<SectionBottomNavigation> {
                     ),
                   ],
                 ),
-                child: const Icon(Icons.add, color: Colors.white, size: 30),
+                child: const Icon(Icons.home, color: Colors.white, size: 30),
               ),
             ),
             label: '',
