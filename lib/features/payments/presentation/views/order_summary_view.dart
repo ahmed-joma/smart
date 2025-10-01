@@ -161,48 +161,9 @@ class _OrderSummaryViewState extends State<OrderSummaryView> {
                     },
                   );
                   break;
-                case 'paypal':
-                  context.push(
-                    '/paypalPayment',
-                    extra: {
-                      'totalAmount': _currentTotalPrice.isNotEmpty
-                          ? _currentTotalPrice
-                          : (orderData['total'] ?? 'SR 138'),
-                      'orderTitle': orderData['title'] ?? 'Order',
-                      'orderData':
-                          orderData, // Pass full order data with API info
-                    },
-                  );
-                  break;
-                case 'crypto':
-                  context.push(
-                    '/cryptoPayment',
-                    extra: {
-                      'totalAmount': _currentTotalPrice.isNotEmpty
-                          ? _currentTotalPrice
-                          : (orderData['total'] ?? 'SR 138'),
-                      'orderTitle': orderData['title'] ?? 'Order',
-                      'orderData':
-                          orderData, // Pass full order data with API info
-                    },
-                  );
-                  break;
                 case 'apple_pay':
                   context.push(
                     '/applePayPayment',
-                    extra: {
-                      'totalAmount': _currentTotalPrice.isNotEmpty
-                          ? _currentTotalPrice
-                          : (orderData['total'] ?? 'SR 138'),
-                      'orderTitle': orderData['title'] ?? 'Order',
-                      'orderData':
-                          orderData, // Pass full order data with API info
-                    },
-                  );
-                  break;
-                case 'google_pay':
-                  context.push(
-                    '/googlePayPayment',
                     extra: {
                       'totalAmount': _currentTotalPrice.isNotEmpty
                           ? _currentTotalPrice

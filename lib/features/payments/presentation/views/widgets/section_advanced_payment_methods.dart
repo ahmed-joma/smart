@@ -37,27 +37,6 @@ class _SectionAdvancedPaymentMethodsState
       'color': Colors.black,
       'description': 'Fast and secure',
     },
-    {
-      'id': 'google_pay',
-      'name': 'Google Pay',
-      'icon': Icons.android,
-      'color': const Color(0xFF4285F4),
-      'description': 'Quick and easy',
-    },
-    {
-      'id': 'paypal',
-      'name': 'PayPal',
-      'icon': Icons.payment,
-      'color': const Color(0xFF0070BA),
-      'description': 'Pay with your PayPal account',
-    },
-    {
-      'id': 'crypto',
-      'name': 'Cryptocurrency',
-      'icon': Icons.currency_bitcoin,
-      'color': const Color(0xFFF7931A),
-      'description': 'Bitcoin, Ethereum, and more',
-    },
   ];
 
   @override
@@ -138,24 +117,25 @@ class _SectionAdvancedPaymentMethodsState
                   ),
                   const SizedBox(height: 20),
 
-                  // Payment Methods Grid
-                  GridView.builder(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    gridDelegate:
-                        const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 2,
-                          crossAxisSpacing: 12,
-                          mainAxisSpacing: 12,
-                          childAspectRatio: 1.2,
+                  // Payment Methods Grid - Updated for 2 methods only
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _buildPaymentMethodCard(
+                          _paymentMethods[0],
+                          widget.selectedMethod == _paymentMethods[0]['id'],
+                          0,
                         ),
-                    itemCount: _paymentMethods.length,
-                    itemBuilder: (context, index) {
-                      final method = _paymentMethods[index];
-                      final isSelected = widget.selectedMethod == method['id'];
-
-                      return _buildPaymentMethodCard(method, isSelected, index);
-                    },
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: _buildPaymentMethodCard(
+                          _paymentMethods[1],
+                          widget.selectedMethod == _paymentMethods[1]['id'],
+                          1,
+                        ),
+                      ),
+                    ],
                   ),
 
                   const SizedBox(height: 16),
@@ -204,7 +184,7 @@ class _SectionAdvancedPaymentMethodsState
     int index,
   ) {
     return AnimatedContainer(
-      duration: const Duration(milliseconds: 200),
+      duration: const Duration(milliseconds: 300),
       curve: Curves.easeInOut,
       child: GestureDetector(
         onTap: () {
@@ -215,73 +195,97 @@ class _SectionAdvancedPaymentMethodsState
           _animationController.forward();
         },
         child: Container(
+          height: 130,
           decoration: BoxDecoration(
-            color: isSelected
-                ? method['color'].withOpacity(0.1)
-                : Colors.grey.shade50,
-            borderRadius: BorderRadius.circular(12),
+            gradient: isSelected
+                ? LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [method['color'], method['color'].withOpacity(0.8)],
+                  )
+                : LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [Colors.white, Colors.grey.shade50],
+                  ),
+            borderRadius: BorderRadius.circular(16),
             border: Border.all(
-              color: isSelected ? method['color'] : Colors.grey.shade300,
+              color: isSelected
+                  ? method['color'].withOpacity(0.3)
+                  : Colors.grey.shade200,
               width: isSelected ? 2 : 1,
             ),
-            boxShadow: isSelected
-                ? [
-                    BoxShadow(
-                      color: method['color'].withOpacity(0.2),
-                      spreadRadius: 2,
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
-                    ),
-                  ]
-                : null,
-          ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              // Icon
-              AnimatedContainer(
-                duration: const Duration(milliseconds: 200),
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: isSelected ? method['color'] : Colors.white,
-                  borderRadius: BorderRadius.circular(8),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.grey.withOpacity(0.1),
-                      spreadRadius: 1,
-                      blurRadius: 4,
-                      offset: const Offset(0, 1),
-                    ),
-                  ],
-                ),
-                child: Icon(
-                  method['icon'],
-                  color: isSelected ? Colors.white : method['color'],
-                  size: 24,
-                ),
-              ),
-              const SizedBox(height: 8),
-
-              // Name
-              Text(
-                method['name'],
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  color: isSelected ? method['color'] : Colors.black87,
-                ),
-                textAlign: TextAlign.center,
-              ),
-
-              // Description
-              Text(
-                method['description'],
-                style: TextStyle(fontSize: 10, color: Colors.grey.shade600),
-                textAlign: TextAlign.center,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
+            boxShadow: [
+              BoxShadow(
+                color: isSelected
+                    ? method['color'].withOpacity(0.3)
+                    : Colors.grey.withOpacity(0.1),
+                spreadRadius: isSelected ? 2 : 1,
+                blurRadius: isSelected ? 12 : 8,
+                offset: const Offset(0, 4),
               ),
             ],
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                // Icon with enhanced design
+                Container(
+                  width: 45,
+                  height: 45,
+                  decoration: BoxDecoration(
+                    color: isSelected
+                        ? Colors.white.withOpacity(0.2)
+                        : method['color'].withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: isSelected
+                          ? Colors.white.withOpacity(0.3)
+                          : method['color'].withOpacity(0.2),
+                      width: 1,
+                    ),
+                  ),
+                  child: Icon(
+                    method['icon'],
+                    color: isSelected ? Colors.white : method['color'],
+                    size: 24,
+                  ),
+                ),
+                const SizedBox(height: 10),
+
+                // Name with better typography
+                Text(
+                  method['name'],
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                    color: isSelected ? Colors.white : Colors.black87,
+                    letterSpacing: 0.3,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 3),
+
+                // Description with improved styling
+                Flexible(
+                  child: Text(
+                    method['description'],
+                    style: TextStyle(
+                      fontSize: 10,
+                      color: isSelected
+                          ? Colors.white.withOpacity(0.8)
+                          : Colors.grey.shade600,
+                      fontWeight: FontWeight.w500,
+                    ),
+                    textAlign: TextAlign.center,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

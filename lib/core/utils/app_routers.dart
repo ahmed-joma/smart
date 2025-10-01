@@ -26,10 +26,7 @@ import '../../features/Hotel_details/presentation/views/Hotel_Details_view.dart'
 import '../../features/Hotel_details/presentation/views/hotel_booking_view.dart';
 import '../../features/payments/presentation/views/order_summary_view.dart';
 import '../../features/payments/presentation/views/credit_card_payment_view.dart';
-import '../../features/payments/presentation/views/paypal_payment_view.dart';
-import '../../features/payments/presentation/views/crypto_payment_view.dart';
 import '../../features/payments/presentation/views/apple_pay_payment_view.dart';
-import '../../features/payments/presentation/views/google_pay_payment_view.dart';
 import '../../features/payments/presentation/views/booking_success_view.dart';
 
 import 'package:flutter/material.dart';
@@ -63,10 +60,7 @@ class AppRouters {
   static const String kHotelBookingView = '/hotelBooking';
   static const String kOrderSummaryView = '/orderSummary';
   static const String kCreditCardPaymentView = '/creditCardPayment';
-  static const String kPayPalPaymentView = '/paypalPayment';
-  static const String kCryptoPaymentView = '/cryptoPayment';
   static const String kApplePayPaymentView = '/applePayPayment';
-  static const String kGooglePayPaymentView = '/googlePayPayment';
   static const String kBookingSuccessView = '/bookingSuccess';
   static const String kTicketSuccessView = '/ticketSuccess';
   static const String kMapView = '/mapView';
@@ -207,43 +201,10 @@ class AppRouters {
         },
       ),
       GoRoute(
-        path: kPayPalPaymentView,
-        builder: (context, state) {
-          final paymentData = state.extra as Map<String, dynamic>?;
-          return PayPalPaymentView(
-            totalAmount: paymentData?['totalAmount'] ?? 'SR 138',
-            orderTitle: paymentData?['orderTitle'] ?? 'Order',
-            orderData: paymentData?['orderData'] as Map<String, dynamic>?,
-          );
-        },
-      ),
-      GoRoute(
-        path: kCryptoPaymentView,
-        builder: (context, state) {
-          final paymentData = state.extra as Map<String, dynamic>?;
-          return CryptoPaymentView(
-            totalAmount: paymentData?['totalAmount'] ?? 'SR 138',
-            orderTitle: paymentData?['orderTitle'] ?? 'Order',
-            orderData: paymentData?['orderData'] as Map<String, dynamic>?,
-          );
-        },
-      ),
-      GoRoute(
         path: kApplePayPaymentView,
         builder: (context, state) {
           final paymentData = state.extra as Map<String, dynamic>?;
           return ApplePayPaymentView(
-            totalAmount: paymentData?['totalAmount'] ?? 'SR 138',
-            orderTitle: paymentData?['orderTitle'] ?? 'Order',
-            orderData: paymentData?['orderData'] as Map<String, dynamic>?,
-          );
-        },
-      ),
-      GoRoute(
-        path: kGooglePayPaymentView,
-        builder: (context, state) {
-          final paymentData = state.extra as Map<String, dynamic>?;
-          return GooglePayPaymentView(
             totalAmount: paymentData?['totalAmount'] ?? 'SR 138',
             orderTitle: paymentData?['orderTitle'] ?? 'Order',
             orderData: paymentData?['orderData'] as Map<String, dynamic>?,
