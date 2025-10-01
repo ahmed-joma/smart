@@ -537,7 +537,11 @@ class _CreditCardPaymentViewState extends State<CreditCardPaymentView>
             ..setEntry(3, 2, 0.001)
             ..rotateY(_cardRotationAnimation.value * 3.14159),
           alignment: Alignment.center,
-          child: _isCardFlipped ? _buildCardBack() : _buildCardFront(),
+          child: Transform(
+            alignment: Alignment.center,
+            transform: Matrix4.identity()..scale(-1.0, 1.0, 1.0),
+            child: _isCardFlipped ? _buildCardBack() : _buildCardFront(),
+          ),
         );
       },
     );
