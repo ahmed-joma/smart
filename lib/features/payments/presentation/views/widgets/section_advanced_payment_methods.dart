@@ -19,10 +19,14 @@ class _SectionAdvancedPaymentMethodsState
     extends State<SectionAdvancedPaymentMethods>
     with TickerProviderStateMixin {
   late AnimationController _animationController;
+  late AnimationController _expandController;
   late Animation<double> _slideAnimation;
   late Animation<double> _fadeAnimation;
+  late Animation<double> _expandAnimation;
 
-  final List<Map<String, dynamic>> _paymentMethods = [
+  bool _showAdditionalMethods = false;
+
+  final List<Map<String, dynamic>> _additionalPaymentMethods = [
     {
       'id': 'card',
       'name': 'Credit Card',
@@ -47,6 +51,11 @@ class _SectionAdvancedPaymentMethodsState
       vsync: this,
     );
 
+    _expandController = AnimationController(
+      duration: const Duration(milliseconds: 300),
+      vsync: this,
+    );
+
     _slideAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(parent: _animationController, curve: Curves.easeOutCubic),
     );
@@ -55,19 +64,24 @@ class _SectionAdvancedPaymentMethodsState
       CurvedAnimation(parent: _animationController, curve: Curves.easeIn),
     );
 
+    _expandAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _expandController, curve: Curves.easeInOut),
+    );
+
     _animationController.forward();
   }
 
   @override
   void dispose() {
     _animationController.dispose();
+    _expandController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return AnimatedBuilder(
-      animation: _animationController,
+      animation: Listenable.merge([_animationController, _expandController]),
       builder: (context, child) {
         return Transform.translate(
           offset: Offset(0, 20 * (1 - _slideAnimation.value)),
@@ -117,25 +131,46 @@ class _SectionAdvancedPaymentMethodsState
                   ),
                   const SizedBox(height: 20),
 
-                  // Payment Methods Grid - Updated for 2 methods only
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _buildPaymentMethodCard(
-                          _paymentMethods[0],
-                          widget.selectedMethod == _paymentMethods[0]['id'],
-                          0,
-                        ),
+                  // PayPal as Primary Payment Method
+                  _buildPayPalCard(),
+
+                  const SizedBox(height: 16),
+
+                  // More Payment Options Button
+                  _buildMoreOptionsButton(),
+
+                  // Additional Payment Methods (Collapsible)
+                  SizeTransition(
+                    sizeFactor: _expandAnimation,
+                    child: FadeTransition(
+                      opacity: _expandAnimation,
+                      child: Column(
+                        children: [
+                          const SizedBox(height: 16),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: _buildPaymentMethodCard(
+                                  _additionalPaymentMethods[0],
+                                  widget.selectedMethod ==
+                                      _additionalPaymentMethods[0]['id'],
+                                  0,
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: _buildPaymentMethodCard(
+                                  _additionalPaymentMethods[1],
+                                  widget.selectedMethod ==
+                                      _additionalPaymentMethods[1]['id'],
+                                  1,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
                       ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: _buildPaymentMethodCard(
-                          _paymentMethods[1],
-                          widget.selectedMethod == _paymentMethods[1]['id'],
-                          1,
-                        ),
-                      ),
-                    ],
+                    ),
                   ),
 
                   const SizedBox(height: 16),
@@ -175,6 +210,173 @@ class _SectionAdvancedPaymentMethodsState
           ),
         );
       },
+    );
+  }
+
+  Widget _buildPayPalCard() {
+    final isSelected = widget.selectedMethod == 'paypal';
+
+    return GestureDetector(
+      onTap: () {
+        widget.onMethodSelected('paypal');
+      },
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          gradient: isSelected
+              ? LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    const Color(0xFF0070BA), // PayPal Blue
+                    const Color(0xFF009CDE), // PayPal Light Blue
+                  ],
+                )
+              : LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [Colors.white, Colors.grey.shade50],
+                ),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: isSelected
+                ? const Color(0xFF0070BA).withOpacity(0.3)
+                : Colors.grey.shade200,
+            width: isSelected ? 2 : 1,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: isSelected
+                  ? const Color(0xFF0070BA).withOpacity(0.3)
+                  : Colors.grey.withOpacity(0.1),
+              spreadRadius: isSelected ? 2 : 1,
+              blurRadius: isSelected ? 12 : 8,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            // PayPal Logo
+            Container(
+              width: 50,
+              height: 50,
+              decoration: BoxDecoration(
+                color: isSelected
+                    ? Colors.white.withOpacity(0.2)
+                    : const Color(0xFF0070BA).withOpacity(0.1),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: isSelected
+                      ? Colors.white.withOpacity(0.3)
+                      : const Color(0xFF0070BA).withOpacity(0.2),
+                  width: 1,
+                ),
+              ),
+              child: Icon(
+                Icons.account_balance_wallet,
+                color: isSelected ? Colors.white : const Color(0xFF0070BA),
+                size: 28,
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'PayPal',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w700,
+                      color: isSelected ? Colors.white : Colors.black87,
+                      letterSpacing: 0.3,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Pay with your PayPal account',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: isSelected
+                          ? Colors.white.withOpacity(0.8)
+                          : Colors.grey.shade600,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            // Selection Indicator
+            Container(
+              width: 24,
+              height: 24,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: isSelected ? Colors.white : Colors.transparent,
+                border: Border.all(
+                  color: isSelected ? Colors.white : Colors.grey.shade400,
+                  width: 2,
+                ),
+              ),
+              child: isSelected
+                  ? const Icon(Icons.check, color: Color(0xFF0070BA), size: 16)
+                  : null,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMoreOptionsButton() {
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          _showAdditionalMethods = !_showAdditionalMethods;
+          if (_showAdditionalMethods) {
+            _expandController.forward();
+          } else {
+            _expandController.reverse();
+          }
+        });
+      },
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+        decoration: BoxDecoration(
+          color: Colors.grey.shade50,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: Colors.grey.shade200),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              _showAdditionalMethods
+                  ? 'Hide other options'
+                  : 'More payment options',
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: Colors.grey.shade700,
+              ),
+            ),
+            const SizedBox(width: 8),
+            AnimatedRotation(
+              turns: _showAdditionalMethods ? 0.5 : 0.0,
+              duration: const Duration(milliseconds: 300),
+              child: Icon(
+                Icons.keyboard_arrow_down,
+                color: Colors.grey.shade600,
+                size: 20,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 

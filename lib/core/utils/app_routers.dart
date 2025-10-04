@@ -27,6 +27,8 @@ import '../../features/Hotel_details/presentation/views/hotel_booking_view.dart'
 import '../../features/payments/presentation/views/order_summary_view.dart';
 import '../../features/payments/presentation/views/credit_card_payment_view.dart';
 import '../../features/payments/presentation/views/apple_pay_payment_view.dart';
+import '../../features/payments/presentation/views/paypal_payment_view.dart';
+import '../../features/payments/presentation/views/paypal_login_view.dart';
 import '../../features/payments/presentation/views/booking_success_view.dart';
 
 import 'package:flutter/material.dart';
@@ -61,6 +63,8 @@ class AppRouters {
   static const String kOrderSummaryView = '/orderSummary';
   static const String kCreditCardPaymentView = '/creditCardPayment';
   static const String kApplePayPaymentView = '/applePayPayment';
+  static const String kPayPalPaymentView = '/paypalPayment';
+  static const String kPayPalLoginView = '/paypalLogin';
   static const String kBookingSuccessView = '/bookingSuccess';
   static const String kTicketSuccessView = '/ticketSuccess';
   static const String kMapView = '/mapView';
@@ -208,6 +212,28 @@ class AppRouters {
             totalAmount: paymentData?['totalAmount'] ?? 'SR 138',
             orderTitle: paymentData?['orderTitle'] ?? 'Order',
             orderData: paymentData?['orderData'] as Map<String, dynamic>?,
+          );
+        },
+      ),
+      GoRoute(
+        path: kPayPalLoginView,
+        builder: (context, state) {
+          final paymentData = state.extra as Map<String, dynamic>?;
+          return PayPalLoginView(
+            totalAmount: paymentData?['totalAmount'] ?? 'SR 138',
+            orderTitle: paymentData?['orderTitle'] ?? 'Order',
+            orderData: paymentData?['orderData'] ?? {},
+          );
+        },
+      ),
+      GoRoute(
+        path: kPayPalPaymentView,
+        builder: (context, state) {
+          final paymentData = state.extra as Map<String, dynamic>?;
+          return PayPalPaymentView(
+            totalAmount: paymentData?['totalAmount'] ?? 'SR 138',
+            orderTitle: paymentData?['orderTitle'] ?? 'Order',
+            orderData: paymentData?['orderData'] ?? {},
           );
         },
       ),

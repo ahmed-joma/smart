@@ -17,7 +17,7 @@ class OrderSummaryView extends StatefulWidget {
 }
 
 class _OrderSummaryViewState extends State<OrderSummaryView> {
-  String _selectedPaymentMethod = 'card';
+  String _selectedPaymentMethod = 'paypal';
   String _currentTotalPrice = '';
   double _originalPrice = 0.0;
   String _userEmail = 'guest@example.com';
@@ -148,6 +148,19 @@ class _OrderSummaryViewState extends State<OrderSummaryView> {
             onPressed: () {
               // توجيه للصفحة المناسبة حسب طريقة الدفع المختارة
               switch (_selectedPaymentMethod) {
+                case 'paypal':
+                  context.push(
+                    '/paypalLogin',
+                    extra: {
+                      'totalAmount': _currentTotalPrice.isNotEmpty
+                          ? _currentTotalPrice
+                          : (orderData['total'] ?? 'SR 138'),
+                      'orderTitle': orderData['title'] ?? 'Order',
+                      'orderData':
+                          orderData, // Pass full order data with API info
+                    },
+                  );
+                  break;
                 case 'card':
                   context.push(
                     '/creditCardPayment',
@@ -175,9 +188,9 @@ class _OrderSummaryViewState extends State<OrderSummaryView> {
                   );
                   break;
                 default:
-                  // افتراضياً بطاقة ائتمان
+                  // افتراضياً PayPal Login
                   context.push(
-                    '/creditCardPayment',
+                    '/paypalLogin',
                     extra: {
                       'totalAmount': _currentTotalPrice.isNotEmpty
                           ? _currentTotalPrice
