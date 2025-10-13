@@ -30,6 +30,7 @@ import '../../features/payments/presentation/views/apple_pay_payment_view.dart';
 import '../../features/payments/presentation/views/paypal_payment_view.dart';
 import '../../features/payments/presentation/views/paypal_login_view.dart';
 import '../../features/payments/presentation/views/booking_success_view.dart';
+import '../../features/Map_View/presentation/views/map_view.dart';
 
 import 'package:flutter/material.dart';
 
@@ -251,6 +252,7 @@ class AppRouters {
           return BookingSuccessView(successData: successData);
         },
       ),
+      GoRoute(path: kMapView, builder: (context, state) => const MapView()),
     ],
   );
 }

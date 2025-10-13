@@ -24,10 +24,19 @@ android {
         applicationId = "com.example.smart"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
-        minSdk = flutter.minSdkVersion
-        targetSdk = flutter.targetSdkVersion
+        minSdk = 24 // Increased for better image decoder support
+        targetSdk = 34 // Use latest target SDK
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+        
+        // Add these for Mapbox
+        ndk {
+            abiFilters += listOf("arm64-v8a", "armeabi-v7a", "x86", "x86_64")
+        }
+        
+        // Add for better image handling
+        renderscriptTargetApi = 34
+        renderscriptSupportModeEnabled = true
     }
 
     buildTypes {
