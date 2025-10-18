@@ -2,7 +2,7 @@ import 'package:dio/dio.dart';
 
 class MapboxGeocodingService {
   final String accessToken =
-      'pk.eyJ1IjoiZWxhZjYwIiwiYSI6ImNtZ21oOGhwNTE4eWQyaXNnZDBhd2t5MXkifQ.7ckljk2nC8Tdf_l1BvdluA';
+      'pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw';
   final Dio _dio = Dio();
 
   /// Search for places using Mapbox Geocoding API

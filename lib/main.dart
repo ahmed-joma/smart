@@ -1,10 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart';
 import 'shared/shared.dart';
 import 'core/utils/app_routers.dart';
 import 'core/utils/service_locator.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialize Mapbox with access token
+  MapboxOptions.setAccessToken(
+    "pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw",
+  );
+
   await initServiceLocator();
   runApp(const SmartShopMap());
 }

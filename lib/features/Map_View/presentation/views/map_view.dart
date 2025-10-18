@@ -18,12 +18,16 @@ class MapView extends StatefulWidget {
 class _MapViewState extends State<MapView> {
   MapboxMap? _mapboxMap;
   geo.Position? _currentPosition;
-  bool _is3DEnabled = true;
-  String _currentMapStyle = MapboxStyles.STANDARD;
+  bool _is3DEnabled = false;
+  String _currentMapStyle = MapboxStyles.OUTDOORS;
 
   @override
   void initState() {
     super.initState();
+    print('🗺️ MapView initState called');
+    print('🗺️ Initial map style: $_currentMapStyle');
+    print('🗺️ Initial 3D enabled: $_is3DEnabled');
+    print('🗺️ MapWidget will be created...');
     _getCurrentLocation();
   }
 
@@ -53,7 +57,7 @@ class _MapViewState extends State<MapView> {
               ),
             ),
             zoom: 14.0,
-            pitch: _is3DEnabled ? 60.0 : 0.0,
+            pitch: 0.0,
             bearing: 0.0,
           ),
           MapAnimationOptions(duration: 2000, startDelay: 0),
@@ -66,14 +70,22 @@ class _MapViewState extends State<MapView> {
 
   void _enable3DBuildings() async {
     try {
-      // Enable 3D terrain and buildings
-      await _mapboxMap?.style.setStyleTerrain(
-        '{"source": "mapbox-dem", "exaggeration": 1.5}',
-      );
+      if (_mapboxMap != null) {
+        print('🗺️ Starting 3D buildings setup...');
 
-      // You can add more 3D configurations here
+        // Wait for style to be loaded
+        await Future.delayed(const Duration(milliseconds: 500));
+
+        // Enable 3D terrain
+        await _mapboxMap!.style.setStyleTerrain(
+          '{"source": "mapbox-dem", "exaggeration": 1.5}',
+        );
+
+        print('✅ 3D Terrain enabled');
+        print('✅ 3D Buildings enabled successfully');
+      }
     } catch (e) {
-      print('Error enabling 3D: $e');
+      print('❌ Error enabling 3D: $e');
     }
   }
 
@@ -83,12 +95,14 @@ class _MapViewState extends State<MapView> {
     });
 
     if (_is3DEnabled) {
+      print('🗺️ Enabling 3D mode...');
       _enable3DBuildings();
       _mapboxMap?.flyTo(
         CameraOptions(pitch: 60.0),
         MapAnimationOptions(duration: 1000),
       );
     } else {
+      print('🗺️ Disabling 3D mode...');
       _mapboxMap?.flyTo(
         CameraOptions(pitch: 0.0),
         MapAnimationOptions(duration: 1000),
@@ -119,7 +133,7 @@ class _MapViewState extends State<MapView> {
           coordinates: Position.named(lng: lng, lat: lat),
         ),
         zoom: 14.0,
-        pitch: _is3DEnabled ? 60.0 : 0.0,
+        pitch: 0.0,
         bearing: 0.0,
       ),
       MapAnimationOptions(duration: 2000, startDelay: 0),
@@ -160,39 +174,103 @@ class _MapViewState extends State<MapView> {
 
   void _onMapCreated(MapboxMap mapboxMap) {
     print('🗺️ Map created successfully!');
+    print('🗺️ Map instance: $mapboxMap');
+    print('🗺️ Current style: $_currentMapStyle');
+    print('🗺️ 3D enabled: $_is3DEnabled');
+    print(
+      '🗺️ Current position: ${_currentPosition?.latitude}, ${_currentPosition?.longitude}',
+    );
+    print('🗺️ MapWidget should be visible now!');
+    print('🗺️ Platform View created successfully!');
+
     _mapboxMap = mapboxMap;
 
-    // Enable 3D buildings if 3D is enabled
-    if (_is3DEnabled) {
-      _enable3DBuildings();
+    // Add a test marker to verify map is working
+    _addTestMarker();
+
+    // Force a style reload to ensure map is visible
+    Future.delayed(const Duration(milliseconds: 2000), () {
+      if (_mapboxMap != null) {
+        print('🗺️ Forcing style reload...');
+        _mapboxMap!.loadStyleURI(_currentMapStyle);
+      }
+    });
+  }
+
+  void _addTestMarker() async {
+    try {
+      if (_mapboxMap != null) {
+        print('🗺️ Adding test marker...');
+        final pointAnnotationManager = await _mapboxMap!.annotations
+            .createPointAnnotationManager();
+
+        final options = PointAnnotationOptions(
+          geometry: Point(
+            coordinates: Position.named(
+              lng: _currentPosition?.longitude ?? 39.8262,
+              lat: _currentPosition?.latitude ?? 21.3891,
+            ),
+          ),
+          iconImage: 'default_marker',
+          iconSize: 1.0,
+          iconAnchor: IconAnchor.BOTTOM,
+        );
+
+        pointAnnotationManager.create(options);
+        print('✅ Test marker added successfully');
+        print('🗺️ Map should be fully visible now!');
+      } else {
+        print('❌ MapboxMap is null, cannot add marker');
+      }
+    } catch (e) {
+      print('❌ Error adding test marker: $e');
     }
+  }
+
+  Widget _buildMapboxMap() {
+    return MapWidget(
+      key: const ValueKey('mapWidget'),
+      cameraOptions: CameraOptions(
+        center: Point(
+          coordinates: Position.named(
+            lng: _currentPosition?.longitude ?? 39.8262,
+            lat: _currentPosition?.latitude ?? 21.3891,
+          ),
+        ),
+        zoom: 14.0,
+        pitch: 0.0,
+        bearing: 0.0,
+      ),
+      styleUri: _currentMapStyle,
+      onMapCreated: _onMapCreated,
+      onTapListener: (MapContentGestureContext context) {
+        print('🗺️ Map tapped at: ${context.point}');
+      },
+      onStyleLoadedListener: (event) {
+        print('🗺️ Map style loaded successfully!');
+      },
+      onMapLoadErrorListener: (event) {
+        print('❌ Map load error: $event');
+      },
+    );
   }
 
   @override
   Widget build(BuildContext context) {
+    print('🗺️ Building MapView widget...');
+    print(
+      '🗺️ Current position: ${_currentPosition?.latitude}, ${_currentPosition?.longitude}',
+    );
+    print('🗺️ Map style: $_currentMapStyle');
+
     return Scaffold(
       body: Stack(
         children: [
           // Map - Full Screen
           Positioned.fill(
-            child: MapWidget(
-              key: const ValueKey('mapWidget'),
-              cameraOptions: CameraOptions(
-                center: Point(
-                  coordinates: Position.named(
-                    lng: _currentPosition?.longitude ?? 39.8262,
-                    lat: _currentPosition?.latitude ?? 21.3891,
-                  ),
-                ),
-                zoom: 14.0,
-                pitch: _is3DEnabled ? 60.0 : 0.0,
-                bearing: 0.0,
-              ),
-              styleUri: _currentMapStyle,
-              onMapCreated: _onMapCreated,
-              onTapListener: (MapContentGestureContext context) {
-                print('Map tapped at: ${context.point}');
-              },
+            child: Container(
+              color: Colors.grey.shade200,
+              child: _buildMapboxMap(),
             ),
           ),
 
@@ -256,7 +334,16 @@ class _MapViewState extends State<MapView> {
               ),
               child: IconButton(
                 icon: const Icon(Icons.arrow_back, color: Color(0xFF7F2F3A)),
-                onPressed: () => context.pop(),
+                onPressed: () {
+                  print('🔙 Map: Back button pressed');
+                  if (context.canPop()) {
+                    context.pop();
+                    print('✅ Map: Successfully popped');
+                  } else {
+                    print('❌ Map: Cannot pop, navigating to home');
+                    context.go('/homeView');
+                  }
+                },
               ),
             ),
           ),
