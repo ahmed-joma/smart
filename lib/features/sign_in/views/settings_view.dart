@@ -16,11 +16,8 @@ class SettingsView extends StatefulWidget {
 
 class _SettingsViewState extends State<SettingsView> {
   bool _notificationsEnabled = true;
-  bool _darkModeEnabled = false;
   bool _locationEnabled = true;
   bool _biometricEnabled = false;
-  String _selectedLanguage = 'English';
-  String _selectedCurrency = 'SAR';
 
   @override
   void initState() {
@@ -74,18 +71,6 @@ class _SettingsViewState extends State<SettingsView> {
                 Icons.edit,
                 () => context.go('/editProfileView'),
               ),
-              _buildSettingsItem(
-                'Change Password',
-                'Update your password',
-                Icons.lock_outline,
-                () => _showComingSoon('Change Password'),
-              ),
-              _buildSettingsItem(
-                'Privacy Settings',
-                'Manage your privacy preferences',
-                Icons.privacy_tip_outlined,
-                () => _showComingSoon('Privacy Settings'),
-              ),
             ]),
 
             const SizedBox(height: 24),
@@ -100,13 +85,6 @@ class _SettingsViewState extends State<SettingsView> {
                 (value) => setState(() => _notificationsEnabled = value),
               ),
               _buildSwitchItem(
-                'Dark Mode',
-                'Switch to dark theme',
-                Icons.dark_mode_outlined,
-                _darkModeEnabled,
-                (value) => setState(() => _darkModeEnabled = value),
-              ),
-              _buildSwitchItem(
                 'Location Services',
                 'Allow app to access your location',
                 Icons.location_on_outlined,
@@ -119,28 +97,6 @@ class _SettingsViewState extends State<SettingsView> {
                 Icons.fingerprint_outlined,
                 _biometricEnabled,
                 (value) => setState(() => _biometricEnabled = value),
-              ),
-            ]),
-
-            const SizedBox(height: 24),
-
-            // Preferences
-            _buildSettingsSection('Preferences', Icons.tune_outlined, [
-              _buildDropdownItem(
-                'Language',
-                'Select your preferred language',
-                Icons.language_outlined,
-                _selectedLanguage,
-                ['English', 'العربية', 'Français', 'Español'],
-                (value) => setState(() => _selectedLanguage = value!),
-              ),
-              _buildDropdownItem(
-                'Currency',
-                'Select your preferred currency',
-                Icons.attach_money_outlined,
-                _selectedCurrency,
-                ['SAR', 'USD', 'EUR', 'GBP'],
-                (value) => setState(() => _selectedCurrency = value!),
               ),
             ]),
 
@@ -420,46 +376,6 @@ class _SettingsViewState extends State<SettingsView> {
         value: value,
         onChanged: onChanged,
         activeColor: AppColors.primary,
-      ),
-    );
-  }
-
-  Widget _buildDropdownItem(
-    String title,
-    String subtitle,
-    IconData icon,
-    String value,
-    List<String> options,
-    ValueChanged<String?> onChanged,
-  ) {
-    return ListTile(
-      leading: Container(
-        padding: const EdgeInsets.all(8),
-        decoration: BoxDecoration(
-          color: AppColors.primary.withOpacity(0.1),
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Icon(icon, color: AppColors.primary, size: 20),
-      ),
-      title: Text(
-        title,
-        style: const TextStyle(
-          fontSize: 16,
-          fontWeight: FontWeight.w600,
-          color: Colors.black87,
-        ),
-      ),
-      subtitle: Text(
-        subtitle,
-        style: TextStyle(fontSize: 14, color: Colors.grey.shade600),
-      ),
-      trailing: DropdownButton<String>(
-        value: value,
-        onChanged: onChanged,
-        underline: const SizedBox(),
-        items: options.map((String option) {
-          return DropdownMenuItem<String>(value: option, child: Text(option));
-        }).toList(),
       ),
     );
   }
