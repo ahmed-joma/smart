@@ -23,6 +23,15 @@ class _SettingsViewState extends State<SettingsView> {
   String _selectedCurrency = 'SAR';
 
   @override
+  void initState() {
+    super.initState();
+    // Load profile data when settings page opens
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<ProfileCubit>().getProfile();
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FA),
@@ -63,7 +72,7 @@ class _SettingsViewState extends State<SettingsView> {
                 'Edit Profile',
                 'Update your personal information',
                 Icons.edit,
-                () => _showComingSoon('Edit Profile'),
+                () => context.go('/editProfileView'),
               ),
               _buildSettingsItem(
                 'Change Password',
@@ -289,7 +298,7 @@ class _SettingsViewState extends State<SettingsView> {
 
               // Edit Button
               GestureDetector(
-                onTap: () => _showComingSoon('Edit Profile'),
+                onTap: () => context.go('/editProfileView'),
                 child: Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
