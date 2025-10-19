@@ -14,6 +14,11 @@ import '../../features/Hotel_Home/presentation/views/featured_hotels_view.dart';
 import '../../features/Hotel_Home/presentation/views/near_location_hotels_view.dart';
 import '../../features/Calendar/presentation/views/calendar_view.dart';
 import '../../features/Help_Faqs/presentation/views/help_faqs_view.dart';
+import '../../features/Help_Center/presentation/views/help_center_view.dart';
+import '../../features/Contact_Us/presentation/views/contact_us_view.dart';
+import '../../features/About_App/presentation/views/about_app_view.dart';
+import '../../features/Terms_of_Service/presentation/views/terms_of_service_view.dart';
+import '../../features/Privacy_Policy/presentation/views/privacy_policy_view.dart';
 import '../../features/My_Profile/presentation/views/my_profile_view.dart';
 import '../../features/My_Profile/presentation/views/edit_profile_view.dart';
 import '../../features/Search_White_Bar/presentation/views/search_view.dart';
@@ -53,6 +58,11 @@ class AppRouters {
   static const String kAiChatbotView = '/aiChatbotView';
   static const String kSettingsView = '/settingsView';
   static const String kHelpFaqsView = '/helpFaqsView';
+  static const String kHelpCenterView = '/helpCenterView';
+  static const String kContactUsView = '/contactUsView';
+  static const String kAboutAppView = '/aboutAppView';
+  static const String kTermsOfServiceView = '/termsOfServiceView';
+  static const String kPrivacyPolicyView = '/privacyPolicyView';
   static const String kSearchView = '/searchView';
   static const String kEventDetailsView = '/eventDetailsView';
   static const String kEventsView = '/eventsView';
@@ -145,6 +155,26 @@ class AppRouters {
       GoRoute(
         path: kHelpFaqsView,
         builder: (context, state) => const HelpFaqsView(),
+      ),
+      GoRoute(
+        path: kHelpCenterView,
+        builder: (context, state) => const HelpCenterView(),
+      ),
+      GoRoute(
+        path: kContactUsView,
+        builder: (context, state) => const ContactUsView(),
+      ),
+      GoRoute(
+        path: kAboutAppView,
+        builder: (context, state) => const AboutAppView(),
+      ),
+      GoRoute(
+        path: kTermsOfServiceView,
+        builder: (context, state) => const TermsOfServiceView(),
+      ),
+      GoRoute(
+        path: kPrivacyPolicyView,
+        builder: (context, state) => const PrivacyPolicyView(),
       ),
       GoRoute(
         path: kSearchView,

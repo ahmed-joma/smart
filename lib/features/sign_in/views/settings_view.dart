@@ -108,49 +108,31 @@ class _SettingsViewState extends State<SettingsView> {
                 'Help Center',
                 'Get help and support',
                 Icons.help_outline,
-                () => _showComingSoon('Help Center'),
+                () => context.go('/helpCenterView'),
               ),
               _buildSettingsItem(
                 'Contact Us',
                 'Send us feedback or report issues',
                 Icons.email_outlined,
-                () => _showComingSoon('Contact Us'),
+                () => context.go('/contactUsView'),
               ),
               _buildSettingsItem(
                 'About App',
                 'App version and information',
                 Icons.info_outline,
-                () => _showAboutDialog(),
+                () => context.go('/aboutAppView'),
               ),
               _buildSettingsItem(
                 'Terms of Service',
                 'Read our terms and conditions',
                 Icons.description_outlined,
-                () => _showComingSoon('Terms of Service'),
+                () => context.go('/termsOfServiceView'),
               ),
               _buildSettingsItem(
                 'Privacy Policy',
                 'Read our privacy policy',
                 Icons.policy_outlined,
-                () => _showComingSoon('Privacy Policy'),
-              ),
-            ]),
-
-            const SizedBox(height: 24),
-
-            // Danger Zone
-            _buildSettingsSection('Account Actions', Icons.warning_outlined, [
-              _buildDangerItem(
-                'Sign Out',
-                'Sign out of your account',
-                Icons.logout_outlined,
-                () => _showSignOutDialog(),
-              ),
-              _buildDangerItem(
-                'Delete Account',
-                'Permanently delete your account',
-                Icons.delete_outline,
-                () => _showDeleteAccountDialog(),
+                () => context.go('/privacyPolicyView'),
               ),
             ]),
 
@@ -376,138 +358,6 @@ class _SettingsViewState extends State<SettingsView> {
         value: value,
         onChanged: onChanged,
         activeColor: AppColors.primary,
-      ),
-    );
-  }
-
-  Widget _buildDangerItem(
-    String title,
-    String subtitle,
-    IconData icon,
-    VoidCallback onTap,
-  ) {
-    return ListTile(
-      leading: Container(
-        padding: const EdgeInsets.all(8),
-        decoration: BoxDecoration(
-          color: Colors.red.withOpacity(0.1),
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Icon(icon, color: Colors.red, size: 20),
-      ),
-      title: Text(
-        title,
-        style: const TextStyle(
-          fontSize: 16,
-          fontWeight: FontWeight.w600,
-          color: Colors.red,
-        ),
-      ),
-      subtitle: Text(
-        subtitle,
-        style: TextStyle(fontSize: 14, color: Colors.grey.shade600),
-      ),
-      trailing: const Icon(Icons.chevron_right, color: Colors.grey),
-      onTap: onTap,
-    );
-  }
-
-  void _showComingSoon(String feature) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text('$feature'),
-        content: const Text(
-          'This feature is coming soon! Stay tuned for updates.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('OK'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showAboutDialog() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('About App'),
-        content: const Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('Smart Events & Hotels'),
-            SizedBox(height: 8),
-            Text('Version: 1.0.0'),
-            SizedBox(height: 8),
-            Text('Build: 2024.09.28'),
-            SizedBox(height: 8),
-            Text(
-              'Discover amazing events and book hotels with ease. Your ultimate travel companion.',
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('OK'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showSignOutDialog() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Sign Out'),
-        content: const Text(
-          'Are you sure you want to sign out? You will need to log in again to access your account.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              _showComingSoon('Sign Out');
-            },
-            style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('Sign Out'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showDeleteAccountDialog() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Delete Account'),
-        content: const Text(
-          'Are you sure you want to permanently delete your account? This action cannot be undone and all your data will be lost.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              _showComingSoon('Delete Account');
-            },
-            style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('Delete'),
-          ),
-        ],
       ),
     );
   }
