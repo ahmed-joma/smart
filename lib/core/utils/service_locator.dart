@@ -16,6 +16,7 @@ import '../../features/Hotel_details/data/repos/hotel_repository.dart'
 import 'token_manager.dart';
 import 'cubits/filter_cubit.dart';
 import 'cubits/favorite_cubit.dart';
+import '../../features/Profile/presentation/manager/profile_cubit.dart';
 
 final GetIt sl = GetIt.instance;
 
@@ -46,6 +47,7 @@ Future<void> initServiceLocator() async {
   // Cubits
   sl.registerLazySingleton(() => FilterCubit(sl<FilterRepository>()));
   sl.registerLazySingleton(() => FavoriteCubit(sl<FavoriteRepository>()));
+  sl.registerLazySingleton(() => ProfileCubit());
 
   // Initialize services
   await sl<TokenManager>().initialize();

@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../shared/shared.dart';
+import '../../../../core/utils/service_locator.dart';
+import '../../../../core/utils/api_service.dart';
+import '../../Profile/presentation/manager/profile_cubit.dart';
+import '../../../../shared/widgets/profile_avatar.dart';
 
 class SettingsView extends StatefulWidget {
   const SettingsView({super.key});
@@ -192,89 +197,112 @@ class _SettingsViewState extends State<SettingsView> {
   }
 
   Widget _buildProfileSection() {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 5),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          // Profile Avatar
-          Container(
-            width: 60,
-            height: 60,
-            decoration: BoxDecoration(
-              color: AppColors.primary.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(30),
-            ),
-            child: Icon(Icons.person, color: AppColors.primary, size: 30),
-          ),
+    return BlocBuilder<ProfileCubit, ProfileState>(
+      builder: (context, state) {
+        String imageUrl = '';
+        String userName = 'User';
+        String userEmail = 'user@example.com';
 
-          const SizedBox(width: 16),
+        if (state is ProfileSuccess) {
+          // Use data from ProfileCubit if available
+          imageUrl = state.data.user.imageUrl;
+          userName = state.data.user.fullName;
+          // Get email from ApiService since UserProfile doesn't have email
+          final apiService = sl<ApiService>();
+          userEmail = apiService.userData?['email'] ?? 'user@example.com';
+        } else {
+          // Fallback to ApiService data
+          final apiService = sl<ApiService>();
+          imageUrl = apiService.userData?['image_url'] ?? '';
+          userName = apiService.userData?['full_name'] ?? 'User';
+          userEmail = apiService.userData?['email'] ?? 'user@example.com';
+        }
 
-          // Profile Info
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'Ahmed Ali',
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w700,
-                    color: Colors.black87,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  'ahmed@example.com',
-                  style: TextStyle(fontSize: 14, color: Colors.grey.shade600),
-                ),
-                const SizedBox(height: 8),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 4,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.green.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Text(
-                    'Premium Member',
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.green.shade700,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          // Edit Button
-          GestureDetector(
-            onTap: () => _showComingSoon('Edit Profile'),
-            child: Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: AppColors.primary.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(8),
+        return Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.05),
+                blurRadius: 10,
+                offset: const Offset(0, 5),
               ),
-              child: Icon(Icons.edit, color: AppColors.primary, size: 20),
-            ),
+            ],
           ),
-        ],
-      ),
+          child: Row(
+            children: [
+              // Profile Avatar
+              ProfileAvatar(
+                imageUrl: imageUrl.isNotEmpty ? imageUrl : null,
+                name: userName,
+                size: 60,
+                showEditIcon: false,
+              ),
+
+              const SizedBox(width: 16),
+
+              // Profile Info
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      userName,
+                      style: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.black87,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      userEmail,
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.grey.shade600,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.green.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        'Premium Member',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.green.shade700,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              // Edit Button
+              GestureDetector(
+                onTap: () => _showComingSoon('Edit Profile'),
+                child: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: AppColors.primary.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Icon(Icons.edit, color: AppColors.primary, size: 20),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 
