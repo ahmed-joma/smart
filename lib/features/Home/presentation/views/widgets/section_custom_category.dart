@@ -17,15 +17,14 @@ class SectionCustomCategory extends StatelessWidget {
         'icon': Icons.hotel,
         'isActive': isHotelsActive,
         'activeGradient': const LinearGradient(
-          colors: [
-            Color(0xFF4A90E2),
-            Color(0xFF357ABD),
-          ], // أزرق عند النشاط (نفس اللون)
+          // قريب من لون الهيدر لكن ليس مطابقًا له
+          colors: [Color(0xFF8A3944), Color(0xFF6B2B33)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         'inactiveGradient': const LinearGradient(
-          colors: [Color(0xFF4A90E2), Color(0xFF357ABD)], // أزرق عند عدم النشاط
+          // أفتح قليلًا ليوضح الفرق عند عدم النشاط
+          colors: [Color(0xFFA0525B), Color(0xFF7C3A42)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -35,18 +34,12 @@ class SectionCustomCategory extends StatelessWidget {
         'icon': Icons.event,
         'isActive': isEventsActive,
         'activeGradient': const LinearGradient(
-          colors: [
-            Color(0xFFD32F2F),
-            Color(0xFFB71C1C),
-          ], // أحمر داكن عند النشاط
+          colors: [Color(0xFF8A3944), Color(0xFF6B2B33)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         'inactiveGradient': const LinearGradient(
-          colors: [
-            Color(0xFFE74C3C),
-            Color(0xFFC0392B),
-          ], // أحمر فاتح عند عدم النشاط
+          colors: [Color(0xFFA0525B), Color(0xFF7C3A42)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
