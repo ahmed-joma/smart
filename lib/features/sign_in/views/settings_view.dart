@@ -17,7 +17,7 @@ class SettingsView extends StatefulWidget {
 class _SettingsViewState extends State<SettingsView> {
   bool _notificationsEnabled = true;
   bool _locationEnabled = true;
-  bool _biometricEnabled = false;
+  // bool _biometricEnabled = false; // removed with Biometric Login option
 
   @override
   void initState() {
@@ -91,13 +91,7 @@ class _SettingsViewState extends State<SettingsView> {
                 _locationEnabled,
                 (value) => setState(() => _locationEnabled = value),
               ),
-              _buildSwitchItem(
-                'Biometric Login',
-                'Use fingerprint or face ID to login',
-                Icons.fingerprint_outlined,
-                _biometricEnabled,
-                (value) => setState(() => _biometricEnabled = value),
-              ),
+              // Removed Biometric Login as requested
             ]),
 
             const SizedBox(height: 24),
