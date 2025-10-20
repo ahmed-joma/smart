@@ -54,11 +54,6 @@ class _ContactUsBodyState extends State<ContactUsBody> {
 
           // Contact Information
           _buildContactInfo(),
-
-          const SizedBox(height: 24),
-
-          // Social Media
-          _buildSocialMedia(),
         ],
       ),
     );
@@ -393,77 +388,6 @@ class _ContactUsBodyState extends State<ContactUsBody> {
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildSocialMedia() {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 5),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Follow Us',
-            style: const TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w700,
-              color: Colors.black87,
-            ),
-          ),
-          const SizedBox(height: 20),
-
-          Row(
-            children: [
-              _buildSocialButton(Icons.facebook, 'Facebook', Colors.blue),
-              const SizedBox(width: 16),
-              _buildSocialButton(Icons.camera_alt, 'Instagram', Colors.pink),
-              const SizedBox(width: 16),
-              _buildSocialButton(Icons.alternate_email, 'Twitter', Colors.blue),
-              const SizedBox(width: 16),
-              _buildSocialButton(Icons.play_arrow, 'YouTube', Colors.red),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSocialButton(IconData icon, String label, Color color) {
-    return Expanded(
-      child: Container(
-        height: 50,
-        decoration: BoxDecoration(
-          color: color.withOpacity(0.1),
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: color.withOpacity(0.3)),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(icon, color: color, size: 20),
-            const SizedBox(width: 8),
-            Text(
-              label,
-              style: TextStyle(
-                color: color,
-                fontWeight: FontWeight.w600,
-                fontSize: 14,
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }
