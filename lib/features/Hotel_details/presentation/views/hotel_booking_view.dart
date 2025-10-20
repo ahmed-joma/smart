@@ -31,7 +31,33 @@ class _HotelBookingViewState extends State<HotelBookingView> {
   }
 
   void _calculateTotalPrice() {
-    _totalPrice = _basePrice * _selectedRooms * _selectedBeds * _selectedNights;
+    // احتساب السعر الأساسي
+    double baseCalculation = _basePrice * _selectedNights;
+
+    // إضافة 50 ريال لكل زيادة في أي شيء
+    double additionalFees = 0;
+
+    // إضافة 50 ريال لكل غرفة إضافية (عدا الأولى)
+    if (_selectedRooms > 1) {
+      additionalFees += (_selectedRooms - 1) * 50;
+    }
+
+    // إضافة 50 ريال لكل سرير إضافي (عدا الأول)
+    if (_selectedBeds > 1) {
+      additionalFees += (_selectedBeds - 1) * 50;
+    }
+
+    // إضافة 50 ريال لكل ضيف إضافي (عدا الأولين)
+    if (_selectedGuests > 2) {
+      additionalFees += (_selectedGuests - 2) * 50;
+    }
+
+    // إضافة 50 ريال لكل ليلة إضافية (عدا الأولى)
+    if (_selectedNights > 1) {
+      additionalFees += (_selectedNights - 1) * 50;
+    }
+
+    _totalPrice = baseCalculation + additionalFees;
   }
 
   @override
