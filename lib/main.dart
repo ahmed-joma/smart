@@ -11,7 +11,7 @@ void main() async {
 
   // Initialize Mapbox with access token
   MapboxOptions.setAccessToken(
-    "pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw",
+    "pk.eyJ1IjoiZWxhZjYwIiwiYSI6ImNtaDR5YWtmbDAxd3AyanNhbGZmZzQ5cm8ifQ.8B8nfcbAa3pM7d68L6ZIMg",
   );
 
   await initServiceLocator();
