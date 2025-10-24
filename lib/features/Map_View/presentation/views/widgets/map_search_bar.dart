@@ -16,12 +16,92 @@ class _MapSearchBarState extends State<MapSearchBar> {
   bool _isSearching = false;
   List<MapboxPlace> _searchResults = [];
   final FocusNode _focusNode = FocusNode();
+  String _selectedSearchType = 'all'; // نوع البحث المحدد
+
+  // أنواع البحث المتاحة مع تركيز على السعودية
+  final Map<String, String> _searchTypes = {
+    'all': 'All Places',
+    'saudi': 'Saudi Arabia',
+    'cities': 'Cities',
+    'landmarks': 'Landmarks',
+  };
+
+  // قائمة بالمدن السعودية الشهيرة للبحث السريع
+  final List<String> _saudiCities = [
+    'الرياض',
+    'Riyadh',
+    'جدة',
+    'Jeddah',
+    'مكة المكرمة',
+    'Mecca',
+    'المدينة المنورة',
+    'Medina',
+    'الدمام',
+    'Dammam',
+    'الخبر',
+    'Khobar',
+    'الظهران',
+    'Dhahran',
+    'الطائف',
+    'Taif',
+    'بريدة',
+    'Buraydah',
+    'تبوك',
+    'Tabuk',
+    'حائل',
+    'Hail',
+    'أبها',
+    'Abha',
+    'نجران',
+    'Najran',
+    'جازان',
+    'Jazan',
+    'سكاكا',
+    'Sakaka',
+    'عرعر',
+    'Arar',
+  ];
+
+  // قائمة بالمعالم السعودية الشهيرة
+  final List<String> _saudiLandmarks = [
+    'الكعبة المشرفة',
+    'Kaaba',
+    'المسجد الحرام',
+    'Grand Mosque',
+    'المسجد النبوي',
+    'Prophet Mosque',
+    'برج المملكة',
+    'Kingdom Tower',
+    'برج الفيصلية',
+    'Faisaliah Tower',
+    'قصر المصمك',
+    'Masmak Fortress',
+    'منطقة البلد',
+    'Al Balad',
+    'وادي الرمة',
+    'Wadi Al Rumah',
+    'جبل النور',
+    'Mount Noor',
+    'غار حراء',
+    'Hira Cave',
+    'جبل أحد',
+    'Mount Uhud',
+    'مدائن صالح',
+    'Mada\'in Saleh',
+    'قلعة تبوك',
+    'Tabuk Castle',
+    'قصر خزام',
+    'Khuzam Palace',
+    'متحف الرياض',
+    'Riyadh Museum',
+    'حديقة الملك عبدالله',
+    'King Abdullah Park',
+  ];
 
   @override
-  void dispose() {
-    _searchController.dispose();
-    _focusNode.dispose();
-    super.dispose();
+  void initState() {
+    super.initState();
+    // إضافة اقتراحات المدن السعودية عند بدء الكتابة
   }
 
   void _onSearchChanged(String query) async {
@@ -38,10 +118,76 @@ class _MapSearchBarState extends State<MapSearchBar> {
     });
 
     // Add delay for better UX (debounce)
-    await Future.delayed(const Duration(milliseconds: 500));
+    await Future.delayed(const Duration(milliseconds: 300));
 
     if (_searchController.text == query) {
-      final results = await _geocodingService.searchPlaces(query);
+      List<MapboxPlace> results = [];
+
+      // البحث السريع في المدن والمعالم السعودية أولاً
+      final matchingCities = _saudiCities
+          .where(
+            (city) =>
+                city.toLowerCase().contains(query.toLowerCase()) ||
+                city.contains(query),
+          )
+          .toList();
+
+      final matchingLandmarks = _saudiLandmarks
+          .where(
+            (landmark) =>
+                landmark.toLowerCase().contains(query.toLowerCase()) ||
+                landmark.contains(query),
+          )
+          .toList();
+
+      // البحث حسب النوع المحدد
+      switch (_selectedSearchType) {
+        case 'saudi':
+          results = await _geocodingService.searchSaudiPlaces(query);
+          break;
+        case 'cities':
+          results = await _geocodingService.searchSaudiCities(query);
+          break;
+        case 'landmarks':
+          results = await _geocodingService.searchSaudiLandmarks(query);
+          break;
+        default:
+          results = await _geocodingService.searchPlaces(query);
+      }
+
+      // إضافة المدن والمعالم المطابقة في البداية
+      if (matchingCities.isNotEmpty && _selectedSearchType == 'cities') {
+        // إضافة المدن المطابقة كأولوية
+        for (String city in matchingCities) {
+          final cityPlace = MapboxPlace(
+            id: 'saudi_city_${city}',
+            placeName: city,
+            text: city,
+            longitude: 46.6753, // إحداثيات الرياض كمرجع
+            latitude: 24.7136,
+            bbox: [46.6753, 24.7136, 46.6753, 24.7136],
+            placeType: 'place',
+          );
+          results.insert(0, cityPlace);
+        }
+      }
+
+      if (matchingLandmarks.isNotEmpty && _selectedSearchType == 'landmarks') {
+        // إضافة المعالم المطابقة كأولوية
+        for (String landmark in matchingLandmarks) {
+          final landmarkPlace = MapboxPlace(
+            id: 'saudi_landmark_${landmark}',
+            placeName: landmark,
+            text: landmark,
+            longitude: 39.8262, // إحداثيات مكة كمرجع
+            latitude: 21.3891,
+            bbox: [39.8262, 21.3891, 39.8262, 21.3891],
+            placeType: 'poi',
+          );
+          results.insert(0, landmarkPlace);
+        }
+      }
+
       if (mounted) {
         setState(() {
           _searchResults = results;
@@ -58,6 +204,14 @@ class _MapSearchBarState extends State<MapSearchBar> {
       _searchResults = [];
     });
     widget.onPlaceSelected(place);
+  }
+
+  void _clearSearch() {
+    _searchController.clear();
+    setState(() {
+      _searchResults = [];
+      _isSearching = false;
+    });
   }
 
   @override
@@ -82,14 +236,31 @@ class _MapSearchBarState extends State<MapSearchBar> {
           child: Row(
             children: [
               const SizedBox(width: 16),
-              Icon(Icons.search, color: Colors.grey.shade600, size: 24),
+              Stack(
+                children: [
+                  Icon(Icons.search, color: Colors.grey.shade600, size: 24),
+                  if (_selectedSearchType == 'saudi')
+                    Positioned(
+                      right: -2,
+                      top: -2,
+                      child: Container(
+                        width: 8,
+                        height: 8,
+                        decoration: const BoxDecoration(
+                          color: Color(0xFF7F2F3A),
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                    ),
+                ],
+              ),
               const SizedBox(width: 12),
               Expanded(
                 child: TextField(
                   controller: _searchController,
                   focusNode: _focusNode,
                   decoration: InputDecoration(
-                    hintText: 'Search cities, hotels, events...',
+                    hintText: 'Search Saudi cities, landmarks, streets...',
                     hintStyle: TextStyle(
                       color: Colors.grey.shade400,
                       fontSize: 16,
@@ -110,23 +281,74 @@ class _MapSearchBarState extends State<MapSearchBar> {
                 )
               else if (_searchController.text.isNotEmpty)
                 IconButton(
+                  onPressed: _clearSearch,
                   icon: Icon(Icons.clear, color: Colors.grey.shade600),
-                  onPressed: () {
-                    _searchController.clear();
-                    setState(() {
-                      _searchResults = [];
-                    });
-                  },
                 ),
-              const SizedBox(width: 8),
             ],
           ),
         ),
 
-        // Search Results
-        if (_searchResults.isNotEmpty)
+        // Search Type Selector
+        if (_searchController.text.isNotEmpty) ...[
+          const SizedBox(height: 8),
           Container(
-            margin: const EdgeInsets.only(top: 8),
+            height: 40,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.05),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Row(
+              children: _searchTypes.entries.map((entry) {
+                final isSelected = _selectedSearchType == entry.key;
+                return Expanded(
+                  child: GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        _selectedSearchType = entry.key;
+                      });
+                      _onSearchChanged(_searchController.text);
+                    },
+                    child: Container(
+                      margin: const EdgeInsets.all(4),
+                      decoration: BoxDecoration(
+                        color: isSelected
+                            ? const Color(0xFF7F2F3A).withOpacity(0.1)
+                            : Colors.transparent,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Center(
+                        child: Text(
+                          entry.value,
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: isSelected
+                                ? FontWeight.w600
+                                : FontWeight.w400,
+                            color: isSelected
+                                ? const Color(0xFF7F2F3A)
+                                : Colors.grey.shade600,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                );
+              }).toList(),
+            ),
+          ),
+        ],
+
+        // Search Results
+        if (_searchResults.isNotEmpty) ...[
+          const SizedBox(height: 8),
+          Container(
             constraints: const BoxConstraints(maxHeight: 300),
             decoration: BoxDecoration(
               color: Colors.white,
@@ -155,9 +377,9 @@ class _MapSearchBarState extends State<MapSearchBar> {
                       color: const Color(0xFF7F2F3A).withOpacity(0.1),
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    child: const Icon(
-                      Icons.location_on,
-                      color: Color(0xFF7F2F3A),
+                    child: Icon(
+                      _getPlaceIcon(place.placeType),
+                      color: const Color(0xFF7F2F3A),
                       size: 20,
                     ),
                   ),
@@ -171,18 +393,70 @@ class _MapSearchBarState extends State<MapSearchBar> {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  subtitle: Text(
-                    place.placeName,
-                    style: TextStyle(fontSize: 14, color: Colors.grey.shade600),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
+                  subtitle: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        place.placeName,
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.grey.shade600,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      if (place.placeType != null)
+                        Text(
+                          _getPlaceTypeLabel(place.placeType!),
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: const Color(0xFF7F2F3A).withOpacity(0.7),
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                    ],
                   ),
                   onTap: () => _onPlaceSelected(place),
                 );
               },
             ),
           ),
+        ],
       ],
     );
+  }
+
+  IconData _getPlaceIcon(String? placeType) {
+    switch (placeType) {
+      case 'place':
+        return Icons.location_city;
+      case 'country':
+        return Icons.flag; // علم السعودية
+      case 'poi':
+        return Icons.place; // معلم سياحي
+      case 'address':
+        return Icons.home;
+      case 'neighborhood':
+        return Icons.location_on;
+      default:
+        return Icons.location_on;
+    }
+  }
+
+  String _getPlaceTypeLabel(String placeType) {
+    switch (placeType) {
+      case 'place':
+        return 'مدينة';
+      case 'country':
+        return 'دولة';
+      case 'poi':
+        return 'معلم سياحي';
+      case 'address':
+        return 'عنوان';
+      case 'neighborhood':
+        return 'حي';
+      default:
+        return 'مكان';
+    }
   }
 }

@@ -118,7 +118,7 @@ class _MapViewState extends State<MapView> {
     _mapboxMap?.loadStyleURI(style);
   }
 
-  void _onPlaceSelected(dynamic place) {
+  void _onPlaceSelected(dynamic place) async {
     // Get the place from MapboxPlace
     final double lng = place.longitude;
     final double lat = place.latitude;
@@ -126,21 +126,202 @@ class _MapViewState extends State<MapView> {
     print('📍 Selected place: ${place.placeName}');
     print('📍 Coordinates: $lat, $lng');
 
-    // Fly to the selected location
-    _mapboxMap?.flyTo(
+    // إضافة تأثير بصري أثناء الانتقال
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Flying to ${place.text ?? place.placeName}...'),
+        duration: const Duration(seconds: 2),
+        backgroundColor: const Color(0xFF7F2F3A),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      ),
+    );
+
+    // Fly to the selected location with smooth animation
+    await _mapboxMap?.flyTo(
       CameraOptions(
         center: Point(
           coordinates: Position.named(lng: lng, lat: lat),
         ),
-        zoom: 14.0,
+        zoom: 16.0, // تكبير أكثر للرؤية الواضحة
         pitch: 0.0,
         bearing: 0.0,
       ),
-      MapAnimationOptions(duration: 2000, startDelay: 0),
+      MapAnimationOptions(
+        duration: 2500, // مدة أطول للانتقال السلس
+        startDelay: 0,
+      ),
     );
 
-    // Add marker at the selected location (optional)
+    // Add marker at the selected location
     _addSearchMarker(place);
+
+    // إضافة معلومات إضافية عن المكان
+    _showPlaceInfo(place);
+  }
+
+  void _showPlaceInfo(dynamic place) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        height: MediaQuery.of(context).size.height * 0.4,
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(20),
+            topRight: Radius.circular(20),
+          ),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Handle bar
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade300,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
+
+              // Place info
+              Row(
+                children: [
+                  Container(
+                    width: 50,
+                    height: 50,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF7F2F3A).withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Icon(
+                      Icons.location_on,
+                      color: Color(0xFF7F2F3A),
+                      size: 24,
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          place.text ?? place.placeName,
+                          style: const TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black87,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          place.placeName,
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.grey.shade600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: 20),
+
+              // Coordinates info
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade50,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Coordinates',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.black87,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Latitude: ${place.latitude.toStringAsFixed(6)}',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.grey.shade700,
+                      ),
+                    ),
+                    Text(
+                      'Longitude: ${place.longitude.toStringAsFixed(6)}',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.grey.shade700,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 20),
+
+              // Action buttons
+              Row(
+                children: [
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      onPressed: () {
+                        Navigator.pop(context);
+                        // يمكن إضافة وظائف إضافية هنا
+                      },
+                      icon: const Icon(Icons.directions),
+                      label: const Text('Get Directions'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF7F2F3A),
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                      icon: const Icon(Icons.close),
+                      label: const Text('Close'),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: const Color(0xFF7F2F3A),
+                        side: const BorderSide(color: Color(0xFF7F2F3A)),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   void _addSearchMarker(dynamic place) async {
