@@ -79,6 +79,36 @@ class MapboxGeocodingService {
     }
   }
 
+  /// Reverse Geocoding: تحويل الإحداثيات إلى عنوان
+  Future<MapboxPlace?> reverseGeocode(double longitude, double latitude) async {
+    try {
+      final url =
+          'https://api.mapbox.com/geocoding/v5/mapbox.places/$longitude,$latitude.json';
+
+      final response = await _dio.get(
+        url,
+        queryParameters: {
+          'access_token': accessToken,
+          'language': 'ar,en', // دعم العربية والإنجليزية
+          'types':
+              'country,region,postcode,district,place,locality,neighborhood,address,poi',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final List<dynamic> features = response.data['features'];
+        if (features.isNotEmpty) {
+          return MapboxPlace.fromJson(features.first);
+        }
+      }
+
+      return null;
+    } catch (e) {
+      print('❌ Error in reverse geocoding: $e');
+      return null;
+    }
+  }
+
   /// Search specifically for Saudi Arabian places
   Future<List<MapboxPlace>> searchSaudiPlaces(String query) async {
     if (query.isEmpty) return [];
@@ -223,35 +253,6 @@ class MapboxGeocodingService {
   /// Search for landmarks and POIs
   Future<List<MapboxPlace>> searchLandmarks(String query) async {
     return await searchByType(query, 'poi');
-  }
-
-  /// Reverse geocoding - Get place name from coordinates
-  Future<String?> reverseGeocode(double longitude, double latitude) async {
-    try {
-      final url =
-          'https://api.mapbox.com/geocoding/v5/mapbox.places/$longitude,$latitude.json';
-
-      final response = await _dio.get(
-        url,
-        queryParameters: {
-          'access_token': accessToken,
-          'limit': 1,
-          'language': 'en,ar',
-        },
-      );
-
-      if (response.statusCode == 200) {
-        final List<dynamic> features = response.data['features'];
-        if (features.isNotEmpty) {
-          return features[0]['place_name'];
-        }
-      }
-
-      return null;
-    } catch (e) {
-      print('❌ Error reverse geocoding: $e');
-      return null;
-    }
   }
 }
 

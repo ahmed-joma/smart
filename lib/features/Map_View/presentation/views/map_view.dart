@@ -7,6 +7,7 @@ import 'widgets/map_filter_button.dart';
 import 'widgets/map_location_button.dart';
 import 'widgets/map_style_button.dart';
 import 'widgets/map_3d_toggle_button.dart';
+import '../../data/services/mapbox_geocoding_service.dart';
 
 class MapView extends StatefulWidget {
   const MapView({super.key});
@@ -20,6 +21,8 @@ class _MapViewState extends State<MapView> {
   geo.Position? _currentPosition;
   bool _is3DEnabled = false;
   String _currentMapStyle = MapboxStyles.OUTDOORS;
+  final MapboxGeocodingService _geocodingService = MapboxGeocodingService();
+  CircleAnnotationManager? _userCircleManager;
 
   @override
   void initState() {
@@ -353,6 +356,34 @@ class _MapViewState extends State<MapView> {
     // TODO: Filter markers based on selected filters
   }
 
+  /// تقريب الخريطة (Zoom In)
+  void _zoomIn() async {
+    if (_mapboxMap != null) {
+      final currentZoom = await _mapboxMap!.getCameraState();
+      final newZoom = (currentZoom.zoom + 1).clamp(0.0, 22.0);
+
+      await _mapboxMap!.easeTo(
+        CameraOptions(zoom: newZoom),
+        MapAnimationOptions(duration: 300),
+      );
+      print('🔍 Zoomed in to level: $newZoom');
+    }
+  }
+
+  /// تصغير الخريطة (Zoom Out)
+  void _zoomOut() async {
+    if (_mapboxMap != null) {
+      final currentZoom = await _mapboxMap!.getCameraState();
+      final newZoom = (currentZoom.zoom - 1).clamp(0.0, 22.0);
+
+      await _mapboxMap!.easeTo(
+        CameraOptions(zoom: newZoom),
+        MapAnimationOptions(duration: 300),
+      );
+      print('🔍 Zoomed out to level: $newZoom');
+    }
+  }
+
   void _onMapCreated(MapboxMap mapboxMap) {
     print('🗺️ Map created successfully!');
     print('🗺️ Map instance: $mapboxMap');
@@ -408,6 +439,510 @@ class _MapViewState extends State<MapView> {
     }
   }
 
+  /// معالجة الضغط على الخريطة
+  Future<void> _handleMapTap(MapContentGestureContext context) async {
+    print('🗺️ Map tapped at: ${context.point}');
+
+    if (_mapboxMap == null) return;
+
+    try {
+      // الحصول على الإحداثيات مباشرة من context.point
+      final point = context.point;
+      final lat = point.coordinates.lat.toDouble();
+      final lng = point.coordinates.lng.toDouble();
+
+      print('📍 Tapped coordinates: $lat, $lng');
+
+      // إضافة marker في المكان المضغوط
+      await _addUserMarker(lng, lat);
+
+      // الحصول على معلومات المكان من Reverse Geocoding
+      final placeInfo = await _geocodingService.reverseGeocode(lng, lat);
+
+      // عرض معلومات المكان
+      if (placeInfo != null) {
+        _showLocationInfo(placeInfo);
+      } else {
+        // عرض الإحداثيات فقط إذا لم نحصل على معلومات
+        _showCoordinatesInfo(lat, lng);
+      }
+    } catch (e) {
+      print('❌ Error handling map tap: $e');
+    }
+  }
+
+  /// إضافة marker (دبوس) في المكان الذي ضغط عليه المستخدم
+  Future<void> _addUserMarker(double lng, double lat) async {
+    try {
+      // حذف الدائرة السابقة إذا كانت موجودة
+      if (_userCircleManager != null) {
+        await _userCircleManager!.deleteAll();
+      } else {
+        _userCircleManager = await _mapboxMap?.annotations
+            .createCircleAnnotationManager();
+      }
+
+      // إضافة دائرة مرئية واضحة (الدبوس)
+      final circleOptions = CircleAnnotationOptions(
+        geometry: Point(
+          coordinates: Position.named(lng: lng, lat: lat),
+        ),
+        circleRadius: 12.0, // حجم الدائرة
+        circleColor: 0xFF7F2F3A, // لون أحمر مميز
+        circleStrokeWidth: 3.0, // سمك الحد الخارجي
+        circleStrokeColor: 0xFFFFFFFF, // حد أبيض للتباين
+        circleOpacity: 1.0, // شفافية كاملة
+      );
+
+      await _userCircleManager?.create(circleOptions);
+      print('✅ User marker (دبوس) added at: $lat, $lng');
+
+      // إضافة دائرة خارجية شبه شفافة للتأثير البصري
+      final outerCircleOptions = CircleAnnotationOptions(
+        geometry: Point(
+          coordinates: Position.named(lng: lng, lat: lat),
+        ),
+        circleRadius: 20.0, // أكبر قليلاً
+        circleColor: 0xFF7F2F3A, // نفس اللون
+        circleOpacity: 0.3, // شبه شفافة
+      );
+
+      await _userCircleManager?.create(outerCircleOptions);
+
+      // تحريك الكاميرا قليلاً للتأكد من رؤية الدبوس
+      await _mapboxMap?.easeTo(
+        CameraOptions(
+          center: Point(
+            coordinates: Position.named(lng: lng, lat: lat),
+          ),
+          zoom: 15.0, // تكبير خفيف
+        ),
+        MapAnimationOptions(duration: 500),
+      );
+    } catch (e) {
+      print('❌ Error adding user marker: $e');
+    }
+  }
+
+  /// عرض معلومات المكان مع العنوان
+  void _showLocationInfo(MapboxPlace place) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => DraggableScrollableSheet(
+        initialChildSize: 0.5,
+        minChildSize: 0.3,
+        maxChildSize: 0.8,
+        builder: (context, scrollController) => Container(
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(24),
+              topRight: Radius.circular(24),
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black26,
+                blurRadius: 10,
+                offset: Offset(0, -2),
+              ),
+            ],
+          ),
+          child: ListView(
+            controller: scrollController,
+            padding: const EdgeInsets.all(24),
+            children: [
+              // Handle bar
+              Center(
+                child: Container(
+                  width: 50,
+                  height: 5,
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade300,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 24),
+
+              // Icon & Title
+              Row(
+                children: [
+                  Container(
+                    width: 60,
+                    height: 60,
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [
+                          const Color(0xFF7F2F3A),
+                          const Color(0xFF7F2F3A).withOpacity(0.7),
+                        ],
+                      ),
+                      borderRadius: BorderRadius.circular(16),
+                      boxShadow: [
+                        BoxShadow(
+                          color: const Color(0xFF7F2F3A).withOpacity(0.3),
+                          blurRadius: 8,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: const Icon(
+                      Icons.location_on,
+                      color: Colors.white,
+                      size: 32,
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          place.text ?? 'موقع محدد',
+                          style: const TextStyle(
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black87,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.my_location,
+                              size: 16,
+                              color: Colors.grey.shade600,
+                            ),
+                            const SizedBox(width: 4),
+                            Expanded(
+                              child: Text(
+                                _getPlaceType(place),
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.grey.shade600,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: 24),
+
+              // Full Address
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [Colors.grey.shade50, Colors.grey.shade100],
+                  ),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: Colors.grey.shade200, width: 1),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.location_city,
+                          color: const Color(0xFF7F2F3A),
+                          size: 20,
+                        ),
+                        const SizedBox(width: 8),
+                        const Text(
+                          'العنوان الكامل',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black87,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      place.placeName,
+                      style: TextStyle(
+                        fontSize: 15,
+                        color: Colors.grey.shade700,
+                        height: 1.5,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 16),
+
+              // Coordinates
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      const Color(0xFF7F2F3A).withOpacity(0.05),
+                      const Color(0xFF7F2F3A).withOpacity(0.1),
+                    ],
+                  ),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: const Color(0xFF7F2F3A).withOpacity(0.2),
+                    width: 1,
+                  ),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.gps_fixed,
+                          color: const Color(0xFF7F2F3A),
+                          size: 20,
+                        ),
+                        const SizedBox(width: 8),
+                        const Text(
+                          'الإحداثيات',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black87,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _buildCoordinateItem(
+                            'خط العرض',
+                            place.latitude.toStringAsFixed(6),
+                            Icons.north,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: _buildCoordinateItem(
+                            'خط الطول',
+                            place.longitude.toStringAsFixed(6),
+                            Icons.east,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// عرض الإحداثيات فقط (عند عدم توفر معلومات)
+  void _showCoordinatesInfo(double lat, double lng) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        padding: const EdgeInsets.all(24),
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(24),
+            topRight: Radius.circular(24),
+          ),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Handle bar
+            Container(
+              width: 50,
+              height: 5,
+              decoration: BoxDecoration(
+                color: Colors.grey.shade300,
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
+            const SizedBox(height: 24),
+
+            // Icon
+            Container(
+              width: 80,
+              height: 80,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    const Color(0xFF7F2F3A),
+                    const Color(0xFF7F2F3A).withOpacity(0.7),
+                  ],
+                ),
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF7F2F3A).withOpacity(0.3),
+                    blurRadius: 12,
+                    offset: const Offset(0, 6),
+                  ),
+                ],
+              ),
+              child: const Icon(Icons.push_pin, color: Colors.white, size: 40),
+            ),
+
+            const SizedBox(height: 24),
+
+            const Text(
+              'موقع محدد',
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: Colors.black87,
+              ),
+            ),
+
+            const SizedBox(height: 24),
+
+            // Coordinates
+            Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    const Color(0xFF7F2F3A).withOpacity(0.05),
+                    const Color(0xFF7F2F3A).withOpacity(0.1),
+                  ],
+                ),
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Column(
+                children: [
+                  _buildCoordinateRow(
+                    'خط العرض (Latitude)',
+                    lat.toStringAsFixed(6),
+                  ),
+                  const Divider(height: 24),
+                  _buildCoordinateRow(
+                    'خط الطول (Longitude)',
+                    lng.toStringAsFixed(6),
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 24),
+
+            // Close Button
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () => Navigator.pop(context),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF7F2F3A),
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  elevation: 0,
+                ),
+                child: const Text(
+                  'إغلاق',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCoordinateItem(String label, String value, IconData icon) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        children: [
+          Icon(icon, color: const Color(0xFF7F2F3A), size: 20),
+          const SizedBox(height: 8),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 12,
+              color: Colors.grey.shade600,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            value,
+            style: const TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.bold,
+              color: Colors.black87,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCoordinateRow(String label, String value) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 15,
+            color: Colors.grey.shade700,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        Text(
+          value,
+          style: const TextStyle(
+            fontSize: 15,
+            fontWeight: FontWeight.bold,
+            color: Color(0xFF7F2F3A),
+          ),
+        ),
+      ],
+    );
+  }
+
+  String _getPlaceType(MapboxPlace place) {
+    // استخراج نوع المكان من context
+    if (place.placeName.contains('Street') ||
+        place.placeName.contains('شارع')) {
+      return 'شارع';
+    } else if (place.placeName.contains('District') ||
+        place.placeName.contains('حي')) {
+      return 'حي';
+    } else if (place.placeName.contains('City') ||
+        place.placeName.contains('مدينة')) {
+      return 'مدينة';
+    } else if (place.placeName.contains('Region') ||
+        place.placeName.contains('منطقة')) {
+      return 'منطقة';
+    }
+    return 'موقع';
+  }
+
   Widget _buildMapboxMap() {
     return MapWidget(
       key: const ValueKey('mapWidget'),
@@ -424,9 +959,7 @@ class _MapViewState extends State<MapView> {
       ),
       styleUri: _currentMapStyle,
       onMapCreated: _onMapCreated,
-      onTapListener: (MapContentGestureContext context) {
-        print('🗺️ Map tapped at: ${context.point}');
-      },
+      onTapListener: _handleMapTap,
       onStyleLoadedListener: (event) {
         print('🗺️ Map style loaded successfully!');
       },
@@ -495,6 +1028,81 @@ class _MapViewState extends State<MapView> {
             bottom: 100,
             right: 16,
             child: MapLocationButton(onPressed: _getCurrentLocation),
+          ),
+
+          // Zoom Controls (أزرار التقريب والتصغير)
+          Positioned(
+            bottom: 180,
+            right: 16,
+            child: Column(
+              children: [
+                // Zoom In Button (تقريب)
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.1),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      onTap: _zoomIn,
+                      borderRadius: BorderRadius.circular(12),
+                      child: Container(
+                        width: 48,
+                        height: 48,
+                        alignment: Alignment.center,
+                        child: const Icon(
+                          Icons.add,
+                          color: Color(0xFF7F2F3A),
+                          size: 28,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 8),
+
+                // Zoom Out Button (تصغير)
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.1),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      onTap: _zoomOut,
+                      borderRadius: BorderRadius.circular(12),
+                      child: Container(
+                        width: 48,
+                        height: 48,
+                        alignment: Alignment.center,
+                        child: const Icon(
+                          Icons.remove,
+                          color: Color(0xFF7F2F3A),
+                          size: 28,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
 
           // Back Button
