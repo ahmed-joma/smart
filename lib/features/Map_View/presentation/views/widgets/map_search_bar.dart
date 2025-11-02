@@ -18,6 +18,74 @@ class _MapSearchBarState extends State<MapSearchBar> {
   final FocusNode _focusNode = FocusNode();
   String _selectedSearchType = 'all'; // نوع البحث المحدد
 
+  // الأماكن المميزة في الرياض (Priority Places)
+  // هذه الأسماء مؤقتة - سيتم تحديثها بالأسماء الرسمية من Mapbox
+  final List<Map<String, dynamic>> _featuredPlaces = [
+    {
+      'name': 'JAX District', // الاسم الرسمي لواجهة روشن في Mapbox
+      'nameAr': 'جاكس ديستركت',
+      'searchTerms': ['JAX', 'Roshan', 'روشن', 'واجهة'], // مصطلحات البحث
+      'lat': 24.8153,
+      'lng': 46.6346,
+      'description':
+          'A modern area in Riyadh known for its beautiful architecture, restaurants, and art spaces. It\'s a new destination for culture and entertainment.',
+    },
+    {
+      'name': 'Diriyah', // الاسم الرسمي
+      'nameAr': 'الدرعية',
+      'searchTerms': ['Diriyah', 'الدرعية', 'Ad Diriyah'],
+      'lat': 24.7324,
+      'lng': 46.5749,
+      'description':
+          'A historic city and UNESCO World Heritage site. It\'s famous for its traditional Najdi architecture and the story of Saudi Arabia\'s beginnings.',
+    },
+    {
+      'name': 'Bujairi Terrace', // الاسم الرسمي
+      'nameAr': 'حي البجيري',
+      'searchTerms': ['Bujairi', 'البجيري', 'Al Bujairi'],
+      'lat': 24.7331,
+      'lng': 46.5771,
+      'description':
+          'Located in Diriyah, it\'s a charming area with cafes, restaurants, and a stunning view of At-Turaif. Perfect for dining and walking.',
+    },
+    {
+      'name': 'King Abdullah Financial District', // الاسم الرسمي
+      'nameAr': 'مركز الملك عبدالله المالي',
+      'searchTerms': ['KAFD', 'Financial District', 'المالي'],
+      'lat': 24.7706,
+      'lng': 46.6384,
+      'description':
+          'A modern business area with skyscrapers, luxury hotels, and fine dining. It\'s one of the most futuristic parts of Riyadh.',
+    },
+    {
+      'name': 'Riyadh Boulevard', // الاسم الرسمي
+      'nameAr': 'بوليفارد الرياض',
+      'searchTerms': ['Boulevard', 'بوليفارد', 'Boulevard City'],
+      'lat': 24.7519,
+      'lng': 46.6289,
+      'description':
+          'A large entertainment zone filled with restaurants, shows, shops, and seasonal events. It\'s a top spot for tourists and families.',
+    },
+    {
+      'name': 'Boulevard Riyadh City', // الاسم الرسمي
+      'nameAr': 'بوليفارد رياض سيتي',
+      'searchTerms': ['Boulevard World', 'بوليفارد العالم', 'World'],
+      'lat': 24.8073,
+      'lng': 46.6738,
+      'description':
+          'A theme park style area with international pavilions, games, and global food bringing cultures from around the world to Riyadh.',
+    },
+    {
+      'name': 'Souq Al Zal', // الاسم الرسمي للمعيقلية
+      'nameAr': 'سوق الزل',
+      'searchTerms': ['Muaiqelia', 'المعيقلية', 'Zal', 'الزل'],
+      'lat': 24.6340,
+      'lng': 46.7146,
+      'description':
+          'A traditional market in the old part of Riyadh, known for its perfumes, clothes, and gifts great for local shopping and heritage vibes.',
+    },
+  ];
+
   // أنواع البحث المتاحة مع تركيز على السعودية
   final Map<String, String> _searchTypes = {
     'all': 'All Places',
@@ -122,6 +190,49 @@ class _MapSearchBarState extends State<MapSearchBar> {
 
     if (_searchController.text == query) {
       List<MapboxPlace> results = [];
+
+      // إضافة الأماكن المميزة أولاً إذا كانت مطابقة للبحث
+      final matchingFeaturedPlaces = _featuredPlaces.where((place) {
+        final queryLower = query.toLowerCase();
+
+        // البحث في الاسم الرسمي
+        if (place['name'].toString().toLowerCase().contains(queryLower)) {
+          return true;
+        }
+
+        // البحث في الاسم العربي
+        if (place['nameAr'].toString().toLowerCase().contains(queryLower)) {
+          return true;
+        }
+
+        // البحث في مصطلحات البحث الإضافية
+        if (place['searchTerms'] != null) {
+          final searchTerms = place['searchTerms'] as List;
+          for (var term in searchTerms) {
+            if (term.toString().toLowerCase().contains(queryLower)) {
+              return true;
+            }
+          }
+        }
+
+        return false;
+      }).toList();
+
+      // تحويل الأماكن المميزة إلى MapboxPlace
+      for (var place in matchingFeaturedPlaces) {
+        final featuredPlace = MapboxPlace(
+          id: 'featured_${place['name']}',
+          placeName:
+              '${place['nameAr']} - ${place['name']}, Riyadh, Saudi Arabia',
+          text: place['name'],
+          longitude: place['lng'],
+          latitude: place['lat'],
+          bbox: [place['lng'], place['lat'], place['lng'], place['lat']],
+          placeType: 'poi',
+          description: place['description'], // إضافة الوصف
+        );
+        results.add(featuredPlace);
+      }
 
       // البحث السريع في المدن والمعالم السعودية أولاً
       final matchingCities = _saudiCities

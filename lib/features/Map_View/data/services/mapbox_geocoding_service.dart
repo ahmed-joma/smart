@@ -264,6 +264,7 @@ class MapboxPlace {
   final double latitude;
   final List<double> bbox;
   final String? placeType;
+  final String? description; // وصف المكان
 
   MapboxPlace({
     required this.id,
@@ -273,6 +274,7 @@ class MapboxPlace {
     required this.latitude,
     required this.bbox,
     this.placeType,
+    this.description,
   });
 
   factory MapboxPlace.fromJson(Map<String, dynamic> json) {
@@ -309,6 +311,7 @@ class MapboxPlace {
       'latitude': latitude,
       'bbox': bbox,
       'place_type': placeType,
+      'description': description,
     };
   }
 }
