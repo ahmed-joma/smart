@@ -24,6 +24,73 @@ class _MapViewState extends State<MapView> {
   final MapboxGeocodingService _geocodingService = MapboxGeocodingService();
   CircleAnnotationManager? _userCircleManager;
 
+  // الأماكن المميزة في الرياض (إحداثيات محدثة ودقيقة)
+  final List<Map<String, dynamic>> _featuredPlaces = [
+    {
+      'name': 'بوليفارد وورلد',
+      'nameEn': 'Boulevard World',
+      'lat': 24.7492, // محدث - منطقة بوليفارد الفعلية
+      'lng': 46.6289,
+      'description':
+          'A large entertainment zone filled with restaurants, shows, shops, and seasonal events. It\'s a top spot for tourists and families.',
+      'icon': Icons.celebration,
+    },
+    {
+      'name': 'الواجهة - الروشن',
+      'nameEn': 'Wajhat Roshan',
+      'lat': 24.8128, // محدث - منطقة الروشن الحقيقية
+      'lng': 46.6335,
+      'description':
+          'A modern area in Riyadh known for its beautiful architecture, restaurants, and art spaces. It\'s a new destination for culture and entertainment.',
+      'icon': Icons.architecture,
+    },
+    {
+      'name': 'الدرعية التاريخية',
+      'nameEn': 'Ad Diriyah Historic District',
+      'lat': 24.7331, // محدث - الدرعية الحقيقية
+      'lng': 46.5729,
+      'description':
+          'A historic city and UNESCO World Heritage site. It\'s famous for its traditional Najdi architecture and the story of Saudi Arabia\'s beginnings.',
+      'icon': Icons.account_balance,
+    },
+    {
+      'name': 'بوليفارد الرياض سيتي',
+      'nameEn': 'Boulevard Riyadh City',
+      'lat': 24.7445, // محدث - منطقة بوليفارد سيتي
+      'lng': 46.6556,
+      'description':
+          'A large entertainment zone filled with restaurants, shows, shops, and seasonal events. It\'s a top spot for tourists and families.',
+      'icon': Icons.shopping_bag,
+    },
+    {
+      'name': 'سوق المعيقلية',
+      'nameEn': 'Al Muaiqelia Market',
+      'lat': 24.6377, // محدث - سوق المعيقلية الحقيقي
+      'lng': 46.7166,
+      'description':
+          'A traditional market in the old part of Riyadh, known for its perfumes, clothes, and gifts great for local shopping and heritage vibes.',
+      'icon': Icons.shopping_basket,
+    },
+    {
+      'name': 'مركز الملك عبدالله المالي',
+      'nameEn': 'King Abdullah Financial District (KAFD)',
+      'lat': 24.7701, // محدث - KAFD الحقيقي
+      'lng': 46.6379,
+      'description':
+          'A modern business area with skyscrapers, luxury hotels, and fine dining. It\'s one of the most futuristic parts of Riyadh.',
+      'icon': Icons.business,
+    },
+    {
+      'name': 'حي البجيري التراثي',
+      'nameEn': 'Al Bujairi Heritage Park',
+      'lat': 24.7329, // محدث - البجيري الحقيقي في الدرعية
+      'lng': 46.5767,
+      'description':
+          'Located in Diriyah, it\'s a charming area with cafes, restaurants, and a stunning view of At-Turaif. Perfect for dining and walking.',
+      'icon': Icons.local_cafe,
+    },
+  ];
+
   @override
   void initState() {
     super.initState();
@@ -382,6 +449,56 @@ class _MapViewState extends State<MapView> {
       );
       print('🔍 Zoomed out to level: $newZoom');
     }
+  }
+
+  /// الانتقال إلى مكان مميز
+  void _navigateToFeaturedPlace(Map<String, dynamic> place) async {
+    final double lat = place['lat'];
+    final double lng = place['lng'];
+    final String name = place['name'];
+    final String description = place['description'];
+
+    print('📍 Navigating to featured place: $name');
+
+    // إضافة تأثير بصري
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('جاري الانتقال إلى $name...'),
+        duration: const Duration(seconds: 2),
+        backgroundColor: const Color(0xFF7F2F3A),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      ),
+    );
+
+    // الانتقال إلى المكان
+    await _mapboxMap?.flyTo(
+      CameraOptions(
+        center: Point(
+          coordinates: Position.named(lng: lng, lat: lat),
+        ),
+        zoom: 16.0,
+        pitch: 0.0,
+        bearing: 0.0,
+      ),
+      MapAnimationOptions(duration: 2500, startDelay: 0),
+    );
+
+    // إضافة marker
+    await _addUserMarker(lng, lat);
+
+    // عرض معلومات المكان
+    final placeInfo = MapboxPlace(
+      id: 'featured_place_$name',
+      placeName: name,
+      text: name,
+      latitude: lat,
+      longitude: lng,
+      bbox: [lng, lat, lng, lat], // bounding box للمكان
+      description: description,
+    );
+
+    _showLocationInfo(placeInfo);
   }
 
   void _onMapCreated(MapboxMap mapboxMap) {
@@ -997,6 +1114,81 @@ class _MapViewState extends State<MapView> {
     return 'موقع';
   }
 
+  /// بناء زر المكان المميز
+  Widget _buildFeaturedPlaceButton(Map<String, dynamic> place) {
+    return Container(
+      margin: const EdgeInsets.only(right: 12),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () => _navigateToFeaturedPlace(place),
+          borderRadius: BorderRadius.circular(12),
+          child: Container(
+            padding: const EdgeInsets.symmetric(
+              horizontal: 12,
+              vertical: 6,
+            ), // قللنا من 16,12 إلى 12,6
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                colors: [Color(0xFF7F2F3A), Color(0xFF9F3F4A)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(12), // قللنا من 16 إلى 12
+              boxShadow: [
+                BoxShadow(
+                  color: const Color(0xFF7F2F3A).withOpacity(0.3),
+                  blurRadius: 6, // قللنا من 8 إلى 6
+                  offset: const Offset(0, 3), // قللنا من 4 إلى 3
+                ),
+              ],
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(6), // قللنا من 8 إلى 6
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(8), // قللنا من 10 إلى 8
+                  ),
+                  child: Icon(
+                    place['icon'] as IconData,
+                    color: Colors.white,
+                    size: 18, // قللنا من 20 إلى 18
+                  ),
+                ),
+                const SizedBox(width: 8), // قللنا من 10 إلى 8
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      place['name'],
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 13, // قللنا من 14 إلى 13
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 1), // قللنا من 2 إلى 1
+                    Text(
+                      place['nameEn'],
+                      style: TextStyle(
+                        color: Colors.white.withOpacity(0.8),
+                        fontSize: 10, // قللنا من 11 إلى 10
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _buildMapboxMap() {
     return MapWidget(
       key: const ValueKey('mapWidget'),
@@ -1050,16 +1242,38 @@ class _MapViewState extends State<MapView> {
             child: MapSearchBar(onPlaceSelected: _onPlaceSelected),
           ),
 
-          // Filter Button
+          // Featured Places Horizontal Scroll (تحت البحث مباشرة)
           Positioned(
             top: MediaQuery.of(context).padding.top + 80,
+            left: 0,
+            right: 0,
+            child: SizedBox(
+              height: 55, // قللنا من 80 إلى 55
+              child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                itemCount: _featuredPlaces.length,
+                itemBuilder: (context, index) {
+                  return _buildFeaturedPlaceButton(_featuredPlaces[index]);
+                },
+              ),
+            ),
+          ),
+
+          // Filter Button
+          Positioned(
+            top:
+                MediaQuery.of(context).padding.top +
+                145, // عدلنا من 170 إلى 145
             right: 16,
             child: MapFilterButton(onFilterApplied: _onFilterApplied),
           ),
 
           // Map Style Button
           Positioned(
-            top: MediaQuery.of(context).padding.top + 140,
+            top:
+                MediaQuery.of(context).padding.top +
+                205, // عدلنا من 230 إلى 205
             right: 16,
             child: MapStyleButton(
               currentStyle: _currentMapStyle,
@@ -1069,7 +1283,9 @@ class _MapViewState extends State<MapView> {
 
           // 3D Toggle Button
           Positioned(
-            top: MediaQuery.of(context).padding.top + 200,
+            top:
+                MediaQuery.of(context).padding.top +
+                265, // عدلنا من 290 إلى 265
             right: 16,
             child: Map3DToggleButton(
               is3DEnabled: _is3DEnabled,
